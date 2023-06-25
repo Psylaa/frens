@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func login(c *fiber.Ctx, jwtSecret string) error {
+func login(c *fiber.Ctx, jwtSecret string, jwtDuration int) error {
 	// Parse the request body
 	var body struct {
 		Username string `json:"username"`
@@ -30,7 +30,7 @@ func login(c *fiber.Ctx, jwtSecret string) error {
 	// Set the claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(jwtDuration)).Unix()
 
 	// Sign the token with our secret
 	t, err := token.SignedString([]byte(jwtSecret))

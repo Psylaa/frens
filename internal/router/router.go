@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 
+	"github.com/bwoff11/frens/internal/activitypub"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -10,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Init(port string, jwtSecret string) {
+func Init(port string, jwtSecret string, jwtDuration int) {
 	// Initialize Fiber
 	app := fiber.New()
 
@@ -19,7 +20,7 @@ func Init(port string, jwtSecret string) {
 
 	// Define routes
 	app.Post("/login", func(c *fiber.Ctx) error {
-		return login(c, jwtSecret)
+		return login(c, jwtSecret, jwtDuration)
 	})
 	app.Post("/users", createUser)
 
@@ -35,6 +36,11 @@ func Init(port string, jwtSecret string) {
 	app.Delete("/statuses/:id", func(c *fiber.Ctx) error {
 		return deleteStatus(c, jwtSecret)
 	})
+
+	// ActivityPub routes
+	app.Get("/users/:username", activitypub.GetUserProfile)
+	app.Post("/users/:username/inbox", activitypub.HandleInbox)
+	app.Get("/users/:username/outbox", activitypub.HandleOutbox)
 
 	// Start the server
 	app.Listen(":" + port)

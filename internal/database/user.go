@@ -50,3 +50,12 @@ func VerifyUser(username string, password string) (*User, error) {
 
 	return &user, nil
 }
+
+func GetUserByUsername(username string) (*User, error) {
+	var user User
+	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

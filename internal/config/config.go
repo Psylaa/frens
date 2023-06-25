@@ -8,12 +8,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var c *Config
-
 type Config struct {
 	Server struct {
-		Port      string `yaml:"port" validate:"required"`
-		JWTSecret string `yaml:"jwt_secret" validate:"required"`
+		Port        string `yaml:"port" validate:"required"`
+		JWTSecret   string `yaml:"jwt_secret" validate:"required"`
+		JWTDuration int    `yaml:"jwt_duration" validate:"required"`
 	} `yaml:"server"`
 	Database struct {
 		Host     string `yaml:"host" validate:"required"`
@@ -46,8 +45,6 @@ func ReadConfig(filename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	c = &cfg
 
 	return &cfg, nil
 }

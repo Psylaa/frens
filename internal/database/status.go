@@ -19,6 +19,15 @@ func GetStatus(id uuid.UUID) (*Status, error) {
 	return &status, nil
 }
 
+// GetStatusesByUserID gets all status updates by a user.
+func GetStatusesByUserID(userID uuid.UUID) ([]Status, error) {
+	var statuses []Status
+	if err := db.Preload("Media").Find(&statuses, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return statuses, nil
+}
+
 // CreateStatus creates a new status update.
 func CreateStatus(userID uuid.UUID, text string, media []Media) (*Status, error) {
 	newStatus := Status{

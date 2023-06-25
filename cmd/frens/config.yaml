@@ -2,6 +2,7 @@
 server:
   port: "3000"
   jwt_secret: "supersecret"
+  jwt_duration: 168
 database:
   host: 127.0.0.1
   port: 5432
