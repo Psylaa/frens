@@ -31,7 +31,7 @@ func DeleteLike(userID, statusID uuid.UUID) error {
 	var like Like
 	if err := db.Where("user_id = ? AND status_id = ?", userID, statusID).First(&like).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil
+			return errors.New("like does not exist")
 		}
 		return err
 	}

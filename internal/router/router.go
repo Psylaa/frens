@@ -11,7 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
-func Init(port string, jwtSecret string, jwtDuration int) {
+var (
+	jwtSecret   string
+	jwtDuration int
+)
+
+func Init(port string, secret string, duration int) {
+	// Set global variables
+	jwtSecret = secret
+	jwtDuration = duration
+
 	// Initialize Fiber
 	app := fiber.New()
 
@@ -19,9 +28,7 @@ func Init(port string, jwtSecret string, jwtDuration int) {
 	app.Use(logger.New())
 
 	// Define routes
-	app.Post("/login", func(c *fiber.Ctx) error {
-		return login(c, jwtSecret, jwtDuration)
-	})
+	app.Post("/login", login)
 	app.Post("/users", createUser)
 
 	// Authenticated routes
@@ -29,13 +36,9 @@ func Init(port string, jwtSecret string, jwtDuration int) {
 		SigningKey: jwtware.SigningKey{Key: []byte(jwtSecret)},
 	}))
 
-	app.Post("/statuses", func(c *fiber.Ctx) error {
-		return createStatus(c, jwtSecret)
-	})
+	app.Post("/statuses", createStatus)
 	app.Get("/statuses/:id", getStatus)
-	app.Delete("/statuses/:id", func(c *fiber.Ctx) error {
-		return deleteStatus(c, jwtSecret)
-	})
+	app.Delete("/statuses/:id", deleteStatus)
 
 	// Likes
 	app.Post("/statuses/:id/likes", createLike)

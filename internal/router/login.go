@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func login(c *fiber.Ctx, jwtSecret string, jwtDuration int) error {
+func login(c *fiber.Ctx) error {
 	// Parse the request body
 	var body struct {
 		Username string `json:"username"`

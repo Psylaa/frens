@@ -24,7 +24,7 @@ func getStatus(c *fiber.Ctx) error {
 	return c.JSON(status)
 }
 
-func createStatus(c *fiber.Ctx, jwtSecret string) error {
+func createStatus(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
@@ -54,7 +54,7 @@ func createStatus(c *fiber.Ctx, jwtSecret string) error {
 	return c.Status(fiber.StatusCreated).JSON(status)
 }
 
-func deleteStatus(c *fiber.Ctx, jwtSecret string) error {
+func deleteStatus(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
