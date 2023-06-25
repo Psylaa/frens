@@ -7,11 +7,7 @@ import (
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/router"
-
-	"github.com/jinzhu/gorm"
 )
-
-var db *gorm.DB
 
 func main() {
 	// Read the config

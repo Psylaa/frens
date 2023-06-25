@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,15 +18,16 @@ func CreateUser(username string, email string, password string) (*User, error) {
 		return nil, err
 	}
 
-	user := &User{
-		Username: username,
-		Email:    email,
-		Password: string(hashedPassword),
+	newUser := User{
+		BaseModel: BaseModel{ID: uuid.New()},
+		Username:  username,
+		Email:     email,
+		Password:  string(hashedPassword),
 	}
 
-	if err := db.Create(user).Error; err != nil {
+	if err := db.Create(&newUser).Error; err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &newUser, nil
 }

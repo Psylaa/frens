@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
+	"github.com/google/uuid"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type BaseModel struct {
-	ID        uint      `gorm:"primarykey" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	DeletedAt time.Time `gorm:"index" json:"deletedAt"`
