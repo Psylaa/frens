@@ -37,6 +37,10 @@ func Init(port string, jwtSecret string, jwtDuration int) {
 		return deleteStatus(c, jwtSecret)
 	})
 
+	// Likes
+	app.Post("/statuses/:id/likes", createLike)
+	app.Delete("/statuses/:id/likes", deleteLike)
+
 	// ActivityPub routes
 	app.Get("/users/:username", activitypub.GetUserProfile)
 	app.Post("/users/:username/inbox", activitypub.HandleInbox)

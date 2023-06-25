@@ -33,6 +33,7 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Status{})
 	db.AutoMigrate(&Media{})
+	db.AutoMigrate(&Like{})
 
 	return db
 }
