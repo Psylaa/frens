@@ -15,6 +15,15 @@ type User struct {
 	Password string `json:"-"`
 }
 
+func GetUsers() ([]User, error) {
+	var users []User
+	if err := db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func CreateUser(username string, email string, password string) (*User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

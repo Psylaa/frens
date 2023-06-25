@@ -46,9 +46,10 @@ func Init(port string, secret string, duration int) {
 	app.Delete("/statuses/:id/likes", deleteLike)
 
 	// Follows
-	app.Get("/users/:username/followers", getFollowers)
-	app.Post("/users/:username/followers", createFollower)
-	app.Delete("/users/:username/followers", deleteFollower)
+	app.Get("/users", getUsers)
+	app.Get("/users/:id/followers", getFollowers)
+	app.Post("/users/:id/followers", createFollower)
+	app.Delete("/users/:id/followers", deleteFollower)
 
 	// ActivityPub routes
 	app.Get("/users/:username", activitypub.GetUserProfile)

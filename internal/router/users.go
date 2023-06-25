@@ -2,8 +2,18 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 )
+
+func getUsers(c *fiber.Ctx) error {
+	users, err := db.GetUsers()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(users)
+}
 
 func createUser(c *fiber.Ctx) error {
 	// Parse the request body
