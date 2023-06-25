@@ -1,6 +1,7 @@
 # config.yaml
 server:
   port: "3000"
+  jwt_secret: "supersecret"
 database:
   host: 127.0.0.1
   port: 5432

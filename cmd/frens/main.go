@@ -24,5 +24,5 @@ func main() {
 	database.InitDB(cfg)
 
 	// Initialize router and start the server
-	router.Init(cfg.Server.Port)
+	router.Init(cfg.Server.Port, cfg.Server.JWTSecret)
 }
