@@ -1,0 +1,10 @@
+# config.yaml
+server:
+  port: "3000"
+database:
+  host: 127.0.0.1
+  port: 5432
+  user: sampleuser
+  dbname: frens
+  password: samplepassword
+  sslmode: disable
