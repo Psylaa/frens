@@ -16,7 +16,6 @@ type BaseModel struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	DeletedAt time.Time `gorm:"index" json:"deletedAt"`
 }
 
 var db *gorm.DB
@@ -32,6 +31,8 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	}
 
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Status{})
+	db.AutoMigrate(&Media{})
 
 	return db
 }
