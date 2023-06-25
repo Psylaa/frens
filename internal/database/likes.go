@@ -13,6 +13,15 @@ type Like struct {
 	StatusID uuid.UUID `json:"statusId"`
 }
 
+func GetLikes(statusID uuid.UUID) ([]Like, error) {
+	var likes []Like
+	if err := db.Where("status_id = ?", statusID).Find(&likes).Error; err != nil {
+		return nil, err
+	}
+
+	return likes, nil
+}
+
 func CreateLike(userID, statusID uuid.UUID) (*Like, error) {
 	newLike := Like{
 		BaseModel: BaseModel{ID: uuid.New()},

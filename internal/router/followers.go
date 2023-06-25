@@ -6,53 +6,53 @@ import (
 	"github.com/google/uuid"
 )
 
-func getLikes(c *fiber.Ctx) error {
+func getFollowers(c *fiber.Ctx) error {
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	userID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	likes, err := db.GetLikes(statusID)
+	followers, err := db.GetFollowers(userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(likes)
+	return c.JSON(followers)
 }
 
-func createLike(c *fiber.Ctx) error {
+func createFollower(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
 	}
 
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	followingID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	if _, err := db.CreateLike(userID, statusID); err != nil {
+	if _, err := db.CreateFollower(userID, followingID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func deleteLike(c *fiber.Ctx) error {
+func deleteFollower(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
 	}
 
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	followingID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	if err := db.DeleteLike(userID, statusID); err != nil {
+	if err := db.DeleteFollower(userID, followingID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
