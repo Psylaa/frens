@@ -57,6 +57,12 @@ func Init(port string, secret string, duration int) {
 	app.Delete("/statuses/:id/likes", deleteLike)
 	app.Get("/statuses/:id/likes/:userId", hasUserLiked)
 
+	// Files
+	app.Post("/files", createFile)
+	app.Get("/files/:id", getFile)
+	app.Put("/files/:id", updateFile)
+	app.Delete("/files/:id", deleteFile)
+
 	// Bookmarks
 	app.Get("/statuses/:id/bookmarks", getBookmarks)
 	app.Post("/statuses/:id/bookmarks", createBookmark)

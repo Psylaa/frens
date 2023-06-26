@@ -12,6 +12,7 @@ type User struct {
 	BaseModel
 	Username string `gorm:"unique" json:"username"`
 	Email    string `json:"email"`
+	Bio      string `json:"bio"`
 	Password string `json:"-"`
 }
 

@@ -17,7 +17,9 @@ func main() {
 	}
 
 	// Connect to the database
-	database.InitDB(cfg)
+	if err := database.InitDB(cfg); err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
 
 	// Initialize router and start the server
 	router.Init(cfg.Server.Port, cfg.Server.JWTSecret, cfg.Server.JWTDuration)

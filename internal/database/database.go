@@ -20,14 +20,14 @@ type BaseModel struct {
 
 var db *gorm.DB
 
-func InitDB(cfg *config.Config) *gorm.DB {
+func InitDB(cfg *config.Config) error {
 	dbinfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName, cfg.Database.Password, cfg.Database.SSLMode)
 
 	var err error
 	db, err = gorm.Open("postgres", dbinfo)
 	if err != nil {
-		panic("failed to connect database")
+		return err
 	}
 
 	db.AutoMigrate(&User{})
@@ -40,5 +40,5 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	// Manually create the composite unique index
 	db.Model(&Like{}).AddUniqueIndex("idx_user_status", "user_id", "status_id")
 
-	return db
+	return nil
 }

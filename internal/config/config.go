@@ -1,4 +1,3 @@
-// internal/config/config.go
 package config
 
 import (
@@ -22,6 +21,18 @@ type Config struct {
 		Password string `yaml:"password" validate:"required"`
 		SSLMode  string `yaml:"sslmode" validate:"required"`
 	} `yaml:"database"`
+	Storage struct {
+		Type  string `yaml:"type" validate:"required"`
+		Local struct {
+			Path string `yaml:"path" validate:"required"`
+		} `yaml:"local"`
+		S3 struct {
+			Bucket    string `yaml:"bucket" validate:"required"`
+			Region    string `yaml:"region" validate:"required"`
+			AccessKey string `yaml:"access_key" validate:"required"`
+			SecretKey string `yaml:"secret_key" validate:"required"`
+		} `yaml:"s3"`
+	} `yaml:"storage"`
 }
 
 func (c *Config) Validate() error {

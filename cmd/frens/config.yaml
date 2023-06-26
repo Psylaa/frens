@@ -10,3 +10,12 @@ database:
   dbname: frens
   password: samplepassword
   sslmode: disable
+storage:
+  type: local
+  local:
+    path: /tmp/frens
+  s3:
+    bucket: frens
+    region: us-east-1
+    access_key: sampleaccesskey
+    secret_key: samplesecretkey
