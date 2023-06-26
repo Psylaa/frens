@@ -73,7 +73,7 @@ func deleteStatus(c *fiber.Ctx) error {
 	}
 
 	// Check if the user is the creator or admin
-	if status.UserID != userID {
+	if status.User.ID != userID { // <-- Check the user's ID from the embedded User struct
 		user := c.Locals("user").(*jwt.Token)
 		claims := user.Claims.(jwt.MapClaims)
 		role, ok := claims["role"].(string)

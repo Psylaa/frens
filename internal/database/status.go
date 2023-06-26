@@ -9,15 +9,16 @@ import (
 // Status represents a status update by a user.
 type Status struct {
 	BaseModel
-	UserID uuid.UUID `json:"userId"`
+	UserID uuid.UUID `json:"userId" gorm:"column:user_id;not null"`
+	User   User      `json:"user" gorm:"foreignKey:UserID"`
 	Text   string    `json:"text"`
-	Media  []Media   `gorm:"ForeignKey:StatusID"`
+	Media  []Media   `json:"media" gorm:"ForeignKey:StatusID"`
 }
 
 // GetStatus gets a status update by ID.
 func GetStatus(id uuid.UUID) (*Status, error) {
 	var status Status
-	if err := db.Preload("Media").First(&status, "id = ?", id).Error; err != nil {
+	if err := db.Preload("User").Preload("Media").First(&status, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &status, nil
@@ -26,7 +27,7 @@ func GetStatus(id uuid.UUID) (*Status, error) {
 // GetStatusesByUserID gets all status updates by a user.
 func GetStatusesByUserID(userID uuid.UUID) ([]Status, error) {
 	var statuses []Status
-	if err := db.Preload("Media").Find(&statuses, "user_id = ?", userID).Error; err != nil {
+	if err := db.Preload("User").Preload("Media").Find(&statuses, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
 	return statuses, nil
@@ -36,7 +37,7 @@ func GetStatusesByUserID(userID uuid.UUID) ([]Status, error) {
 // older than the provided timestamp.
 func GetStatusesByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]Status, error) {
 	var statuses []Status
-	if err := db.Preload("Media").
+	if err := db.Preload("User").Preload("Media").
 		Where("user_id IN (?) AND created_at < ?", userIDs, cursor).
 		Order("created_at desc").
 		Limit(limit).
@@ -48,9 +49,15 @@ func GetStatusesByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]S
 
 // CreateStatus creates a new status update.
 func CreateStatus(userID uuid.UUID, text string, media []Media) (*Status, error) {
+	// Retrieve the user from the database
+	user := User{}
+	if err := db.First(&user, "id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+
 	newStatus := Status{
 		BaseModel: BaseModel{ID: uuid.New()},
-		UserID:    userID,
+		User:      user,
 		Text:      text,
 		Media:     media,
 	}
