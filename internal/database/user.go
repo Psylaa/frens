@@ -24,6 +24,15 @@ func GetUsers() ([]User, error) {
 	return users, nil
 }
 
+func GetUser(id string) (*User, error) {
+	var user User
+	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func CreateUser(username string, email string, password string) (*User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

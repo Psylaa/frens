@@ -15,6 +15,17 @@ func getUsers(c *fiber.Ctx) error {
 	return c.JSON(users)
 }
 
+func getUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	user, err := db.GetUser(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(user)
+}
+
 func createUser(c *fiber.Ctx) error {
 	// Parse the request body
 	type request struct {

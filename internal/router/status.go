@@ -24,6 +24,23 @@ func getStatus(c *fiber.Ctx) error {
 	return c.JSON(status)
 }
 
+func getStatuses(c *fiber.Ctx) error {
+	// Get the user ID from the query parameters
+	userID, err := uuid.Parse(c.Query("userId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	// Get the statuses
+	statuses, err := database.GetStatusesByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get statuses"})
+	}
+
+	// Return the statuses
+	return c.JSON(statuses)
+}
+
 func createStatus(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {

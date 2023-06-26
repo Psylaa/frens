@@ -51,3 +51,12 @@ func DeleteLike(userID, statusID uuid.UUID) error {
 
 	return nil
 }
+
+func HasUserLiked(userID, statusID uuid.UUID) (bool, error) {
+	var count int
+	if err := db.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

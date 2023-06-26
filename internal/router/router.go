@@ -34,7 +34,6 @@ func Init(port string, secret string, duration int) {
 	// Define routes
 	app.Post("/login", login)
 	app.Get("/login/verify", verifyToken)
-	app.Post("/users", createUser)
 
 	// Authenticated routes
 	app.Use(jwtware.New(jwtware.Config{
@@ -43,8 +42,11 @@ func Init(port string, secret string, duration int) {
 
 	// Other
 	app.Get("/users", getUsers)
+	app.Get("/users/:id", getUser)
+	app.Post("/users", createUser)
 
-	// Users
+	// Statuses
+	app.Get("/statuses", getStatuses)
 	app.Post("/statuses", createStatus)
 	app.Get("/statuses/:id", getStatus)
 	app.Delete("/statuses/:id", deleteStatus)
@@ -53,10 +55,17 @@ func Init(port string, secret string, duration int) {
 	app.Get("/statuses/:id/likes", getLikes)
 	app.Post("/statuses/:id/likes", createLike)
 	app.Delete("/statuses/:id/likes", deleteLike)
+	app.Get("/statuses/:id/likes/:userId", hasUserLiked)
+
+	// Bookmarks
+	app.Get("/statuses/:id/bookmarks", getBookmarks)
+	app.Post("/statuses/:id/bookmarks", createBookmark)
+	app.Delete("/statuses/:id/bookmarks", deleteBookmark)
+	app.Get("/statuses/:id/bookmarks/:userId", hasUserBookmarked)
 
 	// Feed
 	app.Get("/feed/chronological", getChronologicalFeed)
-	app.Get("/feed/algorithmic", getChronologicalFeed) //placeholder
+	app.Get("/feed/algorithmic", getChronologicalFeed)
 
 	// Follows
 	app.Get("/users/:id/followers", getFollowers)

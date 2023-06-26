@@ -1,27 +1,28 @@
 package router
 
 import (
-	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+
+	db "github.com/bwoff11/frens/internal/database"
 )
 
-func getLikes(c *fiber.Ctx) error {
+func getBookmarks(c *fiber.Ctx) error {
 	id := c.Params("id")
 	statusID, err := uuid.Parse(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	likes, err := db.GetLikes(statusID)
+	bookmarks, err := db.GetBookmarks(statusID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(likes)
+	return c.JSON(bookmarks)
 }
 
-func createLike(c *fiber.Ctx) error {
+func createBookmark(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
@@ -33,14 +34,14 @@ func createLike(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	if _, err := db.CreateLike(userID, statusID); err != nil {
+	if _, err := db.CreateBookmark(userID, statusID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func deleteLike(c *fiber.Ctx) error {
+func deleteBookmark(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
@@ -52,14 +53,14 @@ func deleteLike(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	if err := db.DeleteLike(userID, statusID); err != nil {
+	if err := db.DeleteBookmark(userID, statusID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func hasUserLiked(c *fiber.Ctx) error {
+func hasUserBookmarked(c *fiber.Ctx) error {
 	userId, err := uuid.Parse(c.Params("userId"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
@@ -71,10 +72,10 @@ func hasUserLiked(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	liked, err := db.HasUserLiked(userId, statusId)
+	bookmarked, err := db.HasUserBookmarked(userId, statusId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"liked": liked})
+	return c.JSON(fiber.Map{"bookmarked": bookmarked})
 }

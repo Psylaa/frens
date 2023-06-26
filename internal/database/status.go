@@ -27,7 +27,9 @@ func GetStatus(id uuid.UUID) (*Status, error) {
 // GetStatusesByUserID gets all status updates by a user.
 func GetStatusesByUserID(userID uuid.UUID) ([]Status, error) {
 	var statuses []Status
-	if err := db.Preload("User").Preload("Media").Find(&statuses, "user_id = ?", userID).Error; err != nil {
+	if err := db.Preload("User").Preload("Media").
+		Order("created_at desc").
+		Find(&statuses, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
 	return statuses, nil
