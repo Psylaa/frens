@@ -39,7 +39,9 @@ func login(c *fiber.Ctx) error {
 	}
 
 	// Return the token
-	return c.JSON(fiber.Map{"token": t})
+	return c.JSON(fiber.Map{
+		"id":    user.ID,
+		"token": t})
 }
 
 func verifyToken(c *fiber.Ctx) error {

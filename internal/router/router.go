@@ -56,7 +56,7 @@ func Init(port string, secret string, duration int) {
 
 	// Feed
 	app.Get("/feed/chronological", getChronologicalFeed)
-	//app.Get("/feed/algorithmic", getAlgorithmicFeed)
+	app.Get("/feed/algorithmic", getChronologicalFeed) //placeholder
 
 	// Follows
 	app.Get("/users/:id/followers", getFollowers)
