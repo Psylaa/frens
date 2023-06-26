@@ -33,6 +33,7 @@ func Init(port string, secret string, duration int) {
 
 	// Define routes
 	app.Post("/login", login)
+	app.Get("/login/verify", verifyToken)
 	app.Post("/users", createUser)
 
 	// Authenticated routes

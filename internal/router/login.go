@@ -41,3 +41,28 @@ func login(c *fiber.Ctx) error {
 	// Return the token
 	return c.JSON(fiber.Map{"token": t})
 }
+
+func verifyToken(c *fiber.Ctx) error {
+	// Parse the query parameter
+	var body struct {
+		Token string `query:"token"`
+	}
+	if err := c.QueryParser(&body); err != nil {
+		return err
+	}
+
+	// Verify the token
+	token, err := jwt.Parse(body.Token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
+	}
+
+	// Extract the user ID from the token's claims
+	claims := token.Claims.(jwt.MapClaims)
+	userID := claims["user_id"].(string)
+
+	// Return the user ID
+	return c.JSON(fiber.Map{"user_id": userID})
+}
