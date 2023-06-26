@@ -51,3 +51,12 @@ func GetFollowers(followingID uuid.UUID) ([]Follower, error) {
 
 	return followers, nil
 }
+
+func GetFollowing(followerID uuid.UUID) ([]Follower, error) {
+	var following []Follower
+	if err := db.Where("follower_id = ?", followerID).Find(&following).Error; err != nil {
+		return nil, err
+	}
+
+	return following, nil
+}

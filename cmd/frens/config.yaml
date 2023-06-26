@@ -1,6 +1,6 @@
 # config.yaml
 server:
-  port: "3000"
+  port: "3001"
   jwt_secret: "supersecret"
   jwt_duration: 168
 database:

@@ -34,6 +34,7 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	db.AutoMigrate(&Status{})
 	db.AutoMigrate(&Media{})
 	db.AutoMigrate(&Like{})
+	db.AutoMigrate(&Follower{})
 
 	// Manually create the composite unique index
 	db.Model(&Like{}).AddUniqueIndex("idx_user_status", "user_id", "status_id")

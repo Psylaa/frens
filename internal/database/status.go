@@ -1,6 +1,10 @@
 package database
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // Status represents a status update by a user.
 type Status struct {
@@ -23,6 +27,20 @@ func GetStatus(id uuid.UUID) (*Status, error) {
 func GetStatusesByUserID(userID uuid.UUID) ([]Status, error) {
 	var statuses []Status
 	if err := db.Preload("Media").Find(&statuses, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return statuses, nil
+}
+
+// GetStatusesByUserIDs gets a limited number of status updates from multiple users,
+// older than the provided timestamp.
+func GetStatusesByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]Status, error) {
+	var statuses []Status
+	if err := db.Preload("Media").
+		Where("user_id IN (?) AND created_at < ?", userIDs, cursor).
+		Order("created_at desc").
+		Limit(limit).
+		Find(&statuses).Error; err != nil {
 		return nil, err
 	}
 	return statuses, nil

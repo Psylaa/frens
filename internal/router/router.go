@@ -6,6 +6,7 @@ import (
 	"github.com/bwoff11/frens/internal/activitypub"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -26,6 +27,9 @@ func Init(port string, secret string, duration int) {
 
 	// Apply middleware
 	app.Use(logger.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:3000", // change to your front-end origin
+	}))
 
 	// Define routes
 	app.Post("/login", login)
@@ -36,6 +40,10 @@ func Init(port string, secret string, duration int) {
 		SigningKey: jwtware.SigningKey{Key: []byte(jwtSecret)},
 	}))
 
+	// Other
+	app.Get("/users", getUsers)
+
+	// Users
 	app.Post("/statuses", createStatus)
 	app.Get("/statuses/:id", getStatus)
 	app.Delete("/statuses/:id", deleteStatus)
@@ -45,8 +53,11 @@ func Init(port string, secret string, duration int) {
 	app.Post("/statuses/:id/likes", createLike)
 	app.Delete("/statuses/:id/likes", deleteLike)
 
+	// Feed
+	app.Get("/feed/chronological", getChronologicalFeed)
+	//app.Get("/feed/algorithmic", getAlgorithmicFeed)
+
 	// Follows
-	app.Get("/users", getUsers)
 	app.Get("/users/:id/followers", getFollowers)
 	app.Post("/users/:id/followers", createFollower)
 	app.Delete("/users/:id/followers", deleteFollower)
