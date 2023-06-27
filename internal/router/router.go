@@ -95,7 +95,6 @@ func getUserID(c *fiber.Ctx) (uuid.UUID, error) {
 	claims := user.Claims.(jwt.MapClaims)
 	sub, ok := claims["user_id"].(string)
 	if !ok {
-		logger.Log.Error().Msg("No sub claim in token")
 		return uuid.Nil, fmt.Errorf("no sub claim in token")
 	}
 	return uuid.Parse(sub)
