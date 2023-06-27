@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/activitypub"
+	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/storage"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -18,10 +20,15 @@ var (
 	jwtDuration int
 )
 
-func Init(port string, secret string, duration int) {
+var storages map[config.FileType]storage.Storage
+
+func Init(port string, secret string, duration int, storages map[config.FileType]storage.Storage) {
 	// Set global variables
 	jwtSecret = secret
 	jwtDuration = duration
+
+	// Set global storages
+	storages = storages
 
 	// Initialize Fiber
 	app := fiber.New()
@@ -35,6 +42,14 @@ func Init(port string, secret string, duration int) {
 	}))
 
 	// Define routes
+	setupRoutes(app, storages)
+
+	// Start the server
+	app.Listen(":" + port)
+}
+
+func setupRoutes(app *fiber.App, storages map[config.FileType]storage.Storage) {
+	// Unauthenticated routes
 	app.Post("/login", login)
 	app.Get("/login/verify", verifyToken)
 
@@ -85,9 +100,6 @@ func Init(port string, secret string, duration int) {
 	app.Get("/users/:username", activitypub.GetUserProfile)
 	app.Post("/users/:username/inbox", activitypub.HandleInbox)
 	app.Get("/users/:username/outbox", activitypub.HandleOutbox)
-
-	// Start the server
-	app.Listen(":" + port)
 }
 
 func getUserID(c *fiber.Ctx) (uuid.UUID, error) {

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -19,13 +20,15 @@ type File struct {
 	BaseModel
 	Type  string    `gorm:"type:varchar(100)"`
 	Owner uuid.UUID `gorm:"type:uuid"`
-	ID    uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"` // Duplicated from BaseModel to make it easier to use
 }
 
 func CreateFile(file *File) (*File, error) {
+	file.ID = uuid.New()
 	if err := db.Create(file).Error; err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to create file")
 		return nil, err
 	}
+
 	return file, nil
 }
 

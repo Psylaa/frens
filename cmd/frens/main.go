@@ -1,4 +1,4 @@
-// cmd/frens/main.go
+// main.go
 package main
 
 import (
@@ -22,7 +22,8 @@ func main() {
 	logger.Init(cfg.Server.LogLevel)
 
 	// Initialize storage
-	if err := storage.InitStorage(cfg); err != nil {
+	storages, err := storage.NewStorage(cfg)
+	if err != nil {
 		logger.Log.Fatal().Err(err).Msg("Error initializing storage")
 	}
 
@@ -32,5 +33,5 @@ func main() {
 	}
 
 	// Initialize router and start the server
-	router.Init(cfg.Server.Port, cfg.Server.JWTSecret, cfg.Server.JWTDuration)
+	router.Init(cfg.Server.Port, cfg.Server.JWTSecret, cfg.Server.JWTDuration, storages)
 }

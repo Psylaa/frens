@@ -2,11 +2,10 @@ package router
 
 import (
 	"io"
-	"path/filepath"
 
+	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -56,7 +55,6 @@ func createFile(c *fiber.Ctx) error {
 
 	// Create a new db file instance
 	fileData := database.File{
-		ID:    uuid.New(),
 		Type:  fileType,
 		Owner: userID,
 	}
@@ -71,11 +69,8 @@ func createFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get the original file extension
-	fileExt := filepath.Ext(fileUpload.Filename)
-
 	// Save the file to storage
-	err = storage.SaveFile(storage.FileType(fileType), newFile.ID.String()+fileExt, data)
+	err = storages[config.FileType(fileType)].SaveFile(newFile.ID, data)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Cannot save file")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -109,7 +104,7 @@ func getFile(c *fiber.Ctx) error {
 	}
 
 	// Load the file from storage
-	fileContent, err := storage.LoadFile(storage.FileType(fileType), id.String())
+	fileContent, err := storages[config.FileType(fileType)].LoadFile(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot load file from storage",
@@ -149,7 +144,7 @@ func deleteFile(c *fiber.Ctx) error {
 	}
 
 	// Delete the file from storage
-	err = storage.DeleteFile(storage.FileType(file.Type), c.Params("path"))
+	err = storages[config.FileType(file.Type)].DeleteFile(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot delete file from storage",
