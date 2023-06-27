@@ -39,6 +39,7 @@ func InitDB(cfg *config.Config) error {
 	db.AutoMigrate(&Like{})
 	db.AutoMigrate(&Follower{})
 	db.AutoMigrate(&Bookmark{})
+	db.AutoMigrate(&File{})
 	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index
