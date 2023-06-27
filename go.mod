@@ -3,6 +3,7 @@ module github.com/bwoff11/frens
 go 1.20
 
 require (
+	github.com/aws/aws-sdk-go v1.44.290
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/gofiber/contrib/fiberzerolog v0.1.2
@@ -23,6 +24,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.16.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lib/pq v1.10.9 // indirect

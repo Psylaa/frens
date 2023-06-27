@@ -10,10 +10,12 @@ import (
 
 type User struct {
 	BaseModel
-	Username string `gorm:"unique" json:"username"`
-	Email    string `json:"email"`
-	Bio      string `json:"bio"`
-	Password string `json:"-"`
+	Username       string    `gorm:"unique" json:"username"`
+	Email          string    `json:"email"`
+	Bio            string    `json:"bio"`
+	Password       string    `json:"-"`
+	ProfilePicture uuid.UUID `gorm:"type:uuid" json:"profilePicture"`
+	UserBanner     uuid.UUID `gorm:"type:uuid" json:"userBanner"`
 }
 
 func GetUsers() ([]User, error) {

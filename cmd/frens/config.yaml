@@ -12,11 +12,57 @@ database:
   password: samplepassword
   sslmode: disable
 storage:
-  type: local
-  local:
-    path: C:\\temp\\frens
-  s3:
-    bucket: frens
-    region: us-east-1
-    access_key: sampleaccesskey
-    secret_key: samplesecretkey
+  profile_pictures:
+    type: local
+    local:
+      path: C:\\temp\\frens\\profile_pictures
+    s3:
+      bucket: frens-profile_pictures
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
+  user_banners:
+    type: local
+    local:
+      path: C:\\temp\\frens\\user_banners
+    s3:
+      bucket: frens-user_banners
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
+  status_images:
+    type: local
+    local:
+      path: C:\\temp\\frens\\status_images
+    s3:
+      bucket: frens-status_images
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
+  status_videos:
+    type: local
+    local:
+      path: C:\\temp\\frens\\status_videos
+    s3:
+      bucket: frens-status_videos
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
+  status_audio:
+    type: local
+    local:
+      path: C:\\temp\\frens\\status_audio
+    s3:
+      bucket: frens-status_audio
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
+  status_files:
+    type: local
+    local:
+      path: C:\\temp\\frens\\status_files
+    s3:
+      bucket: frens-status_files
+      region: us-east-1
+      access_key: sampleaccesskey
+      secret_key: samplesecretkey
