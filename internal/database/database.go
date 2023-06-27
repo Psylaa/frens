@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 
 	"github.com/jinzhu/gorm"
@@ -27,8 +28,10 @@ func InitDB(cfg *config.Config) error {
 	var err error
 	db, err = gorm.Open("postgres", dbinfo)
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to connect to database")
 		return err
 	}
+	logger.Log.Info().Msg("Successfully connected to database")
 
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Status{})
@@ -36,9 +39,11 @@ func InitDB(cfg *config.Config) error {
 	db.AutoMigrate(&Like{})
 	db.AutoMigrate(&Follower{})
 	db.AutoMigrate(&Bookmark{})
+	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index
 	db.Model(&Like{}).AddUniqueIndex("idx_user_status", "user_id", "status_id")
+	logger.Log.Info().Msg("Created unique index for Like")
 
 	return nil
 }

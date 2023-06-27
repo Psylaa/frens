@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Server struct {
 		Port        string `yaml:"port" validate:"required"`
+		LogLevel    string `yaml:"log_level" validate:"required"`
 		JWTSecret   string `yaml:"jwt_secret" validate:"required"`
 		JWTDuration int    `yaml:"jwt_duration" validate:"required"`
 	} `yaml:"server"`

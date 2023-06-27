@@ -1,6 +1,7 @@
 # config.yaml
 server:
   port: "3001"
+  log_level: "debug"
   jwt_secret: "supersecret"
   jwt_duration: 168
 database:

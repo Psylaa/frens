@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/activitypub"
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -26,7 +27,9 @@ func Init(port string, secret string, duration int) {
 	app := fiber.New()
 
 	// Apply middleware
-	app.Use(logger.New())
+	app.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: &logger.Log,
+	}))
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:3000", // change to your front-end origin
 	}))
@@ -92,6 +95,7 @@ func getUserID(c *fiber.Ctx) (uuid.UUID, error) {
 	claims := user.Claims.(jwt.MapClaims)
 	sub, ok := claims["user_id"].(string)
 	if !ok {
+		logger.Log.Error().Msg("No sub claim in token")
 		return uuid.Nil, fmt.Errorf("no sub claim in token")
 	}
 	return uuid.Parse(sub)

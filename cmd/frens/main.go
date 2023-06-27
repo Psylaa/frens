@@ -1,4 +1,4 @@
-// cmd/frends/main.go
+// cmd/frens/main.go
 package main
 
 import (
@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/router"
 )
 
@@ -16,9 +17,12 @@ func main() {
 		log.Fatalf("Error reading config: %v", err)
 	}
 
+	// Initialize logger
+	logger.Init(cfg.Server.LogLevel)
+
 	// Connect to the database
 	if err := database.InitDB(cfg); err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
+		logger.Log.Fatal().Err(err).Msg("Error connecting to database")
 	}
 
 	// Initialize router and start the server
