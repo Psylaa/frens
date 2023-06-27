@@ -49,7 +49,7 @@ type Database struct {
 	DBName   string `yaml:"dbname" validate:"required"`
 	Password string `yaml:"password" validate:"required"`
 	SSLMode  string `yaml:"sslmode" validate:"required"`
-	LogMode  bool   `yaml:"log_mode" validate:"required"`
+	LogMode  bool   `yaml:"log_mode"`
 }
 
 func (c *Config) Validate() error {

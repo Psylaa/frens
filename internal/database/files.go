@@ -9,15 +9,17 @@ import (
 
 type File struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
+	Extension string    `json:"extension"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	Owner     uuid.UUID `gorm:"type:uuid"`
+	Owner     uuid.UUID `gorm:"type:uuid" json:"owner"`
 }
 
-func CreateFile(data []byte, owner uuid.UUID) (*File, error) {
+func CreateFile(owner uuid.UUID, extension string) (*File, error) {
 	file := &File{
-		ID:    uuid.New(),
-		Owner: owner,
+		ID:        uuid.New(),
+		Extension: extension,
+		Owner:     owner,
 	}
 	if err := db.Create(file).Error; err != nil {
 		return nil, err

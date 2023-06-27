@@ -1,137 +1,110 @@
 package router
 
 import (
-	"io"
+	"os"
 	"path/filepath"
 
 	"github.com/bwoff11/frens/internal/database"
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 func createFile(c *fiber.Ctx) error {
-	// Get the user ID from the JWT token
-	userID, err := getUserID(c)
+	userId, err := getUserID(c)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot get user ID")
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Cannot get user ID",
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
 	}
 
-	// Parse the multipart form
-	fileUpload, err := c.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot parse file upload")
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Cannot parse file upload",
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Read the uploaded file content
-	file, err := fileUpload.Open()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot open file")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot open file",
-			"message": err.Error(),
-		})
-	}
-	defer file.Close()
+	ext := filepath.Ext(file.Filename)
 
-	data, err := io.ReadAll(file)
+	fileData, err := database.CreateFile(userId, ext)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot read file")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot read file",
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Create the file record in the database
-	newFile, err := database.CreateFile(data, userID)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot create file record")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot create file record",
-			"message": err.Error(),
-		})
+	// Create the directory if it doesn't exist
+	if err := os.MkdirAll(cfg.Storage.Local.Path, os.ModePerm); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Extract the extension from the original file name
-	ext := filepath.Ext(fileUpload.Filename)
-
-	// Save the file to storage
-	newFileName := newFile.ID.String() + ext
-	err = storageInstance.SaveFile(data, newFileName)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot save file")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot save file",
-			"message": err.Error(),
-		})
+	if err := c.SaveFile(file, filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Return the new file
-	return c.JSON(newFile)
+	return c.JSON(fileData)
 }
 
-func getFile(c *fiber.Ctx) error {
-	// Convert id to uuid
-	uuid, err := uuid.Parse(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Invalid ID",
-			"message": err.Error(),
-		})
+func retrieveFile(c *fiber.Ctx) error {
+	filePath := filepath.Join(cfg.Storage.Local.Path, c.Params("filename"))
+	if _, err := os.Stat(filePath); err != nil {
+		if os.IsNotExist(err) {
+			// file does not exist
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "File not found"})
+		} else {
+			// other error
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
 	}
-
-	// Load the file from storage
-	fileContent, err := storageInstance.LoadFile(uuid)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot load file from storage",
-			"message": err.Error(),
-		})
-	}
-
-	// Return the file
-	return c.SendStream(fileContent)
+	return c.SendFile(filePath)
 }
 
 func deleteFile(c *fiber.Ctx) error {
-	// Convert id to uuid
-	uuid, err := uuid.Parse(c.Params("id"))
+	filePath := filepath.Join(cfg.Storage.Local.Path, c.Params("filename"))
+	err := os.Remove(filePath)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Invalid ID",
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	// Delete the file from storage
-	err = storageInstance.DeleteFile(uuid)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot delete file from storage",
-			"message": err.Error(),
-		})
-	}
-
-	// Delete the file from the database
-	err = database.DeleteFile(uuid)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot delete file",
-			"message": err.Error(),
-		})
-	}
-
-	// Return a success message
-	return c.JSON(fiber.Map{
-		"message": "File deleted successfully",
-	})
+	return c.JSON(fiber.Map{"message": "File deleted"})
 }
+
+/*
+func updateFile(c *fiber.Ctx) error {
+	oldFileName := c.Params("filename")
+	userId, err := getUserID(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	ext := filepath.Ext(file.Filename)
+
+	fileData, err := database.UpdateFile(userId, oldFileName, ext)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	oldFilePath := filepath.Join(cfg.Storage.Local.Path, oldFileName)
+	err = os.Remove(oldFilePath)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	newFilePath := filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)
+	out, err := os.Create(newFilePath)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	defer out.Close()
+
+	fileContent, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	defer fileContent.Close()
+
+	_, err = io.Copy(out, fileContent)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fileData)
+}
+*/

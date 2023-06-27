@@ -1,6 +1,8 @@
 package router
 
 import (
+	"log"
+
 	"github.com/bwoff11/frens/internal/database"
 	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
@@ -53,6 +55,7 @@ func createUser(c *fiber.Ctx) error {
 }
 
 func updateUser(c *fiber.Ctx) error {
+	log.Println("Raw Request Body:", string(c.Body())) // Add this log
 	type request struct {
 		Bio            *string    `json:"bio"`
 		ProfilePicture *uuid.UUID `json:"profilePicture"`

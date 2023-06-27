@@ -11,7 +11,7 @@ database:
   dbname: frens
   password: samplepassword
   sslmode: disable
-  log_mode: true
+  log_mode: false
 storage:
   type: local
   local:

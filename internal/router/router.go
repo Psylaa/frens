@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/activitypub"
+	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/storage"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -14,20 +14,11 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	jwtSecret   string
-	jwtDuration int
-)
+var cfg *config.Config
 
-var storageInstance storage.Storage
-
-func Init(port string, secret string, duration int, storage storage.Storage) {
-	// Set global variables
-	jwtSecret = secret
-	jwtDuration = duration
-
-	// Set global storage
-	storageInstance = storage
+func Init(config *config.Config) {
+	// Store the config
+	cfg = config
 
 	// Initialize Fiber
 	app := fiber.New()
@@ -44,18 +35,16 @@ func Init(port string, secret string, duration int, storage storage.Storage) {
 	setupRoutes(app)
 
 	// Start the server
-	app.Listen(":" + port)
+	app.Listen(":" + cfg.Server.Port)
 }
 
 func setupRoutes(app *fiber.App) {
 	// Unauthenticated routes
 	app.Post("/login", login)
 	app.Get("/login/verify", verifyToken)
-	app.Get("/files/:id", getFile)
-
 	// Authenticated routes
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(jwtSecret)},
+		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 	}))
 
 	// Users
@@ -78,7 +67,8 @@ func setupRoutes(app *fiber.App) {
 
 	// Files
 	app.Post("/files", createFile)
-	app.Delete("/files/:id", deleteFile)
+	app.Get("/files/:filename", retrieveFile)
+	app.Delete("/files/:filename", deleteFile)
 
 	// Bookmarks
 	app.Get("/statuses/:id/bookmarks", getBookmarks)

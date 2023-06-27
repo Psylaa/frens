@@ -32,10 +32,10 @@ func login(c *fiber.Ctx) error {
 	// Set the claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(jwtDuration)).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(cfg.Server.JWTDuration)).Unix()
 
 	// Sign the token with our secret
-	t, err := token.SignedString([]byte(jwtSecret))
+	t, err := token.SignedString([]byte(cfg.Server.JWTSecret))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to sign token")
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -58,7 +58,7 @@ func verifyToken(c *fiber.Ctx) error {
 
 	// Verify the token
 	token, err := jwt.Parse(body.Token, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
+		return []byte(cfg.Server.JWTSecret), nil
 	})
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
