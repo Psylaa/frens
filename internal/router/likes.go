@@ -33,6 +33,16 @@ func createLike(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
+	// Check if user has already liked this status
+	userHasLiked, err := db.HasUserLiked(userID, statusID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	if userHasLiked {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "User has already liked this status"})
+	}
+
+	// Create the like
 	if _, err := db.CreateLike(userID, statusID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

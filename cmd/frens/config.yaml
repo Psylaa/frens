@@ -14,7 +14,7 @@ database:
 storage:
   type: local
   local:
-    path: /tmp/frens
+    path: C:\\temp\\frens
   s3:
     bucket: frens
     region: us-east-1

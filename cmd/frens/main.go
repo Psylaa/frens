@@ -8,6 +8,7 @@ import (
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/router"
+	"github.com/bwoff11/frens/internal/storage"
 )
 
 func main() {
@@ -19,6 +20,11 @@ func main() {
 
 	// Initialize logger
 	logger.Init(cfg.Server.LogLevel)
+
+	// Initialize storage
+	if err := storage.InitStorage(cfg); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Error initializing storage")
+	}
 
 	// Connect to the database
 	if err := database.InitDB(cfg); err != nil {
