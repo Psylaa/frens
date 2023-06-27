@@ -4,6 +4,7 @@ import (
 	"github.com/bwoff11/frens/internal/database"
 	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func getUsers(c *fiber.Ctx) error {
@@ -49,4 +50,32 @@ func createUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(user)
+}
+
+func updateUser(c *fiber.Ctx) error {
+	type request struct {
+		Bio            *string    `json:"bio"`
+		ProfilePicture *uuid.UUID `json:"profilePicture"`
+		BannerImage    *uuid.UUID `json:"bannerImage"`
+	}
+
+	var body request
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
+	}
+
+	userId := c.Params("id")
+	user, err := db.GetUser(userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	updatedUser, err := db.UpdateUser(user.ID, body.Bio, body.ProfilePicture, body.BannerImage)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(updatedUser)
 }

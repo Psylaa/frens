@@ -48,7 +48,10 @@ func InitStorage(cfg *config.Config) error {
 		if storageConfig.Type == "local" {
 			dir := storageConfig.Local.Path
 			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				os.MkdirAll(dir, 0755)
+				err := os.MkdirAll(dir, 0755)
+				if err != nil {
+					return fmt.Errorf("Failed to create directory %s: %w", dir, err)
+				}
 			}
 		}
 	}

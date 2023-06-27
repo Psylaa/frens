@@ -15,7 +15,7 @@ type User struct {
 	Bio            string    `json:"bio"`
 	Password       string    `json:"-"`
 	ProfilePicture uuid.UUID `gorm:"type:uuid" json:"profilePicture"`
-	UserBanner     uuid.UUID `gorm:"type:uuid" json:"userBanner"`
+	BannerImage    uuid.UUID `gorm:"type:uuid" json:"bannerImage"`
 }
 
 func GetUsers() ([]User, error) {
@@ -75,6 +75,38 @@ func VerifyUser(username string, password string) (*User, error) {
 func GetUserByUsername(username string) (*User, error) {
 	var user User
 	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func UpdateUser(id uuid.UUID, bio *string, profilePicture *uuid.UUID, bannerImage *uuid.UUID) (*User, error) {
+
+	type request struct {
+		Bio            *string    `json:"bio"`
+		ProfilePicture *uuid.UUID `json:"profilePicture"`
+		BannerImage    *uuid.UUID `json:"bannerImage"`
+	}
+
+	var user User
+	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	if bio != nil {
+		user.Bio = *bio
+	}
+
+	if profilePicture != nil {
+		user.ProfilePicture = *profilePicture
+	}
+
+	if bannerImage != nil {
+		user.BannerImage = *bannerImage
+	}
+
+	if err := db.Save(&user).Error; err != nil {
 		return nil, err
 	}
 
