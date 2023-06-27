@@ -13,39 +13,11 @@ database:
   sslmode: disable
   log_mode: true
 storage:
-  images:
-    type: local
-    local:
-      path: C:\\temp\\frens\\images
-    s3:
-      bucket: frens-images
-      region: us-east-1
-      access_key: sampleaccesskey
-      secret_key: samplesecretkey
-  video:
-    type: local
-    local:
-      path: C:\\temp\\frens\\videos
-    s3:
-      bucket: frens-videos
-      region: us-east-1
-      access_key: sampleaccesskey
-      secret_key: samplesecretkey
-  audio:
-    type: local
-    local:
-      path: C:\\temp\\frens\\audio
-    s3:
-      bucket: frens-audio
-      region: us-east-1
-      access_key: sampleaccesskey
-      secret_key: samplesecretkey
-  other:
-    type: local
-    local:
-      path: C:\\temp\\frens\\other
-    s3:
-      bucket: frens-other
-      region: us-east-1
-      access_key: sampleaccesskey
-      secret_key: samplesecretkey
+  type: local
+  local:
+    path: C:\\temp\\frens
+  s3:
+    bucket: frens-images
+    region: us-east-1
+    access_key: sampleaccesskey
+    secret_key: samplesecretkey

@@ -1,34 +1,27 @@
 package database
 
 import (
-	"github.com/bwoff11/frens/internal/logger"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
-type FileType string
-
-const (
-	ProfilePicture FileType = "ProfilePicture"
-	UserBanner     FileType = "UserBanner"
-	StatusImage    FileType = "StatusImage"
-	StatusVideo    FileType = "StatusVideo"
-	StatusFile     FileType = "StatusFile"
-)
-
 type File struct {
-	BaseModel
-	Type  string    `gorm:"type:varchar(100)"`
-	Owner uuid.UUID `gorm:"type:uuid"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Owner     uuid.UUID `gorm:"type:uuid"`
 }
 
-func CreateFile(file *File) (*File, error) {
-	file.ID = uuid.New()
+func CreateFile(data []byte, owner uuid.UUID) (*File, error) {
+	file := &File{
+		ID:    uuid.New(),
+		Owner: owner,
+	}
 	if err := db.Create(file).Error; err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to create file")
 		return nil, err
 	}
-
 	return file, nil
 }
 

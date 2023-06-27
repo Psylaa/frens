@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/activitypub"
-	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/storage"
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -20,15 +19,15 @@ var (
 	jwtDuration int
 )
 
-var storages map[config.FileType]storage.Storage
+var storageInstance storage.Storage
 
-func Init(port string, secret string, duration int, storages map[config.FileType]storage.Storage) {
+func Init(port string, secret string, duration int, storage storage.Storage) {
 	// Set global variables
 	jwtSecret = secret
 	jwtDuration = duration
 
-	// Set global storages
-	storages = storages
+	// Set global storage
+	storageInstance = storage
 
 	// Initialize Fiber
 	app := fiber.New()
@@ -42,16 +41,17 @@ func Init(port string, secret string, duration int, storages map[config.FileType
 	}))
 
 	// Define routes
-	setupRoutes(app, storages)
+	setupRoutes(app)
 
 	// Start the server
 	app.Listen(":" + port)
 }
 
-func setupRoutes(app *fiber.App, storages map[config.FileType]storage.Storage) {
+func setupRoutes(app *fiber.App) {
 	// Unauthenticated routes
 	app.Post("/login", login)
 	app.Get("/login/verify", verifyToken)
+	app.Get("/files/:id", getFile)
 
 	// Authenticated routes
 	app.Use(jwtware.New(jwtware.Config{
@@ -78,7 +78,6 @@ func setupRoutes(app *fiber.App, storages map[config.FileType]storage.Storage) {
 
 	// Files
 	app.Post("/files", createFile)
-	app.Get("/files/:type/:id", getFile)
 	app.Delete("/files/:id", deleteFile)
 
 	// Bookmarks

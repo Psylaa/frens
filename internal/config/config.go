@@ -17,9 +17,9 @@ const (
 )
 
 type Config struct {
-	Server   Server                      `yaml:"server" validate:"required"`
-	Database Database                    `yaml:"database" validate:"required"`
-	Storage  map[FileType]StorageDetails `yaml:"storage" validate:"required"`
+	Server   Server         `yaml:"server" validate:"required"`
+	Database Database       `yaml:"database" validate:"required"`
+	Storage  StorageDetails `yaml:"storage" validate:"required"`
 }
 
 type StorageDetails struct {

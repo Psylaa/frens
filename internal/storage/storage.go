@@ -1,8 +1,10 @@
+// storage.go
 package storage
 
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
@@ -10,29 +12,30 @@ import (
 )
 
 type Storage interface {
-	DetectFileType(data []byte) config.FileType
-	SaveFile(id uuid.UUID, data []byte) error
+	SaveFile(data []byte, filename string) error
 	LoadFile(id uuid.UUID) (io.ReadCloser, error)
 	DeleteFile(id uuid.UUID) error
 }
 
-// storage.go
-func NewStorage(cfg *config.Config) (map[config.FileType]Storage, error) {
-	storages := make(map[config.FileType]Storage)
-	for fileType, storageConfig := range cfg.Storage {
-		switch storageConfig.Type {
-		case "local":
-			storages[fileType] = newLocalStorage(&storageConfig)
-			logger.Log.Info().Msg("Local storage for " + string(fileType) + " initialized")
-		case "s3":
-			storages[fileType] = newS3Storage(&storageConfig)
-			logger.Log.Info().Msg("S3 storage for " + string(fileType) + " initialized")
-		default:
-			logger.Log.Error().Msg("Unsupported storage type: " + storageConfig.Type)
-			return nil, fmt.Errorf("unsupported storage type: %s", storageConfig.Type)
-		}
-	}
+func NewStorage(cfg *config.Config) (Storage, error) {
+	storageConfig := cfg.Storage
+	switch storageConfig.Type {
+	case "local":
+		logger.Log.Info().Msg("Local storage initialized")
+		localStorage := newLocalStorage(&storageConfig)
 
-	logger.Log.Info().Msg("Storage initialized")
-	return storages, nil
+		// Check if the directory exists, and if not, create it
+		if _, err := os.Stat(localStorage.Path); os.IsNotExist(err) {
+			os.MkdirAll(localStorage.Path, 0755)
+		}
+
+		return localStorage, nil
+	case "s3":
+		logger.Log.Info().Msg("S3 storage initialized")
+		// Similar directory checks could be made here for your S3 bucket
+		return newS3Storage(&storageConfig), nil
+	default:
+		logger.Log.Error().Msg("Unsupported storage type: " + storageConfig.Type)
+		return nil, fmt.Errorf("unsupported storage type: %s", storageConfig.Type)
+	}
 }

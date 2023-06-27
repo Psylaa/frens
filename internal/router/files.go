@@ -2,8 +2,8 @@ package router
 
 import (
 	"io"
+	"path/filepath"
 
-	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/gofiber/fiber/v2"
@@ -23,8 +23,6 @@ func createFile(c *fiber.Ctx) error {
 
 	// Parse the multipart form
 	fileUpload, err := c.FormFile("file")
-	fileType := c.FormValue("type")
-
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Cannot parse file upload")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -53,24 +51,22 @@ func createFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Create a new db file instance
-	fileData := database.File{
-		Type:  fileType,
-		Owner: userID,
-	}
-
-	// Call the CreateFile function from the database package
-	newFile, err := database.CreateFile(&fileData)
+	// Create the file record in the database
+	newFile, err := database.CreateFile(data, userID)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Cannot create file")
+		logger.Log.Error().Err(err).Msg("Cannot create file record")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot create file",
+			"error":   "Cannot create file record",
 			"message": err.Error(),
 		})
 	}
 
+	// Extract the extension from the original file name
+	ext := filepath.Ext(fileUpload.Filename)
+
 	// Save the file to storage
-	err = storages[config.FileType(fileType)].SaveFile(newFile.ID, data)
+	newFileName := newFile.ID.String() + ext
+	err = storageInstance.SaveFile(data, newFileName)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Cannot save file")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -84,8 +80,8 @@ func createFile(c *fiber.Ctx) error {
 }
 
 func getFile(c *fiber.Ctx) error {
-	// Get the file ID from the URL parameter
-	id, err := uuid.Parse(c.Params("id"))
+	// Convert id to uuid
+	uuid, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Invalid ID",
@@ -93,18 +89,8 @@ func getFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get the file type from the URL parameter
-	// Todo: verify its a valid type
-	fileType := c.Params("type")
-	if fileType == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Invalid type",
-			"message": "Type cannot be empty",
-		})
-	}
-
 	// Load the file from storage
-	fileContent, err := storages[config.FileType(fileType)].LoadFile(id)
+	fileContent, err := storageInstance.LoadFile(uuid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot load file from storage",
@@ -117,8 +103,8 @@ func getFile(c *fiber.Ctx) error {
 }
 
 func deleteFile(c *fiber.Ctx) error {
-	// Get the file ID from the URL parameter
-	id, err := uuid.Parse(c.Params("id"))
+	// Convert id to uuid
+	uuid, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Invalid ID",
@@ -126,28 +112,20 @@ func deleteFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Call the GetFile function from the database package
-	file, err := database.GetFile(id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot get file",
-			"message": err.Error(),
-		})
-	}
-
-	// Call the DeleteFile function from the database package
-	if err := database.DeleteFile(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot delete file",
-			"message": err.Error(),
-		})
-	}
-
 	// Delete the file from storage
-	err = storages[config.FileType(file.Type)].DeleteFile(id)
+	err = storageInstance.DeleteFile(uuid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot delete file from storage",
+			"message": err.Error(),
+		})
+	}
+
+	// Delete the file from the database
+	err = database.DeleteFile(uuid)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   "Cannot delete file",
 			"message": err.Error(),
 		})
 	}
