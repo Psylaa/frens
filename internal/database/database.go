@@ -31,6 +31,7 @@ func InitDB(cfg *config.Config) error {
 		logger.Log.Error().Err(err).Msg("Failed to connect to database")
 		return err
 	}
+	db.LogMode(cfg.Database.LogMode)
 	logger.Log.Info().Msg("Successfully connected to database")
 
 	db.AutoMigrate(&User{})

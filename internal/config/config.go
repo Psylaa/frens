@@ -7,20 +7,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Server struct {
-	Port        string `yaml:"port" validate:"required"`
-	LogLevel    string `yaml:"log_level" validate:"required"`
-	JWTSecret   string `yaml:"jwt_secret" validate:"required"`
-	JWTDuration int    `yaml:"jwt_duration" validate:"required"`
-}
+type FileType string
 
-type Database struct {
-	Host     string `yaml:"host" validate:"required"`
-	Port     string `yaml:"port" validate:"required"`
-	User     string `yaml:"user" validate:"required"`
-	DBName   string `yaml:"dbname" validate:"required"`
-	Password string `yaml:"password" validate:"required"`
-	SSLMode  string `yaml:"sslmode" validate:"required"`
+const (
+	Image FileType = "image"
+	Video FileType = "video"
+	Audio FileType = "audio"
+	Other FileType = "other"
+)
+
+type Config struct {
+	Server   Server                      `yaml:"server" validate:"required"`
+	Database Database                    `yaml:"database" validate:"required"`
+	Storage  map[FileType]StorageDetails `yaml:"storage" validate:"required"`
 }
 
 type StorageDetails struct {
@@ -36,17 +35,21 @@ type StorageDetails struct {
 	} `yaml:"s3"`
 }
 
-type Config struct {
-	Server   Server   `yaml:"server"`
-	Database Database `yaml:"database"`
-	Storage  struct {
-		ProfilePictures StorageDetails `yaml:"profile_pictures"`
-		UserBanners     StorageDetails `yaml:"user_banners"`
-		StatusImages    StorageDetails `yaml:"status_images"`
-		StatusVideos    StorageDetails `yaml:"status_videos"`
-		StatusAudio     StorageDetails `yaml:"status_audio"`
-		StatusFiles     StorageDetails `yaml:"status_files"`
-	} `yaml:"storage"`
+type Server struct {
+	Port        string `yaml:"port" validate:"required"`
+	LogLevel    string `yaml:"log_level" validate:"required"`
+	JWTSecret   string `yaml:"jwt_secret" validate:"required"`
+	JWTDuration int    `yaml:"jwt_duration" validate:"required"`
+}
+
+type Database struct {
+	Host     string `yaml:"host" validate:"required"`
+	Port     string `yaml:"port" validate:"required"`
+	User     string `yaml:"user" validate:"required"`
+	DBName   string `yaml:"dbname" validate:"required"`
+	Password string `yaml:"password" validate:"required"`
+	SSLMode  string `yaml:"sslmode" validate:"required"`
+	LogMode  bool   `yaml:"log_mode" validate:"required"`
 }
 
 func (c *Config) Validate() error {

@@ -63,7 +63,7 @@ func Init(port string, secret string, duration int) {
 
 	// Files
 	app.Post("/files", createFile)
-	app.Get("/files/:id", getFile)
+	app.Get("/files/:type/:id", getFile)
 	app.Delete("/files/:id", deleteFile)
 
 	// Bookmarks

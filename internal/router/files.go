@@ -1,34 +1,83 @@
 package router
 
 import (
+	"io"
+	"path/filepath"
+
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 func createFile(c *fiber.Ctx) error {
-	// Parse the request body into a File object
-	var file database.File
-	if err := c.BodyParser(&file); err != nil {
+	// Get the user ID from the JWT token
+	userID, err := getUserID(c)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot get user ID")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Cannot parse JSON",
+			"error":   "Cannot get user ID",
 			"message": err.Error(),
 		})
 	}
 
-	// Call the CreateFile function from the database package
-	newFile, err := database.CreateFile(&file)
+	// Parse the multipart form
+	fileUpload, err := c.FormFile("file")
+	fileType := c.FormValue("type")
+
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot parse file upload")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Cannot parse file upload",
+			"message": err.Error(),
+		})
+	}
+
+	// Read the uploaded file content
+	file, err := fileUpload.Open()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot open file")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   "Cannot open file",
+			"message": err.Error(),
+		})
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot read file")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   "Cannot read file",
+			"message": err.Error(),
+		})
+	}
+
+	// Create a new db file instance
+	fileData := database.File{
+		ID:    uuid.New(),
+		Type:  fileType,
+		Owner: userID,
+	}
+
+	// Call the CreateFile function from the database package
+	newFile, err := database.CreateFile(&fileData)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot create file")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot create file",
 			"message": err.Error(),
 		})
 	}
 
+	// Get the original file extension
+	fileExt := filepath.Ext(fileUpload.Filename)
+
 	// Save the file to storage
-	err = storage.SaveFile(storage.FileType(newFile.Type), c.Params("path"), c.Body())
+	err = storage.SaveFile(storage.FileType(fileType), newFile.ID.String()+fileExt, data)
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Cannot save file")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Cannot save file",
 			"message": err.Error(),
@@ -49,20 +98,21 @@ func getFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Call the GetFile function from the database package
-	file, err := database.GetFile(id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot get file",
-			"message": err.Error(),
+	// Get the file type from the URL parameter
+	// Todo: verify its a valid type
+	fileType := c.Params("type")
+	if fileType == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Invalid type",
+			"message": "Type cannot be empty",
 		})
 	}
 
 	// Load the file from storage
-	fileContent, err := storage.LoadFile(storage.FileType(file.Type), c.Params("path"))
+	fileContent, err := storage.LoadFile(storage.FileType(fileType), id.String())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Cannot load file",
+			"error":   "Cannot load file from storage",
 			"message": err.Error(),
 		})
 	}

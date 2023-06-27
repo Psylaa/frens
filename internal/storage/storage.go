@@ -10,6 +10,8 @@ import (
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/google/uuid"
+	"github.com/h2non/filetype"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -20,37 +22,21 @@ import (
 type FileType string
 
 const (
-	FileTypeImage       FileType = "profile_picture"
-	FileTypeVideo       FileType = "user_banner"
-	FileTypeStatusFile  FileType = "status_file"
-	FileTypeStatusImage FileType = "status_image"
-	FileTypeStatusVideo FileType = "status_video"
-	FileTypeStatusAudio FileType = "status_audio"
+	Image FileType = "image"
+	Video FileType = "video"
+	Audio FileType = "audio"
+	Other FileType = "other"
 )
-
-var storageConfigs map[FileType]config.StorageDetails
 
 func InitStorage(cfg *config.Config) error {
 	logger.Log.Info().Msg("Initializing storage")
 
-	// Store storage configs in map for easy access
-	storageConfigs = map[FileType]config.StorageDetails{
-		FileTypeImage:       cfg.Storage.ProfilePictures,
-		FileTypeVideo:       cfg.Storage.UserBanners,
-		FileTypeStatusFile:  cfg.Storage.StatusFiles,
-		FileTypeStatusImage: cfg.Storage.StatusImages,
-		FileTypeStatusVideo: cfg.Storage.StatusVideos,
-		FileTypeStatusAudio: cfg.Storage.StatusAudio,
-	}
-
-	// Create local directories if the storage type is local
-	for _, storageConfig := range storageConfigs {
+	for _, storageConfig := range cfg.Storage {
 		if storageConfig.Type == "local" {
-			dir := storageConfig.Local.Path
-			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				err := os.MkdirAll(dir, 0755)
+			if _, err := os.Stat(storageConfig.Local.Path); os.IsNotExist(err) {
+				err := os.MkdirAll(storageConfig.Local.Path, 0755)
 				if err != nil {
-					return fmt.Errorf("Failed to create directory %s: %w", dir, err)
+					return err
 				}
 			}
 		}
@@ -59,88 +45,134 @@ func InitStorage(cfg *config.Config) error {
 	return nil
 }
 
-func SaveFile(fileType FileType, path string, data []byte) error {
-	config, ok := storageConfigs[fileType]
-	if !ok {
-		return fmt.Errorf("invalid file type: %s", fileType)
+func DetectFileType(data []byte) FileType {
+	kind, err := filetype.Match(data)
+	if err != nil {
+		return Other
 	}
 
-	switch config.Type {
+	switch kind.MIME.Type {
+	case "image":
+		return Image
+	case "video":
+		return Video
+	case "audio":
+		return Audio
+	default:
+		return Other
+	}
+}
+
+func SaveFile(id uuid.UUID, data []byte) error {
+	fileType := DetectFileType(data)
+	storageConfig, ok := config.Config.Storage[fileType]
+	if !ok {
+		return fmt.Errorf("unsupported file type: %s", fileType)
+	}
+
+	return saveToStorage(id, data, storageConfig)
+}
+
+func LoadFile(id uuid.UUID) (io.ReadCloser, error) {
+	fileType := DetectFileType(nil)
+	storageConfig, ok := config.Config.Storage[fileType]
+	if !ok {
+		return nil, fmt.Errorf("unsupported file type: %s", fileType)
+	}
+
+	data, err := loadFromStorage(id, nil, storageConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.NopCloser(bytes.NewReader(data)), nil
+}
+
+func DeleteFile(id uuid.UUID) error {
+	fileType := DetectFileType(nil)
+	storageConfig, ok := config.Config.Storage[fileType]
+	if !ok {
+		return fmt.Errorf("unsupported file type: %s", fileType)
+	}
+
+	return deleteFromStorage(id, nil, storageConfig)
+}
+
+func performStorageOperation(id uuid.UUID, data []byte, operation func(id uuid.UUID, data []byte, cfg config.StorageDetails) error) error {
+	fileType := DetectFileType(data)
+	storageConfig, ok := config.Config.Storage[fileType]
+	if !ok {
+		return fmt.Errorf("unsupported file type: %s", fileType)
+	}
+
+	return operation(id, data, storageConfig)
+}
+
+func saveToStorage(id uuid.UUID, data []byte, cfg config.StorageDetails) error {
+	switch cfg.Type {
 	case "local":
-		fullPath := filepath.Join(config.Local.Path, path)
-		return os.WriteFile(fullPath, data, 0644)
+		fullPath := filepath.Join(cfg.Local.Path, id.String())
+		return ioutil.WriteFile(fullPath, data, 0644)
 	case "s3":
 		sess := session.Must(session.NewSession(&aws.Config{
-			Region: aws.String(config.S3.Region),
+			Region: aws.String(cfg.S3.Region),
 		}))
 
 		uploader := s3manager.NewUploader(sess)
-
 		_, err := uploader.Upload(&s3manager.UploadInput{
-			Bucket: aws.String(config.S3.Bucket),
-			Key:    aws.String(path),
+			Bucket: aws.String(cfg.S3.Bucket),
+			Key:    aws.String(id.String()),
 			Body:   bytes.NewReader(data),
 		})
 
 		return err
 	default:
-		return fmt.Errorf("unsupported storage type: %s", config.Type)
+		return fmt.Errorf("unsupported storage type: %s", cfg.Type)
 	}
 }
 
-func LoadFile(fileType FileType, path string) (io.ReadCloser, error) {
-	config, ok := storageConfigs[fileType]
-	if !ok {
-		return nil, fmt.Errorf("invalid file type: %s", fileType)
-	}
-
-	switch config.Type {
+func loadFromStorage(id uuid.UUID, data []byte, cfg config.StorageDetails) ([]byte, error) {
+	switch cfg.Type {
 	case "local":
-		fullPath := filepath.Join(config.Local.Path, path)
-		return os.Open(fullPath)
+		fullPath := filepath.Join(cfg.Local.Path, id.String())
+		return ioutil.ReadFile(fullPath)
 	case "s3":
 		sess := session.Must(session.NewSession(&aws.Config{
-			Region: aws.String(config.S3.Region),
+			Region: aws.String(cfg.S3.Region),
 		}))
 
 		downloader := s3manager.NewDownloader(sess)
 
 		buf := aws.NewWriteAtBuffer([]byte{})
 		_, err := downloader.Download(buf, &s3.GetObjectInput{
-			Bucket: aws.String(config.S3.Bucket),
-			Key:    aws.String(path),
+			Bucket: aws.String(cfg.S3.Bucket),
+			Key:    aws.String(id.String()),
 		})
 
-		return ioutil.NopCloser(bytes.NewReader(buf.Bytes())), err
+		return buf.Bytes(), err
 	default:
-		return nil, fmt.Errorf("unsupported storage type: %s", config.Type)
+		return nil, fmt.Errorf("unsupported storage type: %s", cfg.Type)
 	}
 }
 
-func DeleteFile(fileType FileType, path string) error {
-	config, ok := storageConfigs[fileType]
-	if !ok {
-		return fmt.Errorf("invalid file type: %s", fileType)
-	}
-
-	switch config.Type {
+func deleteFromStorage(id uuid.UUID, data []byte, cfg config.StorageDetails) error {
+	switch cfg.Type {
 	case "local":
-		fullPath := filepath.Join(config.Local.Path, path)
+		fullPath := filepath.Join(cfg.Local.Path, id.String())
 		return os.Remove(fullPath)
 	case "s3":
 		sess := session.Must(session.NewSession(&aws.Config{
-			Region: aws.String(config.S3.Region),
+			Region: aws.String(cfg.S3.Region),
 		}))
 
-		deleter := s3.New(sess)
-
-		_, err := deleter.DeleteObject(&s3.DeleteObjectInput{
-			Bucket: aws.String(config.S3.Bucket),
-			Key:    aws.String(path),
+		svc := s3.New(sess)
+		_, err := svc.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(cfg.S3.Bucket),
+			Key:    aws.String(id.String()),
 		})
 
 		return err
 	default:
-		return fmt.Errorf("unsupported storage type: %s", config.Type)
+		return fmt.Errorf("unsupported storage type: %s", cfg.Type)
 	}
 }

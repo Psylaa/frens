@@ -11,6 +11,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.47.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.3.0
+	github.com/h2non/filetype v1.1.3
 	github.com/jinzhu/gorm v1.9.16
 	github.com/rs/zerolog v1.29.1
 	golang.org/x/crypto v0.10.0

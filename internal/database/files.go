@@ -16,10 +16,10 @@ const (
 )
 
 type File struct {
-	gorm.Model
-	ID    uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	Type  FileType  `gorm:"type:varchar(100)"`
+	BaseModel
+	Type  string    `gorm:"type:varchar(100)"`
 	Owner uuid.UUID `gorm:"type:uuid"`
+	ID    uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"` // Duplicated from BaseModel to make it easier to use
 }
 
 func CreateFile(file *File) (*File, error) {
