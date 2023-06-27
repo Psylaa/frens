@@ -42,8 +42,14 @@ func createStatusFromActivity(activity Activity) error {
 		return err
 	}
 
+	// Create new post
+	newPost := db.Post{
+		OwnerID: actor.ID,
+		Text:    activity.Object.Content,
+	}
+
 	// Create a new status from the activity
-	_, err = db.CreateStatus(actor.ID, activity.Object.Content, nil)
+	err = db.CreatePost(&newPost)
 	if err != nil {
 		return err
 	}

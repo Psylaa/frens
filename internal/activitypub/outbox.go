@@ -31,7 +31,7 @@ func HandleOutbox(c *fiber.Ctx) error {
 	}
 
 	// Get the user's statuses
-	statuses, err := db.GetStatusesByUserID(user.ID)
+	statuses, err := db.GetPostsByUserID(user.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get statuses")
 	}

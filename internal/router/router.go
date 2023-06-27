@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/bwoff11/frens/internal/activitypub"
 	"github.com/bwoff11/frens/internal/config"
@@ -16,79 +17,114 @@ import (
 
 var cfg *config.Config
 
-func Init(config *config.Config) {
-	// Store the config
-	cfg = config
+func NewRouter(configuration *config.Config) *Router {
+	cfg = configuration
 
-	// Initialize Fiber
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: errorHandler,
+	})
 
-	// Apply middleware
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: &logger.Log,
 	}))
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:3000", // change to your front-end origin
+		AllowOrigins: cfg.Server.AllowOrigins,
 	}))
 
-	// Define routes
-	setupRoutes(app)
+	r := &Router{cfg, app}
+	r.setupRoutes()
 
-	// Start the server
-	app.Listen(":" + cfg.Server.Port)
+	return r
 }
 
-func setupRoutes(app *fiber.App) {
+func errorHandler(c *fiber.Ctx, err error) error {
+	code := http.StatusInternalServerError
+	if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+	}
+
+	return c.Status(code).JSON(&APIResponse{
+		Success: false,
+		Error:   APIResponseErr(err.Error()),
+	})
+}
+
+func (r *Router) setupRoutes() {
 	// Unauthenticated routes
-	app.Post("/login", login)
-	app.Get("/login/verify", verifyToken)
-	// Authenticated routes
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
+	r.App.Post("/login", login)
+	r.App.Get("/login/verify", verifyToken)
+	r.App.Get("/files/:filename", retrieveFile)
+
+	// Middleware for JWT authentication
+	r.App.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: []byte(r.Config.Server.JWTSecret)},
 	}))
 
+	// Add authenticated routes
+	r.AuthRoutes()
+	r.ActivityPubRoutes()
+}
+
+func (r *Router) AuthRoutes() {
 	// Users
-	app.Get("/users", getUsers)
-	app.Get("/users/:id", getUser)
-	app.Post("/users", createUser)
-	app.Patch("/users/:id", updateUser)
+	r.App.Get("/users", getUsers)
+	r.App.Get("/users/:id", getUser)
+	r.App.Post("/users", createUser)
+	r.App.Patch("/users/:id", updateUser)
+
+	// Users
+	r.App.Get("/users", getUsers)
+	r.App.Get("/users/:id", getUser)
+	r.App.Post("/users", createUser)
+	r.App.Patch("/users/:id", updateUser)
 
 	// Statuses
-	app.Get("/statuses", getStatuses)
-	app.Post("/statuses", createStatus)
-	app.Get("/statuses/:id", getStatus)
-	app.Delete("/statuses/:id", deleteStatus)
+	r.App.Get("/posts", getPosts)
+	r.App.Post("/posts", createPost)
+	r.App.Get("/posts/:id", getPost)
+	r.App.Delete("/posts/:id", deletePost)
 
 	// Likes
-	app.Get("/statuses/:id/likes", getLikes)
-	app.Post("/statuses/:id/likes", createLike)
-	app.Delete("/statuses/:id/likes", deleteLike)
-	app.Get("/statuses/:id/likes/:userId", hasUserLiked)
+	r.App.Get("/statuses/:id/likes", getLikes)
+	r.App.Post("/statuses/:id/likes", createLike)
+	r.App.Delete("/statuses/:id/likes", deleteLike)
+	r.App.Get("/statuses/:id/likes/:userId", hasUserLiked)
 
 	// Files
-	app.Post("/files", createFile)
-	app.Get("/files/:filename", retrieveFile)
-	app.Delete("/files/:filename", deleteFile)
+	r.App.Post("/files", createFile)
+	r.App.Delete("/files/:filename", deleteFile)
 
 	// Bookmarks
-	app.Get("/statuses/:id/bookmarks", getBookmarks)
-	app.Post("/statuses/:id/bookmarks", createBookmark)
-	app.Delete("/statuses/:id/bookmarks", deleteBookmark)
-	app.Get("/statuses/:id/bookmarks/:userId", hasUserBookmarked)
+	r.App.Get("/statuses/:id/bookmarks", getBookmarks)
+	r.App.Post("/statuses/:id/bookmarks", createBookmark)
+	r.App.Delete("/statuses/:id/bookmarks", deleteBookmark)
+	r.App.Get("/statuses/:id/bookmarks/:userId", hasUserBookmarked)
 
 	// Feed
-	app.Get("/feed/chronological", getChronologicalFeed)
-	app.Get("/feed/algorithmic", getChronologicalFeed)
+	r.App.Get("/feed/chronological", getChronologicalFeed)
+	r.App.Get("/feed/algorithmic", getChronologicalFeed)
 
 	// Follows
-	app.Get("/users/:id/followers", getFollowers)
-	app.Post("/users/:id/followers", createFollower)
-	app.Delete("/users/:id/followers", deleteFollower)
+	r.App.Get("/users/:id/followers", getFollowers)
+	r.App.Post("/users/:id/followers", createFollower)
+	r.App.Delete("/users/:id/followers", deleteFollower)
 
 	// ActivityPub routes
-	app.Get("/users/:username", activitypub.GetUserProfile)
-	app.Post("/users/:username/inbox", activitypub.HandleInbox)
-	app.Get("/users/:username/outbox", activitypub.HandleOutbox)
+	r.App.Get("/users/:username", activitypub.GetUserProfile)
+	r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
+	r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
+}
+
+func (r *Router) ActivityPubRoutes() {
+	r.App.Get("/users/:username", activitypub.GetUserProfile)
+	r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
+	r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
+}
+
+func (r *Router) Run() {
+	if err := r.App.Listen(":" + r.Config.Server.Port); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed to start server")
+	}
 }
 
 func getUserID(c *fiber.Ctx) (uuid.UUID, error) {

@@ -10,73 +10,64 @@ import (
 	"github.com/google/uuid"
 )
 
+// login handles the HTTP request for user login.
 func login(c *fiber.Ctx) error {
-	// Parse the request body
 	var body struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
 	if err := c.BodyParser(&body); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInvalidJSON,
+		})
 	}
 
-	// Verify the username and password
 	user, err := database.VerifyUser(body.Username, body.Password)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username or password"})
+		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInternal,
+		})
 	}
 
-	// Create a new token
 	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set the claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = user.ID
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(cfg.Server.JWTDuration)).Unix()
 
-	// Sign the token with our secret
 	t, err := token.SignedString([]byte(cfg.Server.JWTSecret))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to sign token")
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInternal,
+		})
 	}
 
-	// Return the token
-	return c.JSON(fiber.Map{
-		"id":    user.ID,
-		"token": t})
+	return c.JSON(APIResponse{
+		Success: true,
+		Data:    []APIResponseData{APIResponseData{ID: user.ID, Attributes: APIResponseDataAttributes{Token: t}}},
+	})
 }
 
+// verifyToken handles the HTTP request for token verification.
 func verifyToken(c *fiber.Ctx) error {
-	// Parse the query parameter
-	var body struct {
-		Token string `query:"token"`
-	}
-	if err := c.QueryParser(&body); err != nil {
-		return err
+	id, err := uuid.Parse(c.Locals("user_id").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInvalidToken,
+		})
 	}
 
-	// Verify the token
-	token, err := jwt.Parse(body.Token, func(token *jwt.Token) (interface{}, error) {
-		return []byte(cfg.Server.JWTSecret), nil
+	return c.JSON(APIResponse{
+		Success: true,
+		Data: []APIResponseData{
+			APIResponseData{
+				ID:         id,
+				Attributes: APIResponseDataAttributes{Token: c.Locals("token").(string)},
+			},
+		},
 	})
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
-	}
-
-	// Extract the user ID from the token's claims
-	claims := token.Claims.(jwt.MapClaims)
-	userIDStr, ok := claims["user_id"].(string)
-	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user_id claim"})
-	}
-
-	// Convert the user ID string to a UUID
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user_id UUID"})
-	}
-
-	// Return the user ID
-	return c.JSON(fiber.Map{"user_id": userID.String()})
 }

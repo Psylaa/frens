@@ -35,7 +35,7 @@ func InitDB(cfg *config.Config) error {
 	logger.Log.Info().Msg("Successfully connected to database")
 
 	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Status{})
+	db.AutoMigrate(&Post{})
 	db.AutoMigrate(&Media{})
 	db.AutoMigrate(&Like{})
 	db.AutoMigrate(&Follower{})

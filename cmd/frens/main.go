@@ -26,5 +26,6 @@ func main() {
 	}
 
 	// Initialize router and start the server
-	router.Init(cfg)
+	router := router.NewRouter(cfg)
+	router.Run()
 }

@@ -4,6 +4,7 @@ server:
   log_level: "debug"
   jwt_secret: "supersecret"
   jwt_duration: 168
+  allow_origins: true
 database:
   host: 127.0.0.1
   port: 5432

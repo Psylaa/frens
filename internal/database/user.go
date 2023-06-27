@@ -4,18 +4,20 @@ import (
 	"errors"
 	"log"
 
+	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	BaseModel
-	Username       string    `gorm:"unique" json:"username"`
-	Email          string    `json:"email"`
-	Bio            string    `json:"bio"`
-	Password       string    `json:"-"`
-	ProfilePicture uuid.UUID `gorm:"type:uuid" json:"profilePicture"`
-	BannerImage    uuid.UUID `gorm:"type:uuid" json:"bannerImage"`
+	Username       string         `gorm:"unique" json:"username"`
+	Email          string         `json:"email"`
+	Bio            string         `json:"bio"`
+	Password       string         `json:"-"`
+	ProfilePicture *string        `json:"profilePicture"`
+	BannerImage    *string        `json:"bannerImage"`
+	Privacy        shared.Privacy `json:"privacy"`
 }
 
 func GetUsers() ([]User, error) {
@@ -27,7 +29,7 @@ func GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func GetUser(id string) (*User, error) {
+func GetUser(id uuid.UUID) (*User, error) {
 	var user User
 	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
@@ -47,6 +49,7 @@ func CreateUser(username string, email string, password string) (*User, error) {
 		Username:  username,
 		Email:     email,
 		Password:  string(hashedPassword),
+		Privacy:   shared.PrivacyPublic,
 	}
 
 	if err := db.Create(&newUser).Error; err != nil {
@@ -81,13 +84,7 @@ func GetUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-func UpdateUser(id uuid.UUID, bio *string, profilePicture *uuid.UUID, bannerImage *uuid.UUID) (*User, error) {
-
-	type request struct {
-		Bio            *string    `json:"bio"`
-		ProfilePicture *uuid.UUID `json:"profilePicture"`
-		BannerImage    *uuid.UUID `json:"bannerImage"`
-	}
+func UpdateUser(id uuid.UUID, bio *string, profilePicture *string, bannerImage *string) (*User, error) {
 
 	var user User
 	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
@@ -99,11 +96,11 @@ func UpdateUser(id uuid.UUID, bio *string, profilePicture *uuid.UUID, bannerImag
 	}
 
 	if profilePicture != nil {
-		user.ProfilePicture = *profilePicture
+		user.ProfilePicture = profilePicture
 	}
 
 	if bannerImage != nil {
-		user.BannerImage = *bannerImage
+		user.BannerImage = bannerImage
 	}
 
 	if err := db.Save(&user).Error; err != nil {

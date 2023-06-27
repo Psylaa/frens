@@ -47,7 +47,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 
 	followingIDs = append(followingIDs, userID)
 
-	statuses, err := db.GetStatusesByUserIDs(followingIDs, cursor, 10)
+	statuses, err := db.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
