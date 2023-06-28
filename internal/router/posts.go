@@ -72,9 +72,8 @@ func getPosts(c *fiber.Ctx) error {
 // createPost handles the HTTP request to create a new post.
 func createPost(c *fiber.Ctx) error {
 	var body struct {
-		Text    string           `json:"text"`
-		Privacy shared.Privacy   `json:"privacy"`
-		Media   []database.Media `json:"media"`
+		Text    string         `json:"text"`
+		Privacy shared.Privacy `json:"privacy"`
 	}
 
 	if err := c.BodyParser(&body); err != nil {
@@ -95,7 +94,6 @@ func createPost(c *fiber.Ctx) error {
 	newPost := database.Post{
 		Text:    body.Text,
 		Privacy: body.Privacy,
-		Media:   body.Media,
 		OwnerID: userID,
 	}
 

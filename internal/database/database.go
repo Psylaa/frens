@@ -45,7 +45,7 @@ func New(cfg *config.Config) (*Database, error) {
 	db.DB().SetMaxIdleConns(cfg.Database.MaxIdleConns)
 	db.DB().SetMaxOpenConns(cfg.Database.MaxOpenConns)
 
-	db.AutoMigrate(&User{}, &Post{}, &Media{}, &Like{}, &Follower{}, &Bookmark{}, &File{})
+	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follower{}, &Bookmark{}, &File{})
 	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index

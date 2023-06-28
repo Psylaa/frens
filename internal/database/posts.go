@@ -15,7 +15,6 @@ type Post struct {
 	OwnerID uuid.UUID      `json:"owner"`
 	Privacy shared.Privacy `json:"privacy"`
 	Text    string         `json:"text"`
-	Media   []Media        `json:"media" gorm:"ForeignKey:PostID"`
 }
 
 // PostRepo provides access to the Post storage.
@@ -25,7 +24,7 @@ type PostRepo struct {
 
 func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
 	var post Post
-	if err := pr.db.Preload("Media").First(&post, "id = ?", id).Error; err != nil {
+	if err := pr.db.First(&post, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &post, nil
@@ -33,7 +32,7 @@ func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
 
 func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 	var posts []Post
-	if err := pr.db.Preload("Media").
+	if err := pr.db.
 		Order("created_at desc").
 		Find(&posts, "user_id = ?", userID).Error; err != nil {
 		return nil, err
@@ -43,7 +42,7 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 
 func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]Post, error) {
 	var posts []Post
-	if err := pr.db.Preload("Media").
+	if err := pr.db.
 		Where("user_id IN (?) AND created_at < ?", userIDs, cursor).
 		Order("created_at desc").
 		Limit(limit).
