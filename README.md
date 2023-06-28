@@ -31,34 +31,30 @@ Release: This is our end goal - a fully functional, reliable, and user-friendly 
 
 We are excited about the journey ahead and we are committed to making Frens a top-notch social platform. If you're interested in following our progress, contributing, or just learning more, please keep an eye on our GitHub repo and join our community!
 
-Getting Started
-Prerequisites
+# Getting Started
+## Prerequisites
+
 Go 1.15+
 PostgreSQL 9.6+
-Installation
-bash
-Copy code
-# Clone the repository
+
+# Installation
+## Clone the repository
 git clone https://github.com/user/frens.git
 
-# Navigate to the project directory
+## Navigate to the project directory
 cd frens
 
-# Install dependencies
+## Install dependencies
 go get -v ./...
 
-# Build the project
+## Build the project
 go build
-Usage
-bash
-Copy code
-# Start the server
-./frens
-Documentation
-Complete API and user documentation are available at (your documentation URL).
 
-Contributing
+## Start the server
+./frens
+
+# Contributing
 Frens welcomes contributions from everyone. Please see our [CONTRIBUTING.md](link to your CONTRIBUTING.md) file for how to contribute to the project.
 
-License
+# License
 Frens is released under the MIT License.
