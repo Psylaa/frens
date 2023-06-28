@@ -1,7 +1,7 @@
-Frens
+# Frens
 Frens is a light-weight, decentralized social networking platform, designed with a keen focus on user-friendliness and robustness. Built on top of Go, Frens allows for scalable and performance-optimized social media interactions that respect privacy and data ownership.
 
-Features
+## Features
 Decentralized: Users have complete control over their data.
 
 Fast and efficient: Frens is built using Go, providing top-level performance and efficiency.
@@ -16,7 +16,7 @@ Intuitive API: Frens offers a clear, easy-to-use API for developers.
 
 Robust Moderation Tools: Frens provides a suite of tools to help manage and moderate content effectively.
 
-## Current Stage of Development
+# Current Stage of Development
 Frens is currently in the Pre-alpha stage of development. This means we are in the conceptual phase, and actively brainstorming, researching, and deciding the key features and capabilities our platform should have. While we've made progress and built some parts of the platform, there's still a lot more to explore and develop.
 
 Here's a breakdown of the different stages of development:
