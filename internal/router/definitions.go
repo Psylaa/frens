@@ -40,7 +40,7 @@ type APIResponseDataAttributes struct {
 	Extension         string         `json:"extension,omitempty"`
 	ProfilePictureURL string         `json:"profilePictureUrl,omitempty"`
 	CoverImageURL     string         `json:"coverImageUrl,omitempty"`
-	ExpiryDate        string         `json:"expiryDate,omitempty"`
+	ExpiresAt         string         `json:"expiresAt,omitempty"`
 }
 
 type APIResponseDataRelationships struct {

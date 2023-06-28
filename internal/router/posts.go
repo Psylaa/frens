@@ -118,7 +118,8 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 		Type: shared.DataTypePost,
 		ID:   post.ID,
 		Attributes: APIResponseDataAttributes{
-			Text: post.Text,
+			Text:    post.Text,
+			Privacy: post.Privacy,
 		},
 		Relationships: APIResponseDataRelationships{
 			OwnerID: post.OwnerID,
