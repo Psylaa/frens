@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -75,13 +76,13 @@ func createPost(c *fiber.Ctx) error {
 		Text    string         `json:"text"`
 		Privacy shared.Privacy `json:"privacy"`
 	}
-
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Success: false,
 			Error:   ErrInvalidJSON,
 		})
 	}
+	logger.Log.Debug().Msgf("body: %v", body)
 
 	userID, err := getUserID(c)
 	if err != nil {
@@ -90,14 +91,10 @@ func createPost(c *fiber.Ctx) error {
 			Error:   ErrInternal,
 		})
 	}
+	logger.Log.Debug().Msgf("userID: %v", userID)
 
-	newPost := database.Post{
-		Text:    body.Text,
-		Privacy: body.Privacy,
-		OwnerID: userID,
-	}
-
-	if err := db.Posts.CreatePost(&newPost).Error; err != nil {
+	post, err := db.Posts.CreatePost(userID, body.Text, body.Privacy)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
 			Error:   ErrInternal,
@@ -106,7 +103,7 @@ func createPost(c *fiber.Ctx) error {
 
 	return c.JSON(APIResponse{
 		Success: true,
-		Data:    []APIResponseData{createAPIResponseDataPost(&newPost)},
+		Data:    []APIResponseData{createAPIResponseDataPost(post)},
 	})
 }
 

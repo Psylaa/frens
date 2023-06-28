@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -17,6 +18,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).SendString(err.Error())
 	}
+	logger.Log.Debug().Str("userID", userID.String()).Msg("Got user ID from JWT")
 
 	// Get the cursor from the request query parameters. If it's not present,
 	// we default to the current time, which will retrieve the most recent statuses.
@@ -29,6 +31,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 		}
 		cursor = time.Unix(unixTime, 0)
 	}
+	logger.Log.Debug().Time("cursor", cursor).Msg("Got cursor from query parameters")
 
 	// Here is where you'd get the list of users that the authenticated user is
 	// following. This depends on your data storage, so replace this with your
@@ -37,19 +40,23 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
+	logger.Log.Debug().Int("following", len(following)).Msg("Got following")
 
 	// Extract the following IDs
 	followingIDs := make([]uuid.UUID, len(following))
 	for i, follower := range following {
 		followingIDs[i] = follower.FollowingID
 	}
+	logger.Log.Debug().Interface("followingIDs", followingIDs).Msg("Got following IDs")
 
 	followingIDs = append(followingIDs, userID)
 
 	statuses, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting statuses")
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
+	logger.Log.Debug().Int("statuses", len(statuses)).Msg("Got statuses")
 
 	return c.JSON(statuses)
 }
