@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
-	db "github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +10,7 @@ import (
 
 // getUsers handles the HTTP request to fetch all users.
 func getUsers(c *fiber.Ctx) error {
-	users, err := db.GetUsers()
+	users, err := db.Users.GetUsers()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting all users")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
@@ -41,7 +40,7 @@ func getUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := db.GetUser(id)
+	user, err := db.Users.GetUser(id)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting user")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
@@ -72,7 +71,7 @@ func createUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := database.CreateUser(body.Username, body.Email, body.Password)
+	user, err := db.Users.CreateUser(body.Username, body.Email, body.Password)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error creating user: " + err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
@@ -110,7 +109,7 @@ func updateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedUser, err := db.UpdateUser(id, body.Bio, body.ProfilePicture, body.BannerImage)
+	updatedUser, err := db.Users.UpdateUser(id, *body.Bio, *body.ProfilePicture, *body.BannerImage)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
@@ -125,7 +124,7 @@ func updateUser(c *fiber.Ctx) error {
 }
 
 // createAPIResponseData converts user to APIResponseData.
-func createAPIResponseData(user *db.User) APIResponseData {
+func createAPIResponseData(user *database.User) APIResponseData {
 	return APIResponseData{
 		Type: shared.DataTypeUser,
 		ID:   user.ID,

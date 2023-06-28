@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
-	db "github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ func getPost(c *fiber.Ctx) error {
 		})
 	}
 
-	post, err := db.GetPost(postID)
+	post, err := db.Posts.GetPost(postID)
 	switch err {
 	case nil:
 		break
@@ -51,7 +50,7 @@ func getPosts(c *fiber.Ctx) error {
 		})
 	}
 
-	posts, err := db.GetPostsByUserID(userID)
+	posts, err := db.Posts.GetPostsByUserID(userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
@@ -93,14 +92,14 @@ func createPost(c *fiber.Ctx) error {
 		})
 	}
 
-	newPost := db.Post{
+	newPost := database.Post{
 		Text:    body.Text,
 		Privacy: body.Privacy,
 		Media:   body.Media,
 		OwnerID: userID,
 	}
 
-	if err := db.CreatePost(&newPost).Error; err != nil {
+	if err := db.Posts.CreatePost(&newPost).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
 			Error:   ErrInternal,
@@ -119,7 +118,7 @@ func deletePost(c *fiber.Ctx) error {
 }
 
 // createAPIResponseDataPost converts post to APIResponseData.
-func createAPIResponseDataPost(post *db.Post) APIResponseData {
+func createAPIResponseDataPost(post *database.Post) APIResponseData {
 	return APIResponseData{
 		Type: shared.DataTypePost,
 		ID:   post.ID,

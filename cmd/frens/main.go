@@ -21,11 +21,12 @@ func main() {
 	logger.Init(cfg.Server.LogLevel)
 
 	// Connect to the database
-	if err := database.InitDB(cfg); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Error connecting to database")
+	db, err := database.New(cfg)
+	if err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
 	}
 
 	// Initialize router and start the server
-	router := router.NewRouter(cfg)
+	router := router.NewRouter(cfg, db)
 	router.Run()
 }

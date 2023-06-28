@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -34,7 +33,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Here is where you'd get the list of users that the authenticated user is
 	// following. This depends on your data storage, so replace this with your
 	// actual implementation.
-	following, err := db.GetFollowing(userID)
+	following, err := db.Followers.GetFollowing(userID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -47,7 +46,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 
 	followingIDs = append(followingIDs, userID)
 
-	statuses, err := db.GetPostsByUserIDs(followingIDs, cursor, 10)
+	statuses, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

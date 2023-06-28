@@ -3,8 +3,6 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-
-	db "github.com/bwoff11/frens/internal/database"
 )
 
 func getBookmarks(c *fiber.Ctx) error {
@@ -14,7 +12,7 @@ func getBookmarks(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	bookmarks, err := db.GetBookmarks(statusID)
+	bookmarks, err := db.Bookmarks.GetBookmarks(statusID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -34,7 +32,7 @@ func createBookmark(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	if _, err := db.CreateBookmark(userID, statusID); err != nil {
+	if _, err := db.Bookmarks.CreateBookmark(userID, statusID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -53,7 +51,7 @@ func deleteBookmark(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	if err := db.DeleteBookmark(userID, statusID); err != nil {
+	if err := db.Bookmarks.DeleteBookmark(userID, statusID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -72,7 +70,7 @@ func hasUserBookmarked(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	bookmarked, err := db.HasUserBookmarked(userId, statusId)
+	bookmarked, err := db.Bookmarks.HasUserBookmarked(userId, statusId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

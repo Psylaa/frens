@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bwoff11/frens/internal/activitypub"
 	"github.com/bwoff11/frens/internal/config"
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
@@ -16,9 +16,11 @@ import (
 )
 
 var cfg *config.Config
+var db *database.Database
 
-func NewRouter(configuration *config.Config) *Router {
+func NewRouter(configuration *config.Config, database *database.Database) *Router {
 	cfg = configuration
+	db = database
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorHandler,
@@ -108,17 +110,12 @@ func (r *Router) AuthRoutes() {
 	r.App.Get("/users/:id/followers", getFollowers)
 	r.App.Post("/users/:id/followers", createFollower)
 	r.App.Delete("/users/:id/followers", deleteFollower)
-
-	// ActivityPub routes
-	r.App.Get("/users/:username", activitypub.GetUserProfile)
-	r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
-	r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
 }
 
 func (r *Router) ActivityPubRoutes() {
-	r.App.Get("/users/:username", activitypub.GetUserProfile)
-	r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
-	r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
+	//r.App.Get("/users/:username", activitypub.GetUserProfile)
+	//r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
+	//r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
 }
 
 func (r *Router) Run() {

@@ -15,21 +15,25 @@ type File struct {
 	Owner     uuid.UUID `gorm:"type:uuid" json:"owner"`
 }
 
-func CreateFile(owner uuid.UUID, extension string) (*File, error) {
+type FileRepo struct {
+	db *Database
+}
+
+func (fr *FileRepo) CreateFile(owner uuid.UUID, extension string) (*File, error) {
 	file := &File{
 		ID:        uuid.New(),
 		Extension: extension,
 		Owner:     owner,
 	}
-	if err := db.Create(file).Error; err != nil {
+	if err := fr.db.DB.Create(file).Error; err != nil {
 		return nil, err
 	}
 	return file, nil
 }
 
-func GetFile(id uuid.UUID) (*File, error) {
+func (fr *FileRepo) GetFile(id uuid.UUID) (*File, error) {
 	var file File
-	if err := db.Where("id = ?", id).First(&file).Error; err != nil {
+	if err := fr.db.DB.Where("id = ?", id).First(&file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -38,17 +42,17 @@ func GetFile(id uuid.UUID) (*File, error) {
 	return &file, nil
 }
 
-func UpdateFile(file *File) error {
-	return db.Save(file).Error
+func (fr *FileRepo) UpdateFile(file *File) error {
+	return fr.db.DB.Save(file).Error
 }
 
-func DeleteFile(id uuid.UUID) error {
-	file, err := GetFile(id)
+func (fr *FileRepo) DeleteFile(id uuid.UUID) error {
+	file, err := fr.GetFile(id)
 	if err != nil {
 		return err
 	}
 	if file == nil {
 		return gorm.ErrRecordNotFound
 	}
-	return db.Delete(file).Error
+	return fr.db.DB.Delete(file).Error
 }

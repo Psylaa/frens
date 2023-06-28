@@ -3,7 +3,6 @@ package router
 import (
 	"time"
 
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +22,7 @@ func login(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := database.VerifyUser(body.Username, body.Password)
+	user, err := db.Users.VerifyUser(body.Username, body.Password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
@@ -47,7 +46,14 @@ func login(c *fiber.Ctx) error {
 
 	return c.JSON(APIResponse{
 		Success: true,
-		Data:    []APIResponseData{APIResponseData{ID: user.ID, Attributes: APIResponseDataAttributes{Token: t}}},
+		Data: []APIResponseData{
+			{
+				ID: user.ID,
+				Attributes: APIResponseDataAttributes{
+					Token: t,
+				},
+			},
+		},
 	})
 }
 
@@ -64,7 +70,7 @@ func verifyToken(c *fiber.Ctx) error {
 	return c.JSON(APIResponse{
 		Success: true,
 		Data: []APIResponseData{
-			APIResponseData{
+			{
 				ID:         id,
 				Attributes: APIResponseDataAttributes{Token: c.Locals("token").(string)},
 			},

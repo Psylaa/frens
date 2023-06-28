@@ -1,7 +1,6 @@
 package router
 
 import (
-	db "github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -13,7 +12,7 @@ func getFollowers(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	followers, err := db.GetFollowers(userID)
+	followers, err := db.Followers.GetFollowers(userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -33,7 +32,7 @@ func createFollower(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	if _, err := db.CreateFollower(userID, followingID); err != nil {
+	if _, err := db.Followers.CreateFollower(userID, followingID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -52,7 +51,7 @@ func deleteFollower(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	if err := db.DeleteFollower(userID, followingID); err != nil {
+	if err := db.Followers.DeleteFollower(userID, followingID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

@@ -44,13 +44,15 @@ type Server struct {
 }
 
 type Database struct {
-	Host     string `yaml:"host" validate:"required"`
-	Port     string `yaml:"port" validate:"required"`
-	User     string `yaml:"user" validate:"required"`
-	DBName   string `yaml:"dbname" validate:"required"`
-	Password string `yaml:"password" validate:"required"`
-	SSLMode  string `yaml:"sslmode" validate:"required"`
-	LogMode  bool   `yaml:"log_mode"`
+	Host         string `yaml:"host" validate:"required"`
+	Port         string `yaml:"port" validate:"required"`
+	User         string `yaml:"user" validate:"required"`
+	DBName       string `yaml:"dbname" validate:"required"`
+	Password     string `yaml:"password" validate:"required"`
+	SSLMode      string `yaml:"sslmode" validate:"required"`
+	LogMode      bool   `yaml:"log_mode"`
+	MaxIdleConns int    `yaml:"max_idle_conns"`
+	MaxOpenConns int    `yaml:"max_open_conns"`
 }
 
 func (c *Config) Validate() error {

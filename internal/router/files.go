@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,7 +26,7 @@ func createFile(c *fiber.Ctx) error {
 
 	ext := filepath.Ext(file.Filename)
 
-	fileData, err := database.CreateFile(userId, ext)
+	fileData, err := db.Files.CreateFile(userId, ext)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
@@ -52,7 +51,7 @@ func createFile(c *fiber.Ctx) error {
 	return c.JSON(APIResponse{
 		Success: true,
 		Data: []APIResponseData{
-			APIResponseData{
+			{
 				ID: fileData.ID,
 				Attributes: APIResponseDataAttributes{
 					Filename:  file.Filename,
