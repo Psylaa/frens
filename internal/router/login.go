@@ -4,9 +4,8 @@ import (
 	"time"
 
 	"github.com/bwoff11/frens/internal/logger"
-	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // login handles the HTTP request for user login.
@@ -21,6 +20,7 @@ func login(c *fiber.Ctx) error {
 			Error:   ErrInvalidJSON,
 		})
 	}
+	logger.Log.Debug().Interface("body", body).Msg("Parsed body")
 
 	user, err := db.Users.VerifyUser(body.Username, body.Password)
 	if err != nil {
@@ -29,20 +29,25 @@ func login(c *fiber.Ctx) error {
 			Error:   ErrInternal,
 		})
 	}
+	logger.Log.Debug().Interface("user", user).Msg("Verified user")
 
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(cfg.Server.JWTDuration)).Unix()
+	// Create claims
+	claims := jwt.RegisteredClaims{
+		Subject:   user.ID.String(),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+	}
+	logger.Log.Debug().Interface("claims", claims).Msg("Created claims")
 
-	t, err := token.SignedString([]byte(cfg.Server.JWTSecret))
+	// Create token
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(cfg.Server.JWTSecret))
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to sign token")
+		logger.Log.Error().Err(err).Msg("Error creating token")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Success: false,
 			Error:   ErrInternal,
 		})
 	}
+	logger.Log.Debug().Str("token", token).Msg("Created token")
 
 	return c.JSON(APIResponse{
 		Success: true,
@@ -50,7 +55,10 @@ func login(c *fiber.Ctx) error {
 			{
 				ID: user.ID,
 				Attributes: APIResponseDataAttributes{
-					Token: t,
+					Token: token,
+				},
+				Relationships: APIResponseDataRelationships{
+					OwnerID: user.ID,
 				},
 			},
 		},
@@ -59,20 +67,23 @@ func login(c *fiber.Ctx) error {
 
 // verifyToken handles the HTTP request for token verification.
 func verifyToken(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Locals("user_id").(string))
+	id, err := getUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
-			Error:   ErrInvalidToken,
+			Error:   ErrInternal,
 		})
 	}
+	logger.Log.Debug().Str("id", id.String()).Msg("Verified token")
 
 	return c.JSON(APIResponse{
 		Success: true,
 		Data: []APIResponseData{
 			{
-				ID:         id,
-				Attributes: APIResponseDataAttributes{Token: c.Locals("token").(string)},
+				ID: id,
+				Attributes: APIResponseDataAttributes{
+					Token: c.Get("Authorization"),
+				},
 			},
 		},
 	})

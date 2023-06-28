@@ -15,6 +15,8 @@ const (
 	ErrInvalidID    APIResponseErr = "invalid id"
 	ErrInvalidJSON  APIResponseErr = "invalid json"
 	ErrInvalidToken APIResponseErr = "invalid token"
+	ErrUnauthorized APIResponseErr = "unauthorized"
+	ErrMissingToken APIResponseErr = "missing or malformed token"
 )
 
 type APIResponse struct {

@@ -52,14 +52,24 @@ func errorHandler(c *fiber.Ctx, err error) error {
 }
 
 func (r *Router) setupRoutes() {
-	// Unauthenticated routes
-	r.App.Post("/login", login)
-	r.App.Get("/login/verify", verifyToken)
-	r.App.Get("/files/:filename", retrieveFile)
+	r.addUnauthRoutes()
 
 	// Middleware for JWT authentication
 	r.App.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(r.Config.Server.JWTSecret)},
+		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			if err.Error() == "Missing or malformed JWT" {
+				return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+					Success: false,
+					Error:   ErrMissingToken,
+				})
+			}
+
+			return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
+				Success: false,
+				Error:   ErrUnauthorized,
+			})
+		},
 	}))
 
 	// Add authenticated routes
@@ -67,7 +77,18 @@ func (r *Router) setupRoutes() {
 	r.ActivityPubRoutes()
 }
 
+func (r *Router) addUnauthRoutes() {
+	// Unauthenticated routes
+	r.App.Post("/login", login)
+	r.App.Get("/files/:filename", retrieveFile)
+
+	logger.Log.Info().Msg("Added unauthenticated routes")
+}
+
 func (r *Router) AuthRoutes() {
+	// Login
+	r.App.Get("/login/verify", verifyToken)
+
 	// Users
 	r.App.Get("/users", getUsers)
 	r.App.Get("/users/:id", getUser)
@@ -110,25 +131,34 @@ func (r *Router) AuthRoutes() {
 	r.App.Get("/users/:id/followers", getFollowers)
 	r.App.Post("/users/:id/followers", createFollower)
 	r.App.Delete("/users/:id/followers", deleteFollower)
+
+	logger.Log.Info().Msg("Authenticated routes added")
 }
 
 func (r *Router) ActivityPubRoutes() {
 	//r.App.Get("/users/:username", activitypub.GetUserProfile)
 	//r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
 	//r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)
+
+	logger.Log.Info().Msg("ActivityPub routes added")
 }
 
 func (r *Router) Run() {
-	if err := r.App.Listen(":" + r.Config.Server.Port); err != nil {
+	if err := r.App.Listen(":" + cfg.Server.Port); err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
 
 func getUserID(c *fiber.Ctx) (uuid.UUID, error) {
+	if c.Locals("user") == nil {
+		logger.Log.Warn().Msg("no user in context of provided token")
+		return uuid.Nil, fmt.Errorf("no user in context")
+	}
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	sub, ok := claims["user_id"].(string)
+	sub, ok := claims["sub"].(string)
 	if !ok {
+		logger.Log.Warn().Msg("no sub claim in token")
 		return uuid.Nil, fmt.Errorf("no sub claim in token")
 	}
 	return uuid.Parse(sub)
