@@ -34,6 +34,7 @@ type APIResponseData struct {
 	ID            *uuid.UUID                   `json:"id,omitempty"` // Only empty for token requests
 	Attributes    APIResponseDataAttributes    `json:"attributes"`
 	Relationships APIResponseDataRelationships `json:"relationships,omitempty"`
+	Included      []APIResponseDataIncluded    `json:"included,omitempty"`
 	Links         APIResponseDataLinks         `json:"links,omitempty"`
 	Meta          APIResponseDataMeta          `json:"meta,omitempty"`
 }
@@ -71,6 +72,18 @@ type APIResponseDataAttributes struct {
 type APIResponseDataRelationships struct {
 	AuthorID *uuid.UUID `json:"authorId,omitempty"`
 	OwnerID  *uuid.UUID `json:"ownerId,omitempty"`
+}
+
+type APIResponseDataIncluded struct {
+	Author *APIResponseDataIncludedAuthor `json:"author,omitempty"`
+}
+
+type APIResponseDataIncludedAuthor struct {
+	UserID            uuid.UUID `json:"userId"`
+	Username          string    `json:"username"`
+	Bio               string    `json:"bio"`
+	ProfilePictureURL string    `json:"profilePictureUrl"`
+	CoverImageURL     string    `json:"coverImageUrl"`
 }
 
 type APIResponseDataAuthorData struct {

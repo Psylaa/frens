@@ -91,6 +91,14 @@ func createPost(c *fiber.Ctx) error {
 		})
 	}
 
+	// Retrieve the post so we can return the author's information.
+	post, err = db.Posts.GetPost(post.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
+	}
+
 	return c.JSON(APIResponse{
 		Data: []APIResponseData{createAPIResponseDataPost(post)},
 	})
@@ -107,11 +115,24 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 		Type: shared.DataTypePost,
 		ID:   &post.ID,
 		Attributes: APIResponseDataAttributes{
-			Text:    post.Text,
-			Privacy: post.Privacy,
+			CreatedAt: &post.CreatedAt,
+			UpdatedAt: &post.UpdatedAt,
+			Text:      post.Text,
+			Privacy:   post.Privacy,
 		},
 		Relationships: APIResponseDataRelationships{
 			AuthorID: &post.AuthorID,
+		},
+		Included: []APIResponseDataIncluded{
+			{
+				Author: &APIResponseDataIncludedAuthor{
+					UserID:            post.User.ID,
+					Username:          post.User.Username,
+					Bio:               post.User.Bio,
+					ProfilePictureURL: post.User.ProfilePictureURL,
+					CoverImageURL:     post.User.CoverImageURL,
+				},
+			},
 		},
 		Links: APIResponseDataLinks{
 			Self:   "/posts/" + post.ID.String(),
