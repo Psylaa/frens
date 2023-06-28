@@ -12,13 +12,13 @@ import (
 
 type User struct {
 	BaseModel
-	Username       string         `gorm:"unique" json:"username"`
-	Email          string         `json:"email"`
-	Bio            string         `json:"bio"`
-	Password       string         `json:"-"`
-	ProfilePicture string         `json:"profilePicture"`
-	BannerImage    string         `json:"bannerImage"`
-	Privacy        shared.Privacy `json:"privacy"`
+	Username          string         `gorm:"unique" json:"username"`
+	Email             string         `json:"email"`
+	Bio               string         `json:"bio"`
+	Password          string         `json:"-"`
+	ProfilePictureURL string         `json:"profilePictureURL"`
+	CoverImageURL     string         `json:"coverImageURL"`
+	Privacy           shared.Privacy `json:"privacy"`
 }
 
 type UserRepo struct {
@@ -87,15 +87,15 @@ func (ur *UserRepo) VerifyUser(username string, password string) (*User, error) 
 	return user, nil
 }
 
-func (ur *UserRepo) UpdateUser(id uuid.UUID, bio string, profilePicture string, bannerImage string) (*User, error) {
+func (ur *UserRepo) UpdateUser(id uuid.UUID, bio string, profilePictureURL string, coverImageURL string) (*User, error) {
 	user, err := ur.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
 
 	user.Bio = bio
-	user.ProfilePicture = profilePicture
-	user.BannerImage = bannerImage
+	user.ProfilePictureURL = profilePictureURL
+	user.CoverImageURL = coverImageURL
 
 	if err := ur.db.Save(user).Error; err != nil {
 		return nil, err

@@ -33,15 +33,17 @@ type APIResponseData struct {
 }
 
 type APIResponseDataAttributes struct {
-	Privacy   shared.Privacy `json:"privacy,omitempty"`
-	Text      string         `json:"text,omitempty"`
-	Token     string         `json:"token,omitempty"`
-	Filename  string         `json:"filename,omitempty"`
-	Extension string         `json:"extension,omitempty"`
+	Privacy           shared.Privacy `json:"privacy,omitempty"`
+	Text              string         `json:"text,omitempty"`
+	Token             string         `json:"token,omitempty"`
+	Filename          string         `json:"filename,omitempty"`
+	Extension         string         `json:"extension,omitempty"`
+	ProfilePictureURL string         `json:"profilePictureUrl,omitempty"`
+	CoverImageURL     string         `json:"coverImageUrl,omitempty"`
 }
 
 type APIResponseDataRelationships struct {
-	OwnerID uuid.UUID `json:"owner_id,omitempty"`
+	OwnerID uuid.UUID `json:"ownerId,omitempty"`
 }
 
 type Router struct {

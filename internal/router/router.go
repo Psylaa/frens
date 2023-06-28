@@ -30,7 +30,8 @@ func NewRouter(configuration *config.Config, database *database.Database) *Route
 		Logger: &logger.Log,
 	}))
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: cfg.Server.AllowOrigins,
+		//AllowOrigins: cfg.Server.AllowOrigins,
+		AllowOrigins: "*",
 	}))
 
 	r := &Router{cfg, app}
@@ -81,6 +82,7 @@ func (r *Router) addUnauthRoutes() {
 	// Unauthenticated routes
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
+	r.App.Get("/feed/explore", getExploreFeed)
 
 	logger.Log.Info().Msg("Added unauthenticated routes")
 }

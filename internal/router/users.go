@@ -129,7 +129,9 @@ func createAPIResponseData(user *database.User) APIResponseData {
 		Type: shared.DataTypeUser,
 		ID:   user.ID,
 		Attributes: APIResponseDataAttributes{
-			Privacy: user.Privacy,
+			Privacy:           user.Privacy,
+			ProfilePictureURL: user.ProfilePictureURL,
+			CoverImageURL:     user.CoverImageURL,
 		},
 		Relationships: APIResponseDataRelationships{
 			OwnerID: user.ID,

@@ -12,7 +12,7 @@ database:
   dbname: frens
   password: samplepassword
   sslmode: disable
-  log_mode: true
+  log_mode: false
   max_idle_conns: 10
   max_open_conns: 100
 storage:

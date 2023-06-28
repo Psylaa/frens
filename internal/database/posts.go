@@ -68,3 +68,17 @@ func (pr *PostRepo) DeletePost(postID uuid.UUID) error {
 	err := pr.db.Delete(&Post{}, "id = ?", postID).Error
 	return err
 }
+
+func (pr *PostRepo) GetLatestPublicPosts(cursor time.Time, limit int) ([]*Post, error) {
+	var posts []*Post
+	err := pr.db.
+		Where("created_at <= ? AND privacy = ?", cursor, "PUBLIC").
+		Order("created_at desc").
+		Limit(limit).
+		Find(&posts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}

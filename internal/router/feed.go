@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// getChronologicalFeed returns a list of statuses from the users that the
+// getChronologicalFeed returns a list of posts from the users that the
 // authenticated user is following, in chronological order.
 func getChronologicalFeed(c *fiber.Ctx) error {
 	// Get the user ID from the JWT.
@@ -21,7 +21,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	logger.Log.Debug().Str("userID", userID.String()).Msg("Got user ID from JWT")
 
 	// Get the cursor from the request query parameters. If it's not present,
-	// we default to the current time, which will retrieve the most recent statuses.
+	// we default to the current time, which will retrieve the most recent posts.
 	cursorParam := c.Query("cursor")
 	cursor := time.Now()
 	if cursorParam != "" {
@@ -51,12 +51,55 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 
 	followingIDs = append(followingIDs, userID)
 
-	statuses, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
+	posts, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting statuses")
+		logger.Log.Error().Err(err).Msg("Error getting posts")
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
-	logger.Log.Debug().Int("statuses", len(statuses)).Msg("Got statuses")
+	logger.Log.Debug().Int("posts", len(posts)).Msg("Got posts")
 
-	return c.JSON(statuses)
+	// Format the data
+	var data []APIResponseData
+	for _, post := range posts {
+		data = append(data, createAPIResponseDataPost(&post))
+	}
+
+	return c.JSON(APIResponse{
+		Success: true,
+		Data:    data,
+	})
+}
+
+// getExploreFeed returns a list of the latest posts from all users
+func getExploreFeed(c *fiber.Ctx) error {
+	// Get the cursor from the request query parameters. If it's not present,
+	// we default to the current time, which will retrieve the most recent posts.
+	cursorParam := c.Query("cursor")
+	cursor := time.Now()
+	if cursorParam != "" {
+		unixTime, err := strconv.ParseInt(cursorParam, 10, 64)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Invalid cursor")
+		}
+		cursor = time.Unix(unixTime, 0)
+	}
+	logger.Log.Debug().Time("cursor", cursor).Msg("Got cursor from query parameters")
+
+	posts, err := db.Posts.GetLatestPublicPosts(cursor, 10)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting posts")
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+	logger.Log.Debug().Int("posts", len(posts)).Msg("Got posts")
+
+	// Format the data
+	var data []APIResponseData
+	for _, post := range posts {
+		data = append(data, createAPIResponseDataPost(post))
+	}
+
+	return c.JSON(APIResponse{
+		Success: true,
+		Data:    data,
+	})
 }
