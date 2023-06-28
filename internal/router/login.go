@@ -32,9 +32,10 @@ func login(c *fiber.Ctx) error {
 	logger.Log.Debug().Interface("user", user).Msg("Verified user")
 
 	// Create claims
+	expiryDate := time.Now().Add(time.Hour * 24 * 7)
 	claims := jwt.RegisteredClaims{
 		Subject:   user.ID.String(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+		ExpiresAt: jwt.NewNumericDate(expiryDate),
 	}
 	logger.Log.Debug().Interface("claims", claims).Msg("Created claims")
 
@@ -55,7 +56,8 @@ func login(c *fiber.Ctx) error {
 			{
 				ID: user.ID,
 				Attributes: APIResponseDataAttributes{
-					Token: token,
+					Token:      token,
+					ExpiryDate: expiryDate.Format(time.RFC3339), // adding expiryDate to the response
 				},
 				Relationships: APIResponseDataRelationships{
 					OwnerID: user.ID,
