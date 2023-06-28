@@ -47,8 +47,7 @@ func errorHandler(c *fiber.Ctx, err error) error {
 	}
 
 	return c.Status(code).JSON(&APIResponse{
-		Success: false,
-		Error:   APIResponseErr(err.Error()),
+		Error: APIResponseErr(err.Error()),
 	})
 }
 
@@ -61,14 +60,12 @@ func (r *Router) setupRoutes() {
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
 				return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-					Success: false,
-					Error:   ErrMissingToken,
+					Error: ErrMissingToken,
 				})
 			}
 
 			return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-				Success: false,
-				Error:   ErrUnauthorized,
+				Error: ErrUnauthorized,
 			})
 		},
 	}))
@@ -82,8 +79,10 @@ func (r *Router) addUnauthRoutes() {
 	// Unauthenticated routes
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
-	r.App.Get("/feed/explore", getExploreFeed)
+	r.App.Get("/feed/explore", getChronologicalFeed)
 	r.App.Get("/users/:id", getUser)
+	r.App.Get("/posts", getPosts)
+	r.App.Get("/posts/:id", getPost)
 
 	logger.Log.Info().Msg("Added unauthenticated routes")
 }
@@ -99,9 +98,7 @@ func (r *Router) AuthRoutes() {
 	r.App.Patch("/users/:id", updateUser)
 
 	// Statuses
-	r.App.Get("/posts", getPosts)
 	r.App.Post("/posts", createPost)
-	r.App.Get("/posts/:id", getPost)
 	r.App.Delete("/posts/:id", deletePost)
 
 	// Likes

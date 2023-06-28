@@ -21,7 +21,7 @@ type Database struct {
 	*gorm.DB
 	Bookmarks *BookmarkRepo
 	Files     *FileRepo
-	Followers *FollowerRepo
+	Follows   *FollowRepo
 	Likes     *LikeRepo
 	//Media     *MediaRepo
 	Posts *PostRepo
@@ -45,7 +45,7 @@ func New(cfg *config.Config) (*Database, error) {
 	db.DB().SetMaxIdleConns(cfg.Database.MaxIdleConns)
 	db.DB().SetMaxOpenConns(cfg.Database.MaxOpenConns)
 
-	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follower{}, &Bookmark{}, &File{})
+	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follow{}, &Bookmark{}, &File{})
 	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index
@@ -56,7 +56,7 @@ func New(cfg *config.Config) (*Database, error) {
 		DB:        db,
 		Bookmarks: &BookmarkRepo{db: db},
 		Files:     &FileRepo{db: db},
-		Followers: &FollowerRepo{db: db},
+		Follows:   &FollowRepo{db: db},
 		Likes:     &LikeRepo{db: db},
 		Posts:     &PostRepo{db: db},
 		Users:     &UserRepo{db: db},

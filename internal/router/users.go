@@ -1,6 +1,8 @@
 package router
 
 import (
+	"fmt"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
@@ -14,8 +16,7 @@ func getUsers(c *fiber.Ctx) error {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting all users")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
@@ -25,8 +26,7 @@ func getUsers(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
 
@@ -35,8 +35,7 @@ func getUser(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidID,
+			Error: ErrInvalidID,
 		})
 	}
 
@@ -44,14 +43,12 @@ func getUser(c *fiber.Ctx) error {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting user")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    []APIResponseData{createAPIResponseData(user)},
+		Data: []APIResponseData{createAPIResponseData(user)},
 	})
 }
 
@@ -66,8 +63,7 @@ func createUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidJSON,
+			Error: ErrInvalidJSON,
 		})
 	}
 
@@ -75,14 +71,12 @@ func createUser(c *fiber.Ctx) error {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error creating user: " + err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(APIResponse{
-		Success: true,
-		Data:    []APIResponseData{createAPIResponseData(user)},
+		Data: []APIResponseData{createAPIResponseData(user)},
 	})
 }
 
@@ -96,45 +90,55 @@ func updateUser(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidJSON,
+			Error: ErrInvalidJSON,
 		})
 	}
 
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidID,
+			Error: ErrInvalidID,
 		})
 	}
 
 	updatedUser, err := db.Users.UpdateUser(id, *body.Bio, *body.ProfilePicture, *body.BannerImage)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    []APIResponseData{createAPIResponseData(updatedUser)},
+		Data: []APIResponseData{createAPIResponseData(updatedUser)},
 	})
 }
 
 // createAPIResponseData converts user to APIResponseData.
 func createAPIResponseData(user *database.User) APIResponseData {
+	selfLink := fmt.Sprintf("/users/%s", user.ID)
+	postsLink := fmt.Sprintf("/users/%s/posts", user.ID)
+
 	return APIResponseData{
 		Type: shared.DataTypeUser,
-		ID:   user.ID,
+		ID:   &user.ID,
 		Attributes: APIResponseDataAttributes{
+			CreatedAt:         &user.CreatedAt,
+			UpdatedAt:         &user.UpdatedAt,
+			Username:          user.Username,
 			Privacy:           user.Privacy,
 			ProfilePictureURL: user.ProfilePictureURL,
 			CoverImageURL:     user.CoverImageURL,
+			//FollowerCount:     followerCount,
+			//FollowingCount:    followingCount,
 		},
-		Relationships: APIResponseDataRelationships{
-			OwnerID: user.ID,
+		Links: APIResponseDataLinks{
+			Self:      selfLink,
+			Posts:     postsLink,
+			Following: fmt.Sprintf("%s/following", selfLink),
+			Followers: fmt.Sprintf("%s/followers", selfLink),
+		},
+		Meta: APIResponseDataMeta{
+			Version: "1.0",
 		},
 	}
 }

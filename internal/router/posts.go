@@ -14,8 +14,7 @@ func getPost(c *fiber.Ctx) error {
 	postID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidID,
+			Error: ErrInvalidID,
 		})
 	}
 
@@ -25,19 +24,16 @@ func getPost(c *fiber.Ctx) error {
 		break
 	case gorm.ErrRecordNotFound:
 		return c.Status(fiber.StatusNotFound).JSON(APIResponse{
-			Success: false,
-			Error:   ErrNotFound,
+			Error: ErrNotFound,
 		})
 	default:
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    []APIResponseData{createAPIResponseDataPost(post)},
+		Data: []APIResponseData{createAPIResponseDataPost(post)},
 	})
 }
 
@@ -46,16 +42,14 @@ func getPosts(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Query("userId"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidID,
+			Error: ErrInvalidID,
 		})
 	}
 
 	posts, err := db.Posts.GetPostsByUserID(userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
@@ -65,8 +59,7 @@ func getPosts(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
 
@@ -78,8 +71,7 @@ func createPost(c *fiber.Ctx) error {
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidJSON,
+			Error: ErrInvalidJSON,
 		})
 	}
 	logger.Log.Debug().Msgf("body: %v", body)
@@ -87,8 +79,7 @@ func createPost(c *fiber.Ctx) error {
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 	logger.Log.Debug().Msgf("userID: %v", userID)
@@ -96,14 +87,12 @@ func createPost(c *fiber.Ctx) error {
 	post, err := db.Posts.CreatePost(userID, body.Text, body.Privacy)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    []APIResponseData{createAPIResponseDataPost(post)},
+		Data: []APIResponseData{createAPIResponseDataPost(post)},
 	})
 }
 
@@ -116,13 +105,17 @@ func deletePost(c *fiber.Ctx) error {
 func createAPIResponseDataPost(post *database.Post) APIResponseData {
 	return APIResponseData{
 		Type: shared.DataTypePost,
-		ID:   post.ID,
+		ID:   &post.ID,
 		Attributes: APIResponseDataAttributes{
 			Text:    post.Text,
 			Privacy: post.Privacy,
 		},
 		Relationships: APIResponseDataRelationships{
-			OwnerID: post.OwnerID,
+			AuthorID: &post.AuthorID,
+		},
+		Links: APIResponseDataLinks{
+			Self:   "/posts/" + post.ID.String(),
+			Author: "/users/" + post.AuthorID.String(),
 		},
 	}
 }

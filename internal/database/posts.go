@@ -11,9 +11,9 @@ import (
 // Post represents a post update by a user.
 type Post struct {
 	BaseModel
-	OwnerID uuid.UUID      `json:"ownerId"`
-	Privacy shared.Privacy `json:"privacy"`
-	Text    string         `json:"text"`
+	AuthorID uuid.UUID      `json:"ownerId"`
+	Privacy  shared.Privacy `json:"privacy"`
+	Text     string         `json:"text"`
 }
 
 // PostRepo provides access to the Post storage.
@@ -51,10 +51,10 @@ func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, lim
 	return posts, nil
 }
 
-func (pr *PostRepo) CreatePost(ownerID uuid.UUID, text string, privacy shared.Privacy) (*Post, error) {
+func (pr *PostRepo) CreatePost(authorID uuid.UUID, text string, privacy shared.Privacy) (*Post, error) {
 	post := &Post{
 		BaseModel: BaseModel{ID: uuid.New()},
-		OwnerID:   ownerID,
+		AuthorID:  authorID,
 		Privacy:   privacy,
 		Text:      text,
 	}

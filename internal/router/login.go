@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -16,8 +17,7 @@ func login(c *fiber.Ctx) error {
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInvalidJSON,
+			Error: ErrInvalidJSON,
 		})
 	}
 	logger.Log.Debug().Interface("body", body).Msg("Parsed body")
@@ -25,8 +25,7 @@ func login(c *fiber.Ctx) error {
 	user, err := db.Users.VerifyUser(body.Username, body.Password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 	logger.Log.Debug().Interface("user", user).Msg("Verified user")
@@ -44,23 +43,22 @@ func login(c *fiber.Ctx) error {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error creating token")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 	logger.Log.Debug().Str("token", token).Msg("Created token")
 
 	return c.JSON(APIResponse{
-		Success: true,
 		Data: []APIResponseData{
 			{
-				ID: user.ID,
+				Type: shared.DataTypeToken,
+				ID:   &user.ID,
 				Attributes: APIResponseDataAttributes{
 					Token:     token,
 					ExpiresAt: expiryDate.Format(time.RFC3339), // adding expiryDate to the response
 				},
 				Relationships: APIResponseDataRelationships{
-					OwnerID: user.ID,
+					OwnerID: &user.ID,
 				},
 			},
 		},
@@ -72,22 +70,20 @@ func verifyToken(c *fiber.Ctx) error {
 	id, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Success: false,
-			Error:   ErrInternal,
+			Error: ErrInternal,
 		})
 	}
 	logger.Log.Debug().Str("id", id.String()).Msg("Verified token")
 
 	return c.JSON(APIResponse{
-		Success: true,
 		Data: []APIResponseData{
 			{
-				ID: id,
+				Type: shared.DataTypeToken,
 				Attributes: APIResponseDataAttributes{
 					Token: c.Get("Authorization"),
 				},
 				Relationships: APIResponseDataRelationships{
-					OwnerID: id,
+					OwnerID: &id,
 				},
 			},
 		},

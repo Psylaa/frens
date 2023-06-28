@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,7 +37,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Here is where you'd get the list of users that the authenticated user is
 	// following. This depends on your data storage, so replace this with your
 	// actual implementation.
-	following, err := db.Followers.GetFollowing(userID)
+	following, err := db.Follows.GetFollowing(userID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -45,7 +46,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Extract the following IDs
 	followingIDs := make([]uuid.UUID, len(following))
 	for i, follower := range following {
-		followingIDs[i] = follower.FollowingID
+		followingIDs[i] = follower.TargetID
 	}
 	logger.Log.Debug().Interface("followingIDs", followingIDs).Msg("Got following IDs")
 
@@ -61,16 +62,15 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Format the data
 	var data []APIResponseData
 	for _, post := range posts {
+		log.Println(post.AuthorID)
 		data = append(data, createAPIResponseDataPost(&post))
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
 
-// getExploreFeed returns a list of the latest posts from all users
 // getExploreFeed returns a list of the latest posts from all users
 func getExploreFeed(c *fiber.Ctx) error {
 	posts, err := db.Posts.GetLatestPublicPosts(25)
@@ -87,7 +87,6 @@ func getExploreFeed(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
