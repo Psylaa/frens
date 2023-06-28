@@ -3,7 +3,6 @@ module github.com/bwoff11/frens
 go 1.20
 
 require (
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/gofiber/contrib/fiberzerolog v0.1.2
 	github.com/gofiber/contrib/jwt v1.0.2

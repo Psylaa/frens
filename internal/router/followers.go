@@ -61,6 +61,24 @@ func createFollower(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if the follower record already exists
+	exists, err := db.Followers.FollowerExists(userID, followingID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error checking follower")
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInternal,
+		})
+	}
+
+	if exists {
+		logger.Log.Warn().Msg("Follower already exists")
+		return c.Status(fiber.StatusConflict).JSON(APIResponse{
+			Success: false,
+			Error:   "Follower already exists",
+		})
+	}
+
 	if _, err := db.Followers.CreateFollower(userID, followingID); err != nil {
 		logger.Log.Error().Err(err).Msg("Error creating follower")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
@@ -91,6 +109,24 @@ func deleteFollower(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Success: false,
 			Error:   ErrInvalidID,
+		})
+	}
+
+	// Check if the follower record exists
+	exists, err := db.Followers.FollowerExists(userID, followingID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error checking follower")
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Success: false,
+			Error:   ErrInternal,
+		})
+	}
+
+	if !exists {
+		logger.Log.Warn().Msg("Follower does not exist")
+		return c.Status(fiber.StatusNotFound).JSON(APIResponse{
+			Success: false,
+			Error:   "Follower does not exist",
 		})
 	}
 

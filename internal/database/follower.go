@@ -64,3 +64,15 @@ func (fr *FollowerRepo) GetFollowing(followerID uuid.UUID) ([]Follower, error) {
 
 	return following, nil
 }
+
+func (fr *FollowerRepo) FollowerExists(followingID, followerID uuid.UUID) (bool, error) {
+	var follower Follower
+	if err := fr.db.Where("following_id = ? AND follower_id = ?", followingID, followerID).First(&follower).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
