@@ -52,7 +52,6 @@ func login(c *fiber.Ctx) error {
 		Data: []APIResponseData{
 			{
 				Type: shared.DataTypeToken,
-				ID:   &user.ID,
 				Attributes: APIResponseDataAttributes{
 					Token:     token,
 					ExpiresAt: expiryDate.Format(time.RFC3339), // adding expiryDate to the response
@@ -67,13 +66,13 @@ func login(c *fiber.Ctx) error {
 
 // verifyToken handles the HTTP request for token verification.
 func verifyToken(c *fiber.Ctx) error {
-	id, err := getUserID(c)
+	userId, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Error: ErrInternal,
 		})
 	}
-	logger.Log.Debug().Str("id", id.String()).Msg("Verified token")
+	logger.Log.Debug().Str("id", userId.String()).Msg("Verified token")
 
 	return c.JSON(APIResponse{
 		Data: []APIResponseData{
@@ -83,7 +82,7 @@ func verifyToken(c *fiber.Ctx) error {
 					Token: c.Get("Authorization"),
 				},
 				Relationships: APIResponseDataRelationships{
-					OwnerID: &id,
+					OwnerID: &userId,
 				},
 			},
 		},

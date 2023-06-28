@@ -11,7 +11,7 @@ import (
 // Post represents a post update by a user.
 type Post struct {
 	BaseModel
-	AuthorID uuid.UUID      `json:"ownerId"`
+	AuthorID uuid.UUID      `json:"authorId"`
 	Privacy  shared.Privacy `json:"privacy"`
 	Text     string         `json:"text"`
 }
@@ -42,7 +42,7 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]Post, error) {
 	var posts []Post
 	if err := pr.db.
-		Where("owner_id IN (?) AND created_at < ?", userIDs, cursor).
+		Where("author_id IN (?) AND created_at < ?", userIDs, cursor).
 		Order("created_at desc").
 		Limit(limit).
 		Find(&posts).Error; err != nil {

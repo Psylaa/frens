@@ -53,7 +53,7 @@ func (fr *FollowRepo) DeleteFollow(sourceID, targetID uuid.UUID) error {
 	return nil
 }
 
-func (fr *FollowRepo) GetFollowers(targetID uuid.UUID) ([]Follow, error) {
+func (fr *FollowRepo) GetFollows(targetID uuid.UUID) ([]Follow, error) {
 	var follows []Follow
 	if err := fr.db.Where("target_id = ?", targetID).Find(&follows).Error; err != nil {
 		logger.Log.Error().Msgf("Failed to get followers: %v", err)

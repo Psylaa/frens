@@ -17,7 +17,10 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Get the user ID from the JWT.
 	userID, err := getUserID(c)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).SendString(err.Error())
+		logger.Log.Error().Err(err).Msg("Invalid user ID in token")
+		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
+			Error: ErrInvalidToken,
+		})
 	}
 	logger.Log.Debug().Str("userID", userID.String()).Msg("Got user ID from JWT")
 
@@ -28,34 +31,41 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	if cursorParam != "" {
 		unixTime, err := strconv.ParseInt(cursorParam, 10, 64)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString("Invalid cursor")
+			logger.Log.Error().Err(err).Msg("Invalid cursor")
+			return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+				Error: ErrInvalidID,
+			})
 		}
 		cursor = time.Unix(unixTime, 0)
 	}
 	logger.Log.Debug().Time("cursor", cursor).Msg("Got cursor from query parameters")
 
-	// Here is where you'd get the list of users that the authenticated user is
-	// following. This depends on your data storage, so replace this with your
-	// actual implementation.
+	// Get the list of users that the authenticated user is following.
 	following, err := db.Follows.GetFollowing(userID)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		logger.Log.Error().Err(err).Msg("Error getting following users")
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
 	}
-	logger.Log.Debug().Int("following", len(following)).Msg("Got following")
+	logger.Log.Debug().Int("following", len(following)).Msg("Got following users")
 
 	// Extract the following IDs
 	followingIDs := make([]uuid.UUID, len(following))
 	for i, follower := range following {
 		followingIDs[i] = follower.TargetID
 	}
-	logger.Log.Debug().Interface("followingIDs", followingIDs).Msg("Got following IDs")
+	logger.Log.Debug().Interface("followingIDs", followingIDs).Msg("Got following user IDs")
 
 	followingIDs = append(followingIDs, userID)
 
+	// Get posts by following users and the current user
 	posts, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting posts")
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
 	}
 	logger.Log.Debug().Int("posts", len(posts)).Msg("Got posts")
 

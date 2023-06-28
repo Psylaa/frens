@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func getFollowers(c *fiber.Ctx) error {
+func getFollows(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID, err := uuid.Parse(id)
 	if err != nil {
@@ -18,7 +18,7 @@ func getFollowers(c *fiber.Ctx) error {
 		})
 	}
 
-	followers, err := db.Follows.GetFollowers(userID)
+	followers, err := db.Follows.GetFollows(userID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting followers")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
@@ -28,7 +28,7 @@ func getFollowers(c *fiber.Ctx) error {
 
 	var data []APIResponseData
 	for _, follower := range followers {
-		data = append(data, createFollowerAPIResponseData(&follower))
+		data = append(data, createFollowAPIResponseData(&follower))
 	}
 
 	logger.Log.Debug().Msg("Fetched followers successfully")
@@ -38,7 +38,7 @@ func getFollowers(c *fiber.Ctx) error {
 	})
 }
 
-func createFollower(c *fiber.Ctx) error {
+func createFollow(c *fiber.Ctx) error {
 	sourceID, err := getUserID(c)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Invalid user ID in token")
@@ -66,9 +66,9 @@ func createFollower(c *fiber.Ctx) error {
 	}
 
 	if exists {
-		logger.Log.Warn().Msg("Follower already exists")
+		logger.Log.Warn().Msg("Follow already exists")
 		return c.Status(fiber.StatusConflict).JSON(APIResponse{
-			Error: "Follower already exists",
+			Error: "Follow already exists",
 		})
 	}
 
@@ -84,7 +84,7 @@ func createFollower(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func deleteFollower(c *fiber.Ctx) error {
+func deleteFollow(c *fiber.Ctx) error {
 	SourceID, err := getUserID(c)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Invalid user ID in token")
@@ -112,9 +112,9 @@ func deleteFollower(c *fiber.Ctx) error {
 	}
 
 	if !exists {
-		logger.Log.Warn().Msg("Follower does not exist")
+		logger.Log.Warn().Msg("Follow does not exist")
 		return c.Status(fiber.StatusNotFound).JSON(APIResponse{
-			Error: "Follower does not exist",
+			Error: "Follow does not exist",
 		})
 	}
 
@@ -130,20 +130,53 @@ func deleteFollower(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func createFollowerAPIResponseData(follower *database.Follow) APIResponseData {
+func getFollowing(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Invalid user ID")
+		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+			Error: ErrInvalidID,
+		})
+	}
+
+	following, err := db.Follows.GetFollowing(userID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting following")
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
+	}
+
+	var data []APIResponseData
+	for _, follow := range following {
+		data = append(data, createFollowAPIResponseData(&follow))
+	}
+
+	logger.Log.Debug().Msg("Fetched following successfully")
+
+	return c.JSON(APIResponse{
+		Data: data,
+	})
+}
+
+func createFollowAPIResponseData(follow *database.Follow) APIResponseData {
 	return APIResponseData{
-		Type: shared.DataTypeFollower,
-		ID:   &follower.ID,
+		Type: shared.DataTypeFollow,
+		ID:   &follow.ID,
 		Attributes: APIResponseDataAttributes{
-			CreatedAt: &follower.CreatedAt,
-			UpdatedAt: &follower.UpdatedAt,
-			SourceID:  &follower.SourceID,
-			TargetID:  &follower.TargetID,
+			CreatedAt: &follow.CreatedAt,
+			UpdatedAt: &follow.UpdatedAt,
+			SourceID:  &follow.SourceID,
+			TargetID:  &follow.TargetID,
+		},
+		Relationships: APIResponseDataRelationships{
+			OwnerID: &follow.SourceID,
 		},
 		Links: APIResponseDataLinks{
-			Self:   "/followers/" + follower.ID.String(),
-			Source: "/users/" + follower.ID.String(),
-			Target: "/users/" + follower.TargetID.String(),
+			Self:   "/follows/" + follow.ID.String(),
+			Source: "/users/" + follow.SourceID.String(),
+			Target: "/users/" + follow.TargetID.String(),
 		},
 	}
 }

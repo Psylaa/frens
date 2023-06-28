@@ -69,8 +69,8 @@ type APIResponseDataAttributes struct {
 
 // Structure for individual resource object relationships
 type APIResponseDataRelationships struct {
-	AuthorID *uuid.UUID `json:"author,omitempty"`
-	OwnerID  *uuid.UUID `json:"owner,omitempty"`
+	AuthorID *uuid.UUID `json:"authorId,omitempty"`
+	OwnerID  *uuid.UUID `json:"ownerId,omitempty"`
 }
 
 type APIResponseDataAuthorData struct {

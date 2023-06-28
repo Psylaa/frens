@@ -79,7 +79,7 @@ func (r *Router) addUnauthRoutes() {
 	// Unauthenticated routes
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
-	r.App.Get("/feed/explore", getChronologicalFeed)
+	r.App.Get("/feeds/explore", getExploreFeed)
 	r.App.Get("/users/:id", getUser)
 	r.App.Get("/posts", getPosts)
 	r.App.Get("/posts/:id", getPost)
@@ -101,12 +101,6 @@ func (r *Router) AuthRoutes() {
 	r.App.Post("/posts", createPost)
 	r.App.Delete("/posts/:id", deletePost)
 
-	// Likes
-	r.App.Get("/statuses/:id/likes", getLikes)
-	r.App.Post("/statuses/:id/likes", createLike)
-	r.App.Delete("/statuses/:id/likes", deleteLike)
-	r.App.Get("/statuses/:id/likes/:userId", hasUserLiked)
-
 	// Files
 	r.App.Post("/files", createFile)
 	r.App.Delete("/files/:filename", deleteFile)
@@ -117,14 +111,21 @@ func (r *Router) AuthRoutes() {
 	r.App.Delete("/statuses/:id/bookmarks", deleteBookmark)
 	r.App.Get("/statuses/:id/bookmarks/:userId", hasUserBookmarked)
 
+	// Likes
+	r.App.Get("/statuses/:id/likes", getLikes)
+	r.App.Post("/statuses/:id/likes", createLike)
+	r.App.Delete("/statuses/:id/likes", deleteLike)
+	r.App.Get("/statuses/:id/likes/:userId", hasUserLiked)
+
 	// Feed
-	r.App.Get("/feed/chronological", getChronologicalFeed)
-	r.App.Get("/feed/algorithmic", getChronologicalFeed)
+	r.App.Get("/feeds/chronological", getChronologicalFeed)
+	r.App.Get("/feeds/algorithmic", getChronologicalFeed)
 
 	// Follows
-	r.App.Get("/users/:id/followers", getFollowers)
-	r.App.Post("/users/:id/followers", createFollower)
-	r.App.Delete("/users/:id/followers", deleteFollower)
+	r.App.Get("/users/:id/followers", getFollows)
+	r.App.Get("/users/:id/following", getFollowing)
+	r.App.Post("/users/:id/followers", createFollow)
+	r.App.Delete("/users/:id/followers", deleteFollow)
 
 	logger.Log.Info().Msg("Authenticated routes added")
 }
