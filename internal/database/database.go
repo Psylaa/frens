@@ -53,8 +53,12 @@ func New(cfg *config.Config) (*Database, error) {
 	logger.Log.Info().Msg("Created unique index for Like")
 
 	return &Database{
-		DB:    db,
-		Users: &UserRepo{db: db},
-		Posts: &PostRepo{db: db},
+		DB:        db,
+		Bookmarks: &BookmarkRepo{db: db},
+		Files:     &FileRepo{db: db},
+		Followers: &FollowerRepo{db: db},
+		Likes:     &LikeRepo{db: db},
+		Posts:     &PostRepo{db: db},
+		Users:     &UserRepo{db: db},
 	}, nil
 }

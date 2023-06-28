@@ -12,12 +12,12 @@ type Like struct {
 }
 
 type LikeRepo struct {
-	db *Database
+	db *gorm.DB
 }
 
 func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]Like, error) {
 	var likes []Like
-	if err := lr.db.DB.Where("status_id = ?", statusID).Find(&likes).Error; err != nil {
+	if err := lr.db.Where("status_id = ?", statusID).Find(&likes).Error; err != nil {
 		return nil, err
 	}
 
@@ -31,7 +31,7 @@ func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
 		StatusID:  statusID,
 	}
 
-	if err := lr.db.DB.Create(&newLike).Error; err != nil {
+	if err := lr.db.Create(&newLike).Error; err != nil {
 		return nil, err
 	}
 
@@ -40,14 +40,14 @@ func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
 
 func (lr *LikeRepo) DeleteLike(userID, statusID uuid.UUID) error {
 	var like Like
-	if err := lr.db.DB.Where("user_id = ? AND status_id = ?", userID, statusID).First(&like).Error; err != nil {
+	if err := lr.db.Where("user_id = ? AND status_id = ?", userID, statusID).First(&like).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return gorm.ErrRecordNotFound
 		}
 		return err
 	}
 
-	if err := lr.db.DB.Delete(&like).Error; err != nil {
+	if err := lr.db.Delete(&like).Error; err != nil {
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (lr *LikeRepo) DeleteLike(userID, statusID uuid.UUID) error {
 
 func (lr *LikeRepo) HasUserLiked(userID, statusID uuid.UUID) (bool, error) {
 	var count int
-	if err := lr.db.DB.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
+	if err := lr.db.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
 		return false, err
 	}
 

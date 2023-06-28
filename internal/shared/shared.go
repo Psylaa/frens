@@ -10,6 +10,7 @@ const (
 type DataType string
 
 const (
-	DataTypeUser DataType = "user"
-	DataTypePost DataType = "post"
+	DataTypeUser     DataType = "user"
+	DataTypePost     DataType = "post"
+	DataTypeFollower DataType = "follower"
 )

@@ -12,12 +12,12 @@ type Bookmark struct {
 }
 
 type BookmarkRepo struct {
-	db *Database
+	db *gorm.DB
 }
 
 func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]Bookmark, error) {
 	var bookmarks []Bookmark
-	if err := br.db.DB.Where("status_id = ?", statusID).Find(&bookmarks).Error; err != nil {
+	if err := br.db.Where("status_id = ?", statusID).Find(&bookmarks).Error; err != nil {
 		return nil, err
 	}
 
@@ -31,7 +31,7 @@ func (br *BookmarkRepo) CreateBookmark(userID, statusID uuid.UUID) (*Bookmark, e
 		StatusID:  statusID,
 	}
 
-	if err := br.db.DB.Create(&newBookmark).Error; err != nil {
+	if err := br.db.Create(&newBookmark).Error; err != nil {
 		return nil, err
 	}
 
@@ -40,14 +40,14 @@ func (br *BookmarkRepo) CreateBookmark(userID, statusID uuid.UUID) (*Bookmark, e
 
 func (br *BookmarkRepo) DeleteBookmark(userID, statusID uuid.UUID) error {
 	var bookmark Bookmark
-	if err := br.db.DB.Where("user_id = ? AND status_id = ?", userID, statusID).First(&bookmark).Error; err != nil {
+	if err := br.db.Where("user_id = ? AND status_id = ?", userID, statusID).First(&bookmark).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return gorm.ErrRecordNotFound
 		}
 		return err
 	}
 
-	if err := br.db.DB.Delete(&bookmark).Error; err != nil {
+	if err := br.db.Delete(&bookmark).Error; err != nil {
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (br *BookmarkRepo) DeleteBookmark(userID, statusID uuid.UUID) error {
 
 func (br *BookmarkRepo) HasUserBookmarked(userID, statusID uuid.UUID) (bool, error) {
 	var count int
-	if err := br.db.DB.Model(&Bookmark{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
+	if err := br.db.Model(&Bookmark{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
 		return false, err
 	}
 

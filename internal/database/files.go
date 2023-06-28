@@ -16,7 +16,7 @@ type File struct {
 }
 
 type FileRepo struct {
-	db *Database
+	db *gorm.DB
 }
 
 func (fr *FileRepo) CreateFile(owner uuid.UUID, extension string) (*File, error) {
@@ -25,7 +25,7 @@ func (fr *FileRepo) CreateFile(owner uuid.UUID, extension string) (*File, error)
 		Extension: extension,
 		Owner:     owner,
 	}
-	if err := fr.db.DB.Create(file).Error; err != nil {
+	if err := fr.db.Create(file).Error; err != nil {
 		return nil, err
 	}
 	return file, nil
@@ -33,7 +33,7 @@ func (fr *FileRepo) CreateFile(owner uuid.UUID, extension string) (*File, error)
 
 func (fr *FileRepo) GetFile(id uuid.UUID) (*File, error) {
 	var file File
-	if err := fr.db.DB.Where("id = ?", id).First(&file).Error; err != nil {
+	if err := fr.db.Where("id = ?", id).First(&file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -43,7 +43,7 @@ func (fr *FileRepo) GetFile(id uuid.UUID) (*File, error) {
 }
 
 func (fr *FileRepo) UpdateFile(file *File) error {
-	return fr.db.DB.Save(file).Error
+	return fr.db.Save(file).Error
 }
 
 func (fr *FileRepo) DeleteFile(id uuid.UUID) error {
@@ -54,5 +54,5 @@ func (fr *FileRepo) DeleteFile(id uuid.UUID) error {
 	if file == nil {
 		return gorm.ErrRecordNotFound
 	}
-	return fr.db.DB.Delete(file).Error
+	return fr.db.Delete(file).Error
 }
