@@ -36,7 +36,7 @@ func login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(response.GenerateLoginResponse(token, expiryDate))
+	return c.Status(fiber.StatusOK).JSON(response.GenerateLoginResponse(token, expiryDate, user.ID))
 }
 
 // verifyToken handles the HTTP request for token verification.

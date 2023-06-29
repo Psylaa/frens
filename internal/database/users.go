@@ -120,6 +120,10 @@ func (ur *UserRepo) UpdateProfilePicture(userId uuid.UUID, profilePictureID *uui
 			return err
 		}
 
+		if err := ur.db.Model(&newProfilePicture).Updates(File{ID: *profilePictureID}).Error; err != nil {
+			return err
+		}
+
 		user.ProfilePicture = newProfilePicture
 		if err := ur.db.Save(&user).Error; err != nil {
 			return err
@@ -149,6 +153,10 @@ func (ur *UserRepo) UpdateCoverImage(userId uuid.UUID, coverImageID *uuid.UUID) 
 		var newCoverImage File
 		if err := ur.db.First(&newCoverImage, "id = ?", coverImageID).Error; err != nil {
 			logger.Log.Debug().Str("package", "database").Msgf("Cover image not found: %s", err.Error())
+			return err
+		}
+
+		if err := ur.db.Model(&newCoverImage).Updates(File{ID: *coverImageID}).Error; err != nil {
 			return err
 		}
 

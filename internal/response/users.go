@@ -22,11 +22,13 @@ type UserResp_Data struct {
 }
 
 type UserResp_DataAttributes struct {
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	Username  string         `json:"username"`
-	Bio       string         `json:"bio"`
-	Privacy   shared.Privacy `json:"privacy"`
+	CreatedAt        time.Time      `json:"createdAt"`
+	UpdatedAt        time.Time      `json:"updatedAt"`
+	Username         string         `json:"username"`
+	Bio              string         `json:"bio"`
+	Privacy          shared.Privacy `json:"privacy"`
+	ProfilePictureID uuid.UUID      `json:"profilePictureId"`
+	CoverImageID     uuid.UUID      `json:"coverImageId"`
 }
 
 type UserResp_Links struct {
@@ -63,11 +65,13 @@ func GenerateUserResponse(user *database.User) *UserResp {
 				Type: "user",
 				ID:   user.ID,
 				Attributes: UserResp_DataAttributes{
-					CreatedAt: user.CreatedAt,
-					UpdatedAt: user.UpdatedAt,
-					Username:  user.Username,
-					Bio:       user.Bio,
-					Privacy:   user.Privacy,
+					CreatedAt:        user.CreatedAt,
+					UpdatedAt:        user.UpdatedAt,
+					Username:         user.Username,
+					Bio:              user.Bio,
+					Privacy:          user.Privacy,
+					ProfilePictureID: user.ProfilePicture.ID,
+					CoverImageID:     user.CoverImage.ID,
 					//FollowerCount:     followerCount,  // to be implemented
 					//FollowingCount:    followingCount, // to be implemented
 				},

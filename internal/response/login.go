@@ -1,6 +1,10 @@
 package response
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type LoginResp struct {
 	Links    LoginResp_Links      `json:"links,omitempty"`
@@ -20,13 +24,14 @@ type LoginResp_Data struct {
 type LoginResp_DataAttributes struct {
 	Token      string    `json:"token"`
 	Expiration time.Time `json:"expiration"`
+	UserID     uuid.UUID `json:"userId,omitempty"`
 }
 
 type LoginResp_Included struct {
 	// For future use
 }
 
-func GenerateLoginResponse(token string, exp time.Time) *LoginResp {
+func GenerateLoginResponse(token string, exp time.Time, userId uuid.UUID) *LoginResp {
 	return &LoginResp{
 		Links: LoginResp_Links{
 			Self: "/login",
@@ -37,6 +42,7 @@ func GenerateLoginResponse(token string, exp time.Time) *LoginResp {
 				Attributes: LoginResp_DataAttributes{
 					Token:      token,
 					Expiration: exp,
+					UserID:     userId,
 				},
 			},
 		},

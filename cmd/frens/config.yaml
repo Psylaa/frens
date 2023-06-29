@@ -2,7 +2,7 @@
 server:
   base_url: "http://localhost:3001"
   port: "3001"
-  log_level: "debug"
+  log_level: "debug" #Options: debug, info, warn, error, fatal, panic
   jwt_secret: "supersecret"
   jwt_duration: 168
   allow_origins: true
