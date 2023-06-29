@@ -39,19 +39,19 @@ Go 1.15+
 PostgreSQL 9.6+
 
 # Installation
-## Clone the repository
+### Clone the repository
 git clone https://github.com/user/frens.git
 
-## Navigate to the project directory
+### Navigate to the project directory
 cd frens
 
-## Install dependencies
+### Install dependencies
 go get -v ./...
 
-## Build the project
+### Build the project
 go build
 
-## Start the server
+### Start the server
 ./frens
 
 # Contributing
