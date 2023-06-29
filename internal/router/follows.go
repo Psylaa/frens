@@ -170,9 +170,6 @@ func createFollowAPIResponseData(follow *database.Follow) APIResponseData {
 			SourceID:  &follow.SourceID,
 			TargetID:  &follow.TargetID,
 		},
-		Relationships: APIResponseDataRelationships{
-			OwnerID: &follow.SourceID,
-		},
 		Links: APIResponseDataLinks{
 			Self:   "/follows/" + follow.ID.String(),
 			Source: "/users/" + follow.SourceID.String(),

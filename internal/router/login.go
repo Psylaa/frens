@@ -56,9 +56,6 @@ func login(c *fiber.Ctx) error {
 					Token:     token,
 					ExpiresAt: expiryDate.Format(time.RFC3339), // adding expiryDate to the response
 				},
-				Relationships: APIResponseDataRelationships{
-					OwnerID: &user.ID,
-				},
 			},
 		},
 	})
@@ -82,8 +79,16 @@ func verifyToken(c *fiber.Ctx) error {
 				Attributes: APIResponseDataAttributes{
 					Token: c.Get("Authorization"),
 				},
-				Relationships: APIResponseDataRelationships{
-					OwnerID: &userId,
+				Links: APIResponseDataLinks{
+					Self: "/verify",
+				},
+				Relationships: &APIResponseDataRelationships{
+					Owner: &APIResponseDataRelationshipsEntity{
+						Data: &APIResponseDataRelationshipsEntityData{
+							Type: shared.DataTypeUser,
+							ID:   &userId,
+						},
+					},
 				},
 			},
 		},

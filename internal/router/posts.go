@@ -169,9 +169,6 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 			Text:      post.Text,
 			Privacy:   post.Privacy,
 		},
-		Relationships: APIResponseDataRelationships{
-			AuthorID: &post.AuthorID,
-		},
 		Links: APIResponseDataLinks{
 			Self:   "/posts/" + post.ID.String(),
 			Author: "/users/" + post.AuthorID.String(),

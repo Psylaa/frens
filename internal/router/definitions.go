@@ -26,18 +26,23 @@ const (
 
 // Main API response structure
 type APIResponse struct {
-	Data  []APIResponseData `json:"data,omitempty"`
-	Error APIResponseErr    `json:"errors,omitempty"`
+	Data     []APIResponseData         `json:"data,omitempty"`
+	Included []APIResponseDataIncluded `json:"included,omitempty"`
+	Error    APIResponseErr            `json:"errors,omitempty"`
 }
 
 // Structure representing individual resource object
 type APIResponseData struct {
-	Type          shared.DataType              `json:"type"`
-	ID            *uuid.UUID                   `json:"id,omitempty"` // Only empty for token requests
-	Attributes    APIResponseDataAttributes    `json:"attributes"`
-	Relationships APIResponseDataRelationships `json:"relationships,omitempty"`
-	Included      []APIResponseDataIncluded    `json:"included,omitempty"`
-	Links         APIResponseDataLinks         `json:"links,omitempty"`
+	Type          shared.DataType               `json:"type"`
+	ID            *uuid.UUID                    `json:"id,omitempty"` // Only empty for token requests
+	Attributes    APIResponseDataAttributes     `json:"attributes"`
+	Relationships *APIResponseDataRelationships `json:"relationships,omitempty"`
+	Included      []APIResponseDataIncluded     `json:"included,omitempty"`
+	Links         APIResponseDataLinks          `json:"links,omitempty"`
+}
+
+type APIResponseDataIncluded struct {
+	Type shared.DataType `json:"type"`
 }
 
 // Structure for individual resource object attributes
@@ -73,25 +78,17 @@ type APIResponseDataAttributes struct {
 
 // Structure for individual resource object relationships
 type APIResponseDataRelationships struct {
-	AuthorID *uuid.UUID `json:"authorId,omitempty"`
-	OwnerID  *uuid.UUID `json:"ownerId,omitempty"`
+	Author *APIResponseDataRelationshipsEntity `json:"author,omitempty"`
+	Owner  *APIResponseDataRelationshipsEntity `json:"owner,omitempty"`
 }
 
-type APIResponseDataIncluded struct {
-	Author *APIResponseDataIncludedAuthor `json:"author,omitempty"`
+type APIResponseDataRelationshipsEntity struct {
+	Data *APIResponseDataRelationshipsEntityData `json:"data"`
 }
 
-type APIResponseDataIncludedAuthor struct {
-	UserID            uuid.UUID `json:"userId"`
-	Username          string    `json:"username"`
-	Bio               string    `json:"bio"`
-	ProfilePictureURL string    `json:"profilePictureUrl"`
-	CoverImageURL     string    `json:"coverImageUrl"`
-}
-
-type APIResponseDataAuthorData struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
+type APIResponseDataRelationshipsEntityData struct {
+	Type shared.DataType `json:"type"`
+	ID   *uuid.UUID      `json:"id,omitempty"`
 }
 
 // Structure for individual resource object links
