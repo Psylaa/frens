@@ -7,6 +7,7 @@ import (
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/router"
 )
 
@@ -19,6 +20,9 @@ func main() {
 
 	// Initialize logger
 	logger.Init(cfg.Server.LogLevel)
+
+	// Initialize response package
+	response.Init(cfg.Server.BaseURL)
 
 	// Connect to the database
 	db, err := database.New(cfg)

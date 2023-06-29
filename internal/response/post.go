@@ -35,24 +35,15 @@ type PostResp_DataAttributes struct {
 }
 
 type PostResp_DataRelationships struct {
-	Author PostResp_DataRelationshipsAuthor `json:"author"`
-}
-
-type PostResp_DataRelationshipsAuthor struct {
-	Data PostResp_DataRelationshipsAuthorData `json:"data"`
-}
-
-type PostResp_DataRelationshipsAuthorData struct {
-	Type string    `json:"type"`
-	ID   uuid.UUID `json:"id"`
+	Author UserResp `json:"author"`
 }
 
 type PostResp_Included struct {
 }
 
 func GeneratePostResponse(post *database.Post) *PostResp {
-	selfLink := fmt.Sprintf("/posts/%s", post.ID)
-	authorLink := fmt.Sprintf("/users/%s", post.AuthorID)
+	selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
+	authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
 
 	return &PostResp{
 		Links: PostResp_Links{
@@ -61,21 +52,11 @@ func GeneratePostResponse(post *database.Post) *PostResp {
 		},
 		Data: []PostResp_Data{
 			{
-				Type: "post",
-				ID:   post.ID,
-				Attributes: PostResp_DataAttributes{
-					CreatedAt: post.CreatedAt,
-					UpdatedAt: post.UpdatedAt,
-					Privacy:   post.Privacy,
-					Text:      post.Text,
-				},
+				Type:       "post",
+				ID:         post.ID,
+				Attributes: generatePostAttributes(post),
 				Relationships: PostResp_DataRelationships{
-					Author: PostResp_DataRelationshipsAuthor{
-						Data: PostResp_DataRelationshipsAuthorData{
-							Type: "user",
-							ID:   post.AuthorID,
-						},
-					},
+					Author: *GenerateUserResponse(post.Author),
 				},
 			},
 		},
@@ -93,4 +74,27 @@ func GeneratePostsResponse(posts []*database.Post) *PostResp {
 	}
 
 	return &postsResp
+}
+
+func generatePostAttributes(post *database.Post) PostResp_DataAttributes {
+	return PostResp_DataAttributes{
+		CreatedAt: post.CreatedAt,
+		UpdatedAt: post.UpdatedAt,
+		Privacy:   post.Privacy,
+		Text:      post.Text,
+	}
+}
+
+func generateUserResponseData(user *database.User) UserResp_Data {
+	return UserResp_Data{
+		Type: "user",
+		ID:   user.ID,
+		Attributes: UserResp_DataAttributes{
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Username:  user.Username,
+			Bio:       user.Bio,
+			Privacy:   user.Privacy,
+		},
+	}
 }

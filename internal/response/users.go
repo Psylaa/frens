@@ -42,17 +42,21 @@ type UserResp_Included struct {
 }
 
 func GenerateUserResponse(user *database.User) *UserResp {
-	selfLink := fmt.Sprintf("/users/%s", user.ID)
-	postsLink := fmt.Sprintf("/users/%s/posts", user.ID)
+	selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID)
+	postsLink := fmt.Sprintf("%s/users/%s/posts", baseURL, user.ID)
+	followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
+	followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
+	ppLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.ProfilePicture.ID, user.ProfilePicture.Extension)
+	ciLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverImage.ID, user.CoverImage.Extension)
 
 	return &UserResp{
 		Links: UserResp_Links{
 			Self:           selfLink,
 			Posts:          postsLink,
-			Following:      fmt.Sprintf("%s/following", selfLink),
-			Followers:      fmt.Sprintf("%s/followers", selfLink),
-			ProfilePicture: "/files/" + user.ProfilePicture.ID.String() + user.ProfilePicture.Extension,
-			CoverImage:     "/files/" + user.CoverImage.ID.String() + user.CoverImage.Extension,
+			Following:      followingLink,
+			Followers:      followersLink,
+			ProfilePicture: ppLink,
+			CoverImage:     ciLink,
 		},
 		Data: []UserResp_Data{
 			{

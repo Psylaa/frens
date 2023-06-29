@@ -14,12 +14,12 @@ type LoginResp_Links struct {
 
 type LoginResp_Data struct {
 	Type       string                   `json:"type"`
-	ID         string                   `json:"id"`
 	Attributes LoginResp_DataAttributes `json:"attributes"`
 }
 
 type LoginResp_DataAttributes struct {
-	// For future use
+	Token      string    `json:"token"`
+	Expiration time.Time `json:"expiration"`
 }
 
 type LoginResp_Included struct {
@@ -33,10 +33,10 @@ func GenerateLoginResponse(token string, exp time.Time) *LoginResp {
 		},
 		Data: []LoginResp_Data{
 			{
-				Type:       "login",
-				ID:         "1",
+				Type: "login",
 				Attributes: LoginResp_DataAttributes{
-					// For future use
+					Token:      token,
+					Expiration: exp,
 				},
 			},
 		},

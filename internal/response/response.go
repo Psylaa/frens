@@ -20,6 +20,12 @@ type ErrResp struct {
 	Error APIResponseErr `json:"error"`
 }
 
+var baseURL string
+
+func Init(baseUrl string) {
+	baseURL = baseUrl
+}
+
 func GenerateErrorResponse(err APIResponseErr) *ErrResp {
 	return &ErrResp{
 		Error: err,
