@@ -68,11 +68,12 @@ func login(c *fiber.Ctx) error {
 func verifyToken(c *fiber.Ctx) error {
 	userId, err := getUserID(c)
 	if err != nil {
+		logger.Log.Debug().Err(err).Msg("Error verifying token")
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Error: ErrInternal,
 		})
 	}
-	logger.Log.Debug().Str("id", userId.String()).Msg("Verified token")
+	logger.Log.Debug().Str("userId", userId.String()).Msg("Verified token")
 
 	return c.JSON(APIResponse{
 		Data: []APIResponseData{

@@ -27,6 +27,7 @@ func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
 	if err := pr.db.Preload("User").First(&post, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
+
 	return &post, nil
 }
 
@@ -35,7 +36,7 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 	if err := pr.db.
 		Preload("User").
 		Order("created_at desc").
-		Find(&posts, "user_id = ?", userID).Error; err != nil {
+		Find(&posts, "author_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil

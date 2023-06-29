@@ -16,6 +16,7 @@ Intuitive API: Frens offers a clear, easy-to-use API for developers.
 
 Robust Moderation Tools: Frens provides a suite of tools to help manage and moderate content effectively.
 
+
 # Current Stage of Development
 Frens is currently in the Pre-alpha stage of development. This means we are in the conceptual phase, and actively brainstorming, researching, and deciding the key features and capabilities our platform should have. While we've made progress and built some parts of the platform, there's still a lot more to explore and develop.
 

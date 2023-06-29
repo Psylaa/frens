@@ -38,20 +38,25 @@ func getPost(c *fiber.Ctx) error {
 }
 
 // getPosts handles the HTTP request to fetch all posts by a user.
-func getPosts(c *fiber.Ctx) error {
+func GetPostsByUserID(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Query("userId"))
+	logger.Log.Debug().Msgf("userID: %v", userID)
 	if err != nil {
+		logger.Log.Debug().Msgf("error parsing provided user id into uuid: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Error: ErrInvalidID,
 		})
 	}
+	logger.Log.Debug().Msgf("successfully parsed provided user id into uuid: %v", userID)
 
 	posts, err := db.Posts.GetPostsByUserID(userID)
 	if err != nil {
+		logger.Log.Debug().Msgf("error retrieving posts by user id: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Error: ErrInternal,
 		})
 	}
+	logger.Log.Debug().Msgf("successfully retrieved posts by user id: %v", userID)
 
 	var data []APIResponseData
 	for _, post := range posts {
@@ -106,7 +111,51 @@ func createPost(c *fiber.Ctx) error {
 
 // deletePost handles the HTTP request to delete a post.
 func deletePost(c *fiber.Ctx) error {
-	return nil
+	// Parse the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+			Error: ErrInvalidID,
+		})
+	}
+
+	// Get the user ID from the JWT.
+	userID, err := getUserID(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
+			Error: ErrInvalidToken,
+		})
+	}
+
+	// First, check if the post exists and belongs to the user.
+	post, err := db.Posts.GetPost(postID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(APIResponse{
+				Error: ErrNotFound,
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
+	}
+
+	// Check if the user owns the post.
+	if post.AuthorID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(APIResponse{
+			Error: ErrForbidden,
+		})
+	}
+
+	// Delete the post.
+	err = db.Posts.DeletePost(postID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+			Error: ErrInternal,
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
 
 // createAPIResponseDataPost converts post to APIResponseData.
@@ -137,6 +186,9 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 		Links: APIResponseDataLinks{
 			Self:   "/posts/" + post.ID.String(),
 			Author: "/users/" + post.AuthorID.String(),
+		},
+		Meta: APIResponseDataMeta{
+			Version: "1.0",
 		},
 	}
 }

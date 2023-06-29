@@ -24,6 +24,14 @@ func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]Bookmark, error) {
 	return bookmarks, nil
 }
 
+func (br *BookmarkRepo) GetBookmarkCount(statusID uuid.UUID) (int, error) {
+	var count int
+	if err := br.db.Model(&Bookmark{}).Where("status_id = ?", statusID).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (br *BookmarkRepo) CreateBookmark(userID, statusID uuid.UUID) (*Bookmark, error) {
 	newBookmark := Bookmark{
 		BaseModel: BaseModel{ID: uuid.New()},

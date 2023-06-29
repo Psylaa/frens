@@ -34,10 +34,12 @@ func getUsers(c *fiber.Ctx) error {
 func getUser(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing user ID")
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Error: ErrInvalidID,
 		})
 	}
+	logger.Log.Debug().Msgf("Successfully parsed user ID: %v", id)
 
 	user, err := db.Users.GetUser(id)
 	if err != nil {
@@ -46,6 +48,7 @@ func getUser(c *fiber.Ctx) error {
 			Error: ErrInternal,
 		})
 	}
+	logger.Log.Debug().Msgf("Successfully retrieved user: %v", user)
 
 	return c.JSON(APIResponse{
 		Data: []APIResponseData{createAPIResponseData(user)},
@@ -125,6 +128,7 @@ func createAPIResponseData(user *database.User) APIResponseData {
 			CreatedAt:         &user.CreatedAt,
 			UpdatedAt:         &user.UpdatedAt,
 			Username:          user.Username,
+			Bio:               user.Bio,
 			Privacy:           user.Privacy,
 			ProfilePictureURL: user.ProfilePictureURL,
 			CoverImageURL:     user.CoverImageURL,

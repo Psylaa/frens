@@ -31,6 +31,10 @@ func (ur *UserRepo) GetUser(id uuid.UUID) (*User, error) {
 		return nil, err
 	}
 
+	log.Println("User found:", user.Username)
+	log.Println("Profile picture:", user.ProfilePictureURL)
+	log.Println("Cover image:", user.CoverImageURL)
+
 	return &user, nil
 }
 

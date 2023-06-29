@@ -81,7 +81,7 @@ func (r *Router) addUnauthRoutes() {
 	r.App.Get("/files/:filename", retrieveFile)
 	r.App.Get("/feeds/explore", getExploreFeed)
 	r.App.Get("/users/:id", getUser)
-	r.App.Get("/posts", getPosts)
+	r.App.Get("/posts", GetPostsByUserID)
 	r.App.Get("/posts/:id", getPost)
 
 	logger.Log.Info().Msg("Added unauthenticated routes")

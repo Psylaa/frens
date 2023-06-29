@@ -20,6 +20,7 @@ const (
 	ErrInvalidToken APIResponseErr = "invalid token"
 	ErrUnauthorized APIResponseErr = "unauthorized"
 	ErrMissingToken APIResponseErr = "missing or malformed token"
+	ErrForbidden    APIResponseErr = "forbidden"
 )
 
 // Main API response structure
@@ -48,6 +49,7 @@ type APIResponseDataAttributes struct {
 
 	// User specific attributes
 	Username          string         `json:"username,omitempty"`
+	Bio               string         `json:"bio,omitempty"`
 	Privacy           shared.Privacy `json:"privacy,omitempty"`
 	ProfilePictureURL string         `json:"profilePictureUrl,omitempty"`
 	CoverImageURL     string         `json:"coverImageUrl,omitempty"`
@@ -59,7 +61,10 @@ type APIResponseDataAttributes struct {
 	TargetID *uuid.UUID `json:"targetId,omitempty"`
 
 	// Post specific attributes
-	Text string `json:"text,omitempty"`
+	Text          string `json:"text,omitempty"`
+	LikeCount     int    `json:"likeCount,omitempty"`
+	BookmarkCount int    `json:"bookmarkCount,omitempty"`
+	ViewCount     int    `json:"viewCount,omitempty"`
 
 	// File specific attributes
 	Extension string `json:"extension,omitempty"`

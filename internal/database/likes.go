@@ -24,6 +24,14 @@ func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]Like, error) {
 	return likes, nil
 }
 
+func (lr *LikeRepo) GetLikeCount(statusID uuid.UUID) (int, error) {
+	var count int
+	if err := lr.db.Model(&Like{}).Where("status_id = ?", statusID).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
 	newLike := Like{
 		BaseModel: BaseModel{ID: uuid.New()},
