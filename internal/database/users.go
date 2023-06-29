@@ -87,38 +87,82 @@ func (ur *UserRepo) VerifyUser(username string, password string) (*User, error) 
 	return user, nil
 }
 
-func (ur *UserRepo) UpdateUser(id uuid.UUID, bio *string, profilePicture *File, coverImage *File) (*User, error) {
+func (ur *UserRepo) UpdateBio(id uuid.UUID, bio *string) error {
 	user, err := ur.GetUser(id)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
-		return nil, err
+		return err
 	}
 
-	// Create a map to hold the updated fields
-	updates := make(map[string]interface{})
 	if bio != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Updating bio to %s", *bio)
-		updates["bio"] = *bio
-	} else {
-		logger.Log.Debug().Str("package", "database").Msgf("Bio is nil")
+		if err := ur.db.Model(user).Update("bio", *bio).Error; err != nil {
+			return err
+		}
 	}
-	if profilePicture != nil {
-		logger.Log.Debug().Str("package", "database").Msgf("Updating profile picture to %s", profilePicture.ID)
-		updates["profile_picture_id"] = profilePicture.ID
+
+	return nil
+}
+
+func (ur *UserRepo) UpdateProfilePicture(userId uuid.UUID, profilePictureID *uuid.UUID) error {
+	user, err := ur.GetUser(userId)
+	if err != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
+		return err
+	}
+
+	if profilePictureID != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Updating profile picture to %s", profilePictureID)
+
+		var newProfilePicture File
+		if err := ur.db.First(&newProfilePicture, "id = ?", profilePictureID).Error; err != nil {
+			logger.Log.Debug().Str("package", "database").Msgf("Profile picture not found: %s", err.Error())
+			return err
+		}
+
+		user.ProfilePicture = newProfilePicture
+		if err := ur.db.Save(&user).Error; err != nil {
+			return err
+		}
 	} else {
 		logger.Log.Debug().Str("package", "database").Msgf("Profile picture is nil")
+		user.ProfilePictureID = uuid.Nil
+		if err := ur.db.Save(&user).Error; err != nil {
+			return err
+		}
 	}
-	if coverImage != nil {
-		logger.Log.Debug().Str("package", "database").Msgf("Updating cover image to %s", coverImage.ID)
-		updates["cover_image_id"] = coverImage.ID
+
+	return nil
+}
+
+func (ur *UserRepo) UpdateCoverImage(userId uuid.UUID, coverImageID *uuid.UUID) error {
+	user, err := ur.GetUser(userId)
+	if err != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
+		return err
+	}
+	logger.Log.Debug().Str("package", "database").Msgf("Retrieved user for cover image update: %s", user.ID)
+
+	if coverImageID != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Updating cover image to %s", coverImageID)
+
+		var newCoverImage File
+		if err := ur.db.First(&newCoverImage, "id = ?", coverImageID).Error; err != nil {
+			logger.Log.Debug().Str("package", "database").Msgf("Cover image not found: %s", err.Error())
+			return err
+		}
+
+		user.CoverImage = newCoverImage
+		if err := ur.db.Save(&user).Error; err != nil {
+			return err
+		}
 	} else {
 		logger.Log.Debug().Str("package", "database").Msgf("Cover image is nil")
+		user.CoverImageID = uuid.Nil
+		if err := ur.db.Save(&user).Error; err != nil {
+			return err
+		}
 	}
 
-	// Use the Updates method to only update non-zero values
-	if err := ur.db.Model(user).Updates(updates).Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return nil
 }

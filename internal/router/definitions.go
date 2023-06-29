@@ -21,6 +21,7 @@ const (
 	ErrUnauthorized APIResponseErr = "unauthorized"
 	ErrMissingToken APIResponseErr = "missing or malformed token"
 	ErrForbidden    APIResponseErr = "forbidden"
+	ErrInvalidUUID  APIResponseErr = "invalid uuid"
 )
 
 // Main API response structure
