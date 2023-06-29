@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -86,106 +85,77 @@ func createUser(c *fiber.Ctx) error {
 
 // updateUser handles the HTTP request to update a user's details.
 func updateUser(c *fiber.Ctx) error {
-	// parse form data
-	// update to body parser at some point
-	bio := c.FormValue("bio")
-	profilePictureID := c.FormValue("profilePictureId")
-	coverImageID := c.FormValue("coverImageId")
-
-	// if form values are empty, set to nil
-	var bioPtr *string
-	if bio != "" {
-		logger.Log.Debug().Msgf("Successfully parsed bio: %v", bio)
-		bioPtr = &bio
-	} else {
-		logger.Log.Debug().Msg("Bio is empty. Not updating.")
+	var body struct {
+		Bio              *string `json:"bio"`
+		ProfilePictureID *string `json:"profilePictureId"`
+		CoverImageID     *string `json:"coverImageId"`
 	}
 
-	profilePicturePtr, err := getProfilePicturePtr(profilePictureID)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting profile picture")
+	if err := c.BodyParser(&body); err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
+			Error: ErrInvalidJSON,
 		})
 	}
-	coverImagePtr, err := getCoverImagePtr(coverImageID)
+
+	userId, err := getUserID(c)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting cover image")
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Error: ErrInvalidID,
 		})
 	}
 
-	id, err := getUserID(c)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing user ID")
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+	if body.Bio != nil {
+		if err := db.Users.UpdateBio(userId, body.Bio); err != nil {
+			logger.Log.Error().Err(err).Msg("Error updating bio")
+			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+				Error: ErrInternal,
+			})
+		}
 	}
-	logger.Log.Debug().Msgf("Successfully parsed user ID: %v", id)
 
-	updatedUser, err := db.Users.UpdateUser(id, bioPtr, profilePicturePtr, coverImagePtr)
+	if body.ProfilePictureID != nil {
+		ppUUID, err := uuid.Parse(*body.ProfilePictureID)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error parsing ProfilePictureID")
+			return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+				Error: ErrInvalidUUID,
+			})
+		}
+		if err := db.Users.UpdateProfilePicture(userId, &ppUUID); err != nil {
+			logger.Log.Error().Err(err).Msg("Error updating profile picture")
+			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+				Error: ErrInternal,
+			})
+		}
+	}
+
+	if body.CoverImageID != nil {
+		ciUUID, err := uuid.Parse(*body.CoverImageID)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error parsing CoverImageID")
+			return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
+				Error: ErrInvalidUUID,
+			})
+		}
+		if err := db.Users.UpdateCoverImage(userId, &ciUUID); err != nil {
+			logger.Log.Error().Err(err).Msg("Error updating cover image")
+			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
+				Error: ErrInternal,
+			})
+		}
+	}
+
+	// Retrieve updated user
+	user, err := db.Users.GetUser(userId)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error updating user")
+		logger.Log.Error().Err(err).Msg("Error getting user")
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Error: ErrInternal,
 		})
 	}
-	logger.Log.Debug().Msgf("Successfully updated user: %v", updatedUser)
 
-	// Retrieve the user again to get the new file objects
-	updatedUser, err = db.Users.GetUser(id)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting user after update")
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
-	}
-
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{createAPIResponseData(updatedUser)},
-	})
-}
-
-func getProfilePicturePtr(profilePictureID string) (*database.File, error) {
-	var profilePicturePtr *database.File
-	if profilePictureID != "" {
-		logger.Log.Debug().Msgf("Successfully parsed profile picture ID: %v", profilePictureID)
-		id, err := uuid.Parse(profilePictureID)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing profile picture ID")
-			return nil, errors.New("invalid profile picture ID format")
-		}
-		profilePicture, err := db.Files.GetFile(id)
-		if err != nil || profilePicture == nil {
-			logger.Log.Error().Err(err).Msg("Error getting profile picture")
-			return nil, errors.New("profile picture not found")
-		}
-		logger.Log.Debug().Msgf("Successfully retrieved profile picture: %v", profilePicture)
-		profilePicturePtr = profilePicture
-	}
-	return profilePicturePtr, nil
-}
-
-func getCoverImagePtr(coverImageID string) (*database.File, error) {
-	var coverImagePtr *database.File
-	if coverImageID != "" {
-		logger.Log.Debug().Msgf("Successfully parsed cover image ID: %v", coverImageID)
-		id, err := uuid.Parse(coverImageID)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing cover image ID")
-			return nil, errors.New("invalid cover image ID format")
-		}
-		coverImage, err := db.Files.GetFile(id)
-		if err != nil || coverImage == nil {
-			logger.Log.Error().Err(err).Msg("Error getting cover image")
-			return nil, errors.New("cover image not found")
-		}
-		logger.Log.Debug().Msgf("Successfully retrieved cover image: %v", coverImage)
-		coverImagePtr = coverImage
-	}
-	return coverImagePtr, nil
+	return c.Status(fiber.StatusOK).JSON(createAPIResponseData(user))
 }
 
 // createAPIResponseData converts user to APIResponseData.
@@ -210,8 +180,8 @@ func createAPIResponseData(user *database.User) APIResponseData {
 			Posts:          postsLink,
 			Following:      fmt.Sprintf("%s/following", selfLink),
 			Followers:      fmt.Sprintf("%s/followers", selfLink),
-			ProfilePicture: "/files/" + user.ProfilePicture.ID.String() + "." + user.ProfilePicture.Extension,
-			CoverImage:     "/files/" + user.CoverImage.ID.String() + "." + user.CoverImage.Extension,
+			ProfilePicture: "/files/" + user.ProfilePicture.ID.String() + user.ProfilePicture.Extension,
+			CoverImage:     "/files/" + user.CoverImage.ID.String() + user.CoverImage.Extension,
 		},
 		Meta: APIResponseDataMeta{
 			Version: "1.0",
