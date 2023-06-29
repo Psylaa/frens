@@ -38,7 +38,6 @@ type APIResponseData struct {
 	Relationships APIResponseDataRelationships `json:"relationships,omitempty"`
 	Included      []APIResponseDataIncluded    `json:"included,omitempty"`
 	Links         APIResponseDataLinks         `json:"links,omitempty"`
-	Meta          APIResponseDataMeta          `json:"meta,omitempty"`
 }
 
 // Structure for individual resource object attributes
@@ -106,11 +105,6 @@ type APIResponseDataLinks struct {
 	Followers      string `json:"followers,omitempty"`
 	ProfilePicture string `json:"profilePicture,omitempty"`
 	CoverImage     string `json:"coverImage,omitempty"`
-}
-
-// Structure for individual resource object metadata
-type APIResponseDataMeta struct {
-	Version string `json:"version,omitempty"`
 }
 
 // Structure representing the router

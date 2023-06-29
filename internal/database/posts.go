@@ -11,10 +11,10 @@ import (
 // Post represents a post update by a user.
 type Post struct {
 	BaseModel
+	Author   User           `gorm:"foreignKey:AuthorID" json:"author"`
 	AuthorID uuid.UUID      `json:"authorId"`
 	Privacy  shared.Privacy `json:"privacy"`
 	Text     string         `json:"text"`
-	User     User           `gorm:"foreignKey:AuthorID"` // New User field
 }
 
 // PostRepo provides access to the Post storage.
@@ -24,7 +24,7 @@ type PostRepo struct {
 
 func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
 	var post Post
-	if err := pr.db.Preload("User").First(&post, "id = ?", id).Error; err != nil {
+	if err := pr.db.Preload("Author").Preload("Author.ProfilePicture").Preload("Author.CoverImage").First(&post, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 

@@ -172,23 +172,9 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 		Relationships: APIResponseDataRelationships{
 			AuthorID: &post.AuthorID,
 		},
-		Included: []APIResponseDataIncluded{
-			{
-				Author: &APIResponseDataIncludedAuthor{
-					UserID:   post.User.ID,
-					Username: post.User.Username,
-					Bio:      post.User.Bio,
-					//ProfilePictureURL: post.User.ProfilePictureURL,
-					//CoverImageURL:     post.User.CoverImageURL,
-				},
-			},
-		},
 		Links: APIResponseDataLinks{
 			Self:   "/posts/" + post.ID.String(),
 			Author: "/users/" + post.AuthorID.String(),
-		},
-		Meta: APIResponseDataMeta{
-			Version: "1.0",
 		},
 	}
 }

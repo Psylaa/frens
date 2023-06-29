@@ -183,8 +183,5 @@ func createAPIResponseData(user *database.User) APIResponseData {
 			ProfilePicture: "/files/" + user.ProfilePicture.ID.String() + user.ProfilePicture.Extension,
 			CoverImage:     "/files/" + user.CoverImage.ID.String() + user.CoverImage.Extension,
 		},
-		Meta: APIResponseDataMeta{
-			Version: "1.0",
-		},
 	}
 }
