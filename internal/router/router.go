@@ -93,9 +93,9 @@ func (r *Router) AuthRoutes() {
 
 	// Users
 	r.App.Get("/users", getUsers)
+	r.App.Patch("/users/", updateUser)
 	r.App.Get("/users/:id", getUser)
 	r.App.Post("/users", createUser)
-	r.App.Patch("/users/:id", updateUser)
 
 	// Statuses
 	r.App.Post("/posts", createPost)

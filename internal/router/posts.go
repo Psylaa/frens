@@ -175,11 +175,11 @@ func createAPIResponseDataPost(post *database.Post) APIResponseData {
 		Included: []APIResponseDataIncluded{
 			{
 				Author: &APIResponseDataIncludedAuthor{
-					UserID:            post.User.ID,
-					Username:          post.User.Username,
-					Bio:               post.User.Bio,
-					ProfilePictureURL: post.User.ProfilePictureURL,
-					CoverImageURL:     post.User.CoverImageURL,
+					UserID:   post.User.ID,
+					Username: post.User.Username,
+					Bio:      post.User.Bio,
+					//ProfilePictureURL: post.User.ProfilePictureURL,
+					//CoverImageURL:     post.User.CoverImageURL,
 				},
 			},
 		},

@@ -48,13 +48,11 @@ type APIResponseDataAttributes struct {
 	ExpiresAt string     `json:"expiresAt,omitempty"` // Must be string for RFC 7519 on JWT aka "NumericDate"
 
 	// User specific attributes
-	Username          string         `json:"username,omitempty"`
-	Bio               string         `json:"bio,omitempty"`
-	Privacy           shared.Privacy `json:"privacy,omitempty"`
-	ProfilePictureURL string         `json:"profilePictureUrl,omitempty"`
-	CoverImageURL     string         `json:"coverImageUrl,omitempty"`
-	FollowerCount     int            `json:"followerCount,omitempty"`
-	FollowingCount    int            `json:"followingCount,omitempty"`
+	Username       string         `json:"username,omitempty"`
+	Bio            string         `json:"bio,omitempty"`
+	Privacy        shared.Privacy `json:"privacy,omitempty"`
+	FollowerCount  int            `json:"followerCount,omitempty"`
+	FollowingCount int            `json:"followingCount,omitempty"`
 
 	// Follow specific attributes
 	SourceID *uuid.UUID `json:"sourceId,omitempty"`
@@ -98,13 +96,15 @@ type APIResponseDataAuthorData struct {
 
 // Structure for individual resource object links
 type APIResponseDataLinks struct {
-	Self      string `json:"self,omitempty"`
-	Author    string `json:"author,omitempty"`
-	Posts     string `json:"posts,omitempty"`
-	Source    string `json:"source,omitempty"`
-	Target    string `json:"target,omitempty"`
-	Following string `json:"following,omitempty"`
-	Followers string `json:"followers,omitempty"`
+	Self           string `json:"self,omitempty"`
+	Author         string `json:"author,omitempty"`
+	Posts          string `json:"posts,omitempty"`
+	Source         string `json:"source,omitempty"`
+	Target         string `json:"target,omitempty"`
+	Following      string `json:"following,omitempty"`
+	Followers      string `json:"followers,omitempty"`
+	ProfilePicture string `json:"profilePicture,omitempty"`
+	CoverImage     string `json:"coverImage,omitempty"`
 }
 
 // Structure for individual resource object metadata

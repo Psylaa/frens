@@ -1,7 +1,6 @@
 package router
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -72,7 +71,6 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Format the data
 	var data []APIResponseData
 	for _, post := range posts {
-		log.Println(post.AuthorID)
 		data = append(data, createAPIResponseDataPost(&post))
 	}
 

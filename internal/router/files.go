@@ -50,6 +50,9 @@ func createFile(c *fiber.Ctx) error {
 				Attributes: APIResponseDataAttributes{
 					Extension: ext,
 				},
+				Links: APIResponseDataLinks{
+					Self: cfg.Server.BaseURL + "/files/" + fileData.ID.String() + ext,
+				},
 			},
 		},
 	})
