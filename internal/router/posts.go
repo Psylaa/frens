@@ -13,6 +13,9 @@ import (
 func getPost(c *fiber.Ctx) error {
 	postID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
+		logger.Log.Debug().
+			Str("package", "router").
+			Msgf("error parsing provided post id into uuid: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Error: ErrInvalidID,
 		})
@@ -23,10 +26,16 @@ func getPost(c *fiber.Ctx) error {
 	case nil:
 		break
 	case gorm.ErrRecordNotFound:
+		logger.Log.Debug().
+			Str("package", "router").
+			Msgf("database returned record not found error: %v", err)
 		return c.Status(fiber.StatusNotFound).JSON(APIResponse{
 			Error: ErrNotFound,
 		})
 	default:
+		logger.Log.Debug().
+			Str("package", "router").
+			Msgf("database returned unknown error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Error: ErrInternal,
 		})
@@ -42,7 +51,9 @@ func GetPostsByUserID(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Query("userId"))
 	logger.Log.Debug().Msgf("userID: %v", userID)
 	if err != nil {
-		logger.Log.Debug().Msgf("error parsing provided user id into uuid: %v", err)
+		logger.Log.Debug().
+			Str("package", "router").
+			Msgf("error parsing provided user id into uuid: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
 			Error: ErrInvalidID,
 		})
@@ -51,12 +62,16 @@ func GetPostsByUserID(c *fiber.Ctx) error {
 
 	posts, err := db.Posts.GetPostsByUserID(userID)
 	if err != nil {
-		logger.Log.Debug().Msgf("error retrieving posts by user id: %v", err)
+		logger.Log.Debug().
+			Str("package", "router").
+			Msgf("error retrieving posts by user id: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
 			Error: ErrInternal,
 		})
 	}
-	logger.Log.Debug().Msgf("successfully retrieved posts by user id: %v", userID)
+	logger.Log.Debug().
+		Str("package", "router").
+		Msgf("successfully retrieved posts by user id: %v", userID)
 
 	var data []APIResponseData
 	for _, post := range posts {
