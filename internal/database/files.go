@@ -32,14 +32,14 @@ func (fr *FileRepo) CreateFile(owner uuid.UUID, extension string) (*File, error)
 }
 
 func (fr *FileRepo) GetFile(id uuid.UUID) (*File, error) {
-	var file File
-	if err := fr.db.Where("id = ?", id).First(&file).Error; err != nil {
+	var file *File
+	if err := fr.db.Where("id = ?", id).First(file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &file, nil
+	return file, nil
 }
 
 func (fr *FileRepo) UpdateFile(file *File) error {

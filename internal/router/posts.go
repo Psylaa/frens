@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -13,12 +13,7 @@ import (
 func getPost(c *fiber.Ctx) error {
 	postID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		logger.Log.Debug().
-			Str("package", "router").
-			Msgf("error parsing provided post id into uuid: %v", err)
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
 
 	post, err := db.Posts.GetPost(postID)
@@ -26,24 +21,12 @@ func getPost(c *fiber.Ctx) error {
 	case nil:
 		break
 	case gorm.ErrRecordNotFound:
-		logger.Log.Debug().
-			Str("package", "router").
-			Msgf("database returned record not found error: %v", err)
-		return c.Status(fiber.StatusNotFound).JSON(APIResponse{
-			Error: ErrNotFound,
-		})
+		return c.Status(fiber.StatusNotFound).JSON(response.GenerateErrorResponse(response.ErrNotFound))
 	default:
-		logger.Log.Debug().
-			Str("package", "router").
-			Msgf("database returned unknown error: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{createAPIResponseDataPost(post)},
-	})
+	return c.JSON(response.GeneratePostResponse(post))
 }
 
 // getPosts handles the HTTP request to fetch all posts by a user.
@@ -51,36 +34,15 @@ func GetPostsByUserID(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Query("userId"))
 	logger.Log.Debug().Msgf("userID: %v", userID)
 	if err != nil {
-		logger.Log.Debug().
-			Str("package", "router").
-			Msgf("error parsing provided user id into uuid: %v", err)
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
 	logger.Log.Debug().Msgf("successfully parsed provided user id into uuid: %v", userID)
 
 	posts, err := db.Posts.GetPostsByUserID(userID)
 	if err != nil {
-		logger.Log.Debug().
-			Str("package", "router").
-			Msgf("error retrieving posts by user id: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
-	logger.Log.Debug().
-		Str("package", "router").
-		Msgf("successfully retrieved posts by user id: %v", userID)
-
-	var data []APIResponseData
-	for _, post := range posts {
-		data = append(data, createAPIResponseDataPost(&post))
-	}
-
-	return c.JSON(APIResponse{
-		Data: data,
-	})
+	return c.JSON(response.GeneratePostsResponse(posts))
 }
 
 // createPost handles the HTTP request to create a new post.
@@ -90,38 +52,27 @@ func createPost(c *fiber.Ctx) error {
 		Privacy shared.Privacy `json:"privacy"`
 	}
 	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidJSON,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
-	logger.Log.Debug().Msgf("body: %v", body)
 
 	userID, err := getUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
 	}
 	logger.Log.Debug().Msgf("userID: %v", userID)
 
 	post, err := db.Posts.CreatePost(userID, body.Text, body.Privacy)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
 	// Retrieve the post so we can return the author's information.
 	post, err = db.Posts.GetPost(post.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{createAPIResponseDataPost(post)},
-	})
+	return c.JSON(response.GeneratePostResponse(post))
 }
 
 // deletePost handles the HTTP request to delete a post.
@@ -129,64 +80,33 @@ func deletePost(c *fiber.Ctx) error {
 	// Parse the post ID from the URL parameter.
 	postID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
 
 	// Get the user ID from the JWT.
 	userID, err := getUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: ErrInvalidToken,
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
 	}
 
 	// First, check if the post exists and belongs to the user.
 	post, err := db.Posts.GetPost(postID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return c.Status(fiber.StatusNotFound).JSON(APIResponse{
-				Error: ErrNotFound,
-			})
+			return c.Status(fiber.StatusNotFound).JSON(response.GenerateErrorResponse(response.ErrNotFound))
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
 	}
 
 	// Check if the user owns the post.
 	if post.AuthorID != userID {
-		return c.Status(fiber.StatusForbidden).JSON(APIResponse{
-			Error: ErrForbidden,
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrUnauthorized))
 	}
 
 	// Delete the post.
 	err = db.Posts.DeletePost(postID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
-}
-
-// createAPIResponseDataPost converts post to APIResponseData.
-func createAPIResponseDataPost(post *database.Post) APIResponseData {
-	return APIResponseData{
-		Type: shared.DataTypePost,
-		ID:   &post.ID,
-		Attributes: APIResponseDataAttributes{
-			CreatedAt: &post.CreatedAt,
-			UpdatedAt: &post.UpdatedAt,
-			Text:      post.Text,
-			Privacy:   post.Privacy,
-		},
-		Links: APIResponseDataLinks{
-			Self:   "/posts/" + post.ID.String(),
-			Author: "/users/" + post.AuthorID.String(),
-		},
-	}
 }

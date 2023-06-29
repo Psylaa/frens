@@ -15,8 +15,8 @@ type BookmarkRepo struct {
 	db *gorm.DB
 }
 
-func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]Bookmark, error) {
-	var bookmarks []Bookmark
+func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]*Bookmark, error) {
+	var bookmarks []*Bookmark
 	if err := br.db.Where("status_id = ?", statusID).Find(&bookmarks).Error; err != nil {
 		return nil, err
 	}
@@ -33,17 +33,17 @@ func (br *BookmarkRepo) GetBookmarkCount(statusID uuid.UUID) (int, error) {
 }
 
 func (br *BookmarkRepo) CreateBookmark(userID, statusID uuid.UUID) (*Bookmark, error) {
-	newBookmark := Bookmark{
+	newBookmark := &Bookmark{
 		BaseModel: BaseModel{ID: uuid.New()},
 		UserID:    userID,
 		StatusID:  statusID,
 	}
 
-	if err := br.db.Create(&newBookmark).Error; err != nil {
+	if err := br.db.Create(newBookmark).Error; err != nil {
 		return nil, err
 	}
 
-	return &newBookmark, nil
+	return newBookmark, nil
 }
 
 func (br *BookmarkRepo) DeleteBookmark(userID, statusID uuid.UUID) error {

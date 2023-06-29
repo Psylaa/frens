@@ -19,19 +19,19 @@ type FollowRepo struct {
 }
 
 func (fr *FollowRepo) CreateFollow(sourceID uuid.UUID, targetID uuid.UUID) (*Follow, error) {
-	newFollow := Follow{
+	newFollow := &Follow{
 		BaseModel: BaseModel{ID: uuid.New()},
 		SourceID:  sourceID,
 		TargetID:  targetID,
 	}
 
-	if err := fr.db.Create(&newFollow).Error; err != nil {
+	if err := fr.db.Create(newFollow).Error; err != nil {
 		logger.Log.Error().Msgf("Failed to create follow: %v", err)
 		return nil, err
 	}
 
 	logger.Log.Debug().Msgf("Created follow: %v", newFollow)
-	return &newFollow, nil
+	return newFollow, nil
 }
 
 func (fr *FollowRepo) DeleteFollow(sourceID, targetID uuid.UUID) error {
@@ -53,8 +53,8 @@ func (fr *FollowRepo) DeleteFollow(sourceID, targetID uuid.UUID) error {
 	return nil
 }
 
-func (fr *FollowRepo) GetFollows(targetID uuid.UUID) ([]Follow, error) {
-	var follows []Follow
+func (fr *FollowRepo) GetFollows(targetID uuid.UUID) ([]*Follow, error) {
+	var follows []*Follow
 	if err := fr.db.Where("target_id = ?", targetID).Find(&follows).Error; err != nil {
 		logger.Log.Error().Msgf("Failed to get followers: %v", err)
 		return nil, err
@@ -63,8 +63,8 @@ func (fr *FollowRepo) GetFollows(targetID uuid.UUID) ([]Follow, error) {
 	return follows, nil
 }
 
-func (fr *FollowRepo) GetFollowing(sourceID uuid.UUID) ([]Follow, error) {
-	var following []Follow
+func (fr *FollowRepo) GetFollowing(sourceID uuid.UUID) ([]*Follow, error) {
+	var following []*Follow
 	if err := fr.db.Where("source_id = ?", sourceID).Find(&following).Error; err != nil {
 		logger.Log.Error().Msgf("Failed to get following: %v", err)
 		return nil, err

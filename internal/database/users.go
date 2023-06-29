@@ -35,8 +35,8 @@ func (ur *UserRepo) GetUser(id uuid.UUID) (*User, error) {
 	return &user, nil
 }
 
-func (ur *UserRepo) GetUsers() ([]User, error) {
-	var users []User
+func (ur *UserRepo) GetUsers() ([]*User, error) {
+	var users []*User
 	if err := ur.db.Preload("ProfilePicture").Preload("CoverImage").Find(&users).Error; err != nil {
 		return nil, err
 	}

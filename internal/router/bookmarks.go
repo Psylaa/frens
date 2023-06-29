@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -9,15 +10,15 @@ func getBookmarks(c *fiber.Ctx) error {
 	id := c.Params("id")
 	statusID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
 
 	bookmarks, err := db.Bookmarks.GetBookmarks(statusID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.JSON(bookmarks)
+	return c.JSON(response.GenerateBookmarksResponse(bookmarks))
 }
 
 func createBookmark(c *fiber.Ctx) error {

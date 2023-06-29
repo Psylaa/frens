@@ -2,11 +2,11 @@ package router
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -18,13 +18,17 @@ import (
 var cfg *config.Config
 var db *database.Database
 
+// Structure representing the router
+type Router struct {
+	Config *config.Config
+	App    *fiber.App
+}
+
 func NewRouter(configuration *config.Config, database *database.Database) *Router {
 	cfg = configuration
 	db = database
 
-	app := fiber.New(fiber.Config{
-		ErrorHandler: errorHandler,
-	})
+	app := fiber.New(fiber.Config{})
 
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: &logger.Log,
@@ -40,17 +44,6 @@ func NewRouter(configuration *config.Config, database *database.Database) *Route
 	return r
 }
 
-func errorHandler(c *fiber.Ctx, err error) error {
-	code := http.StatusInternalServerError
-	if e, ok := err.(*fiber.Error); ok {
-		code = e.Code
-	}
-
-	return c.Status(code).JSON(&APIResponse{
-		Error: APIResponseErr(err.Error()),
-	})
-}
-
 func (r *Router) setupRoutes() {
 	r.addUnauthRoutes()
 
@@ -59,14 +52,9 @@ func (r *Router) setupRoutes() {
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
-				return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-					Error: ErrMissingToken,
-				})
+				return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
 			}
-
-			return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-				Error: ErrUnauthorized,
-			})
+			return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
 

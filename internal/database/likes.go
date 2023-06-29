@@ -15,8 +15,8 @@ type LikeRepo struct {
 	db *gorm.DB
 }
 
-func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]Like, error) {
-	var likes []Like
+func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]*Like, error) {
+	var likes []*Like
 	if err := lr.db.Where("status_id = ?", statusID).Find(&likes).Error; err != nil {
 		return nil, err
 	}
@@ -24,26 +24,26 @@ func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]Like, error) {
 	return likes, nil
 }
 
-func (lr *LikeRepo) GetLikeCount(statusID uuid.UUID) (int, error) {
+func (lr *LikeRepo) GetLikeCount(statusID uuid.UUID) (*int, error) {
 	var count int
 	if err := lr.db.Model(&Like{}).Where("status_id = ?", statusID).Count(&count).Error; err != nil {
-		return 0, err
+		return nil, err
 	}
-	return count, nil
+	return &count, nil
 }
 
 func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
-	newLike := Like{
+	newLike := &Like{
 		BaseModel: BaseModel{ID: uuid.New()},
 		UserID:    userID,
 		StatusID:  statusID,
 	}
 
-	if err := lr.db.Create(&newLike).Error; err != nil {
+	if err := lr.db.Create(newLike).Error; err != nil {
 		return nil, err
 	}
 
-	return &newLike, nil
+	return newLike, nil
 }
 
 func (lr *LikeRepo) DeleteLike(userID, statusID uuid.UUID) error {

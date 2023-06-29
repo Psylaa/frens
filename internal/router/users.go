@@ -1,11 +1,8 @@
 package router
 
 import (
-	"fmt"
-
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/shared"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -14,45 +11,28 @@ import (
 func getUsers(c *fiber.Ctx) error {
 	users, err := db.Users.GetUsers()
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting all users")
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	var data []APIResponseData
-	for _, user := range users {
-		data = append(data, createAPIResponseData(&user))
-	}
-
-	return c.JSON(APIResponse{
-		Data: data,
-	})
+	return c.Status(fiber.StatusOK).JSON(response.GenerateUsersResponse(users))
 }
 
 // getUser handles the HTTP request to fetch a specific user.
 func getUser(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing user ID")
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
 	logger.Log.Debug().Msgf("Successfully parsed user ID: %v", id)
 
 	user, err := db.Users.GetUser(id)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting user")
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 	logger.Log.Debug().Msgf("Successfully retrieved user: %v", user)
 
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{createAPIResponseData(user)},
-	})
+	return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
 }
 
 // createUser handles the HTTP request to create a new user.
@@ -65,22 +45,16 @@ func createUser(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&body); err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidJSON,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
 
 	user, err := db.Users.CreateUser(body.Username, body.Email, body.Password)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error creating user: " + err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(APIResponse{
-		Data: []APIResponseData{createAPIResponseData(user)},
-	})
+	return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
 }
 
 // updateUser handles the HTTP request to update a user's details.
@@ -93,24 +67,18 @@ func updateUser(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&body); err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidJSON,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
 
 	userId, err := getUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: ErrInvalidID,
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrUnauthorized))
 	}
 
 	if body.Bio != nil {
 		if err := db.Users.UpdateBio(userId, body.Bio); err != nil {
 			logger.Log.Error().Err(err).Msg("Error updating bio")
-			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-				Error: ErrInternal,
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 		}
 	}
 
@@ -118,15 +86,11 @@ func updateUser(c *fiber.Ctx) error {
 		ppUUID, err := uuid.Parse(*body.ProfilePictureID)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing ProfilePictureID")
-			return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-				Error: ErrInvalidUUID,
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidUUID))
 		}
 		if err := db.Users.UpdateProfilePicture(userId, &ppUUID); err != nil {
 			logger.Log.Error().Err(err).Msg("Error updating profile picture")
-			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-				Error: ErrInternal,
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 		}
 	}
 
@@ -134,54 +98,19 @@ func updateUser(c *fiber.Ctx) error {
 		ciUUID, err := uuid.Parse(*body.CoverImageID)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing CoverImageID")
-			return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-				Error: ErrInvalidUUID,
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidUUID))
 		}
 		if err := db.Users.UpdateCoverImage(userId, &ciUUID); err != nil {
 			logger.Log.Error().Err(err).Msg("Error updating cover image")
-			return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-				Error: ErrInternal,
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 		}
 	}
 
 	// Retrieve updated user
 	user, err := db.Users.GetUser(userId)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting user")
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(createAPIResponseData(user))
-}
-
-// createAPIResponseData converts user to APIResponseData.
-func createAPIResponseData(user *database.User) APIResponseData {
-	selfLink := fmt.Sprintf("/users/%s", user.ID)
-	postsLink := fmt.Sprintf("/users/%s/posts", user.ID)
-
-	return APIResponseData{
-		Type: shared.DataTypeUser,
-		ID:   &user.ID,
-		Attributes: APIResponseDataAttributes{
-			CreatedAt: &user.CreatedAt,
-			UpdatedAt: &user.UpdatedAt,
-			Username:  user.Username,
-			Bio:       user.Bio,
-			Privacy:   user.Privacy,
-			//FollowerCount:     followerCount,
-			//FollowingCount:    followingCount,
-		},
-		Links: APIResponseDataLinks{
-			Self:           selfLink,
-			Posts:          postsLink,
-			Following:      fmt.Sprintf("%s/following", selfLink),
-			Followers:      fmt.Sprintf("%s/followers", selfLink),
-			ProfilePicture: "/files/" + user.ProfilePicture.ID.String() + user.ProfilePicture.Extension,
-			CoverImage:     "/files/" + user.CoverImage.ID.String() + user.CoverImage.Extension,
-		},
-	}
+	return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
 }

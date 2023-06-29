@@ -3,8 +3,7 @@ package router
 import (
 	"time"
 
-	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/shared"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -16,19 +15,13 @@ func login(c *fiber.Ctx) error {
 		Password string `json:"password"`
 	}
 	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: ErrInvalidJSON,
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
-	logger.Log.Debug().Interface("body", body).Msg("Parsed body")
 
 	user, err := db.Users.VerifyUser(body.Username, body.Password)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
-	logger.Log.Debug().Interface("user", user).Msg("Verified user")
 
 	// Create claims
 	expiryDate := time.Now().Add(time.Hour * 24 * 7)
@@ -36,61 +29,17 @@ func login(c *fiber.Ctx) error {
 		Subject:   user.ID.String(),
 		ExpiresAt: jwt.NewNumericDate(expiryDate),
 	}
-	logger.Log.Debug().Interface("claims", claims).Msg("Created claims")
 
 	// Create token
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(cfg.Server.JWTSecret))
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error creating token")
-		return c.Status(fiber.StatusInternalServerError).JSON(APIResponse{
-			Error: ErrInternal,
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
-	logger.Log.Debug().Str("token", token).Msg("Created token")
 
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{
-			{
-				Type: shared.DataTypeToken,
-				Attributes: APIResponseDataAttributes{
-					Token:     token,
-					ExpiresAt: expiryDate.Format(time.RFC3339), // adding expiryDate to the response
-				},
-			},
-		},
-	})
+	return c.Status(fiber.StatusOK).JSON(response.GenerateLoginResponse(token, expiryDate))
 }
 
 // verifyToken handles the HTTP request for token verification.
 func verifyToken(c *fiber.Ctx) error {
-	userId, err := getUserID(c)
-	if err != nil {
-		logger.Log.Debug().Err(err).Msg("Error verifying token")
-		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: ErrInternal,
-		})
-	}
-	logger.Log.Debug().Str("userId", userId.String()).Msg("Verified token")
-
-	return c.JSON(APIResponse{
-		Data: []APIResponseData{
-			{
-				Type: shared.DataTypeToken,
-				Attributes: APIResponseDataAttributes{
-					Token: c.Get("Authorization"),
-				},
-				Links: APIResponseDataLinks{
-					Self: "/verify",
-				},
-				Relationships: &APIResponseDataRelationships{
-					Owner: &APIResponseDataRelationshipsEntity{
-						Data: &APIResponseDataRelationshipsEntityData{
-							Type: shared.DataTypeUser,
-							ID:   &userId,
-						},
-					},
-				},
-			},
-		},
-	})
+	return c.SendStatus(fiber.StatusOK)
 }
