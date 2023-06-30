@@ -55,6 +55,10 @@ func createPost(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
 
+	if body.Privacy == "" {
+		body.Privacy = shared.PrivacyPublic
+	}
+
 	userID, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
