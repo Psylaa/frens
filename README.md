@@ -1,50 +1,25 @@
 # Frens
-Frens is a light-weight, decentralized social networking platform, designed with a keen focus on user-friendliness and robustness. Built on top of Go, Frens allows for scalable and performance-optimized social media interactions that respect privacy and data ownership.
+Welcome to Frens, a decentralized social networking platform engineered for performance, scalability, and respect for user privacy. Our platform is lightweight yet robust, built on Go, and is dedicated to providing an enhanced social media experience that prioritizes user control over data.
 
-## Features
-#### Decentralized: Users have complete control over their data.
-#### Fast and efficient: Frens is built using Go, providing top-level performance and efficiency.
-#### Scalable: Frens can be scaled horizontally to support growing networks without sacrificing performance.
-#### Rich Media Support: Share text, images, videos, and more.
-#### Privacy Centric: Frens prioritizes your privacy, keeping your data safe.
-#### Intuitive API: Frens offers a clear, easy-to-use API for developers.
-#### Robust Moderation Tools: Frens provides a suite of tools to help manage and moderate content effectively.
+## Key Features
+Decentralized Infrastructure: Frens promotes user data ownership with a decentralized structure.
+High Performance: Leveraging the efficiency of Go, Frens ensures top-level performance and speed.
+Scalability: Frens supports horizontal scalability to accommodate growing networks without compromising performance.
+Rich Media Support: Share a wide array of content types - text, images, videos, and more.
+Privacy Centric: We value your privacy, and design our features with this priority in mind.
+User-Friendly API: Our clear, intuitive API makes development a breeze.
+Robust Moderation Tools: We equip you with a comprehensive suite of moderation tools for effective content management.
 
+## Comprehensive Documentation in Our Wiki
+Our extensive wiki is your primary resource for all things Frens. Whether you're a user looking to get the most out of the Frens platform, a developer eager to dive into our code, or a curious onlooker who wants to understand our design philosophy and AI integration strategy, the wiki has you covered.
 
-# Current Stage of Development
-Frens is currently in the Pre-alpha stage of development. This means we are in the conceptual phase, and actively brainstorming, researching, and deciding the key features and capabilities our platform should have. While we've made progress and built some parts of the platform, there's still a lot more to explore and develop.
+Our wiki is meticulously organized and updated, providing a wealth of knowledge about every aspect of Frens. It serves as a roadmap, guiding you through our:
 
-Here's a breakdown of the different stages of development:
-#### Pre-alpha: This is the current phase we're in. The focus of this phase is to brainstorm, conceptualize and define the key features and functionalities our platform will offer. We are in the process of drafting, designing and prototyping several features and experimenting with different ideas.
-#### Alpha: In the next stage, we'll have a clear roadmap of the features we want to implement, and we'll be actively working on bringing them to life. Some parts of the platform will become functional, but it's important to note that heavy development will still be underway.
-#### Beta: Once all planned features are implemented, we'll move on to the beta phase. This is when extensive testing, debugging, and refinement occur. All features will be in place, but there may be bugs and reliability issues that need to be ironed out.
-#### Release: This is our end goal - a fully functional, reliable, and user-friendly platform that's free from bugs. In the release stage, Frens will be ready for everyday use, offering a robust set of features and a smooth user experience.
-#### We are excited about the journey ahead and we are committed to making Frens a top-notch social platform. If you're interested in following our progress, contributing, or just learning more, please keep an eye on our GitHub repo and join our community!
+Design Philosophy: Understand the principles that drive our development process and learn about our AI integration.
+API Documentation: Dive into the details of our intuitive API, with clear explanations and examples to ease your development process.
+Development Stages: Get a clear idea about our development strategy, from pre-alpha to release stages.
+And much more!
+Our commitment to transparency and education means our wiki is always growing and evolving, just like Frens itself. It's not just a manual—it's a journey into the heart of our project.
 
-# Getting Started
-## Prerequisites
-
-Go 1.15+
-PostgreSQL 9.6+
-
-# Installation
-### Clone the repository
-git clone https://github.com/user/frens.git
-
-### Navigate to the project directory
-cd frens
-
-### Install dependencies
-go get -v ./...
-
-### Build the project
-go build
-
-### Start the server
-./frens
-
-# Contributing
-Frens welcomes contributions from everyone. Please see our [CONTRIBUTING.md](link to your CONTRIBUTING.md) file for how to contribute to the project.
-
-# License
+## License
 Frens is released under the MIT License.
