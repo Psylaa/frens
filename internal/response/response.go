@@ -61,9 +61,17 @@ func Init(baseUrl string) {
 	baseURL = baseUrl
 }
 
-func GenerateErrorResponse(err APIResponseErr) *ErrResp {
+func CreateErrorResponse(err APIResponseErr) *ErrResp {
 	return &ErrResp{
 		Error: err,
+	}
+}
+
+func CreateCountResponse(count int) *Response {
+	return &Response{
+		Meta: Meta{
+			Count: count,
+		},
 	}
 }
 

@@ -1,38 +1,87 @@
 definitions:
-  response.BookmarkResp:
+  response.Error:
+    type: object
+  response.Meta:
+    properties:
+      count:
+        type: integer
+    type: object
+  response.Response:
     properties:
       data:
+        description: Can be an array or a single data object
+      errors:
         items:
-          $ref: '#/definitions/response.BookmarkResp_Data'
+          $ref: '#/definitions/response.Error'
         type: array
       included:
+        description: Recursive types must be pointers
         items:
-          $ref: '#/definitions/response.BookmarkResp_Included'
+          $ref: '#/definitions/response.Response'
         type: array
-      links:
-        $ref: '#/definitions/response.BookmarkResp_Links'
-    type: object
-  response.BookmarkResp_Data:
-    properties:
-      attributes:
-        $ref: '#/definitions/response.BookmarkResp_DataAttributes'
-      id:
-        type: string
-      type:
-        type: string
-    type: object
-  response.BookmarkResp_DataAttributes:
-    type: object
-  response.BookmarkResp_Included:
-    type: object
-  response.BookmarkResp_Links:
-    properties:
-      self:
-        type: string
+      meta:
+        $ref: '#/definitions/response.Meta'
     type: object
 info:
   contact: {}
 paths:
+  /bookmarks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a bookmark from a post
+      parameters:
+      - description: Bookmark ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete bookmark
+      tags:
+      - Bookmarks
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific bookmark
+      parameters:
+      - description: Bookmark ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get bookmark
+      tags:
+      - Bookmarks
   /statuses/{id}/bookmarks:
     get:
       consumes:
@@ -50,7 +99,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.BookmarkResp'
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
       summary: Get post bookmarks
       tags:
       - Bookmarks

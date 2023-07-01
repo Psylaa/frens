@@ -17,7 +17,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Get the user ID from the JWT.
 	userID, err := getUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrUnauthorized))
+		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
 	}
 	logger.Log.Debug().Str("userID", userID.String()).Msg("Got user ID from JWT")
 
@@ -28,7 +28,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	if cursorParam != "" {
 		unixTime, err := strconv.ParseInt(cursorParam, 10, 64)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidCursor))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCursor))
 		}
 		cursor = time.Unix(unixTime, 0)
 	}
@@ -37,7 +37,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	// Get the list of users that the authenticated user is following.
 	following, err := db.Follows.GetFollowing(userID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 	logger.Log.Debug().Int("following", len(following)).Msg("Got following users")
 
@@ -54,7 +54,7 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 	posts, err := db.Posts.GetPostsByUserIDs(followingIDs, cursor, 10)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting posts")
-		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 	logger.Log.Debug().Int("posts", len(posts)).Msg("Got posts")
 

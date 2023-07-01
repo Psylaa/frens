@@ -8,6 +8,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// @Summary Get bookmark by ID
+// @Description Retrieve a specific bookmark by its ID
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Bookmark ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /bookmarks/{id} [get]
 func getBookmarkByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "bookmark", "getBookmarkByID")
 
@@ -15,13 +25,10 @@ func getBookmarkByID(c *fiber.Ctx) error {
 	bookmarkID, err := uuid.Parse(bookmarkId)
 	if err != nil {
 		log.Error().Err(err).Msg("Error parsing bookmark ID: " + bookmarkId)
-		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 	}
 
-	code, resp := srv.Bookmarks.GetByBookmarkID(&bookmarkID)
-
-	logger.DebugLogRequestCompleted("router", "bookmark", "getBookmarkByID")
-	return c.Status(code).JSON(resp)
+	return srv.Bookmarks.GetByBookmarkID(c, &bookmarkID)
 }
 
 // @Summary Get post bookmarks
@@ -30,8 +37,10 @@ func getBookmarkByID(c *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Post ID"
-// @Success 200 {object} response.BookmarkResp
-// @Router /statuses/{id}/bookmarks [get]
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /posts/{id}/bookmarks [get]
 func getBookmarksByPostID(c *fiber.Ctx) error {
 	return nil
 
@@ -39,12 +48,12 @@ func getBookmarksByPostID(c *fiber.Ctx) error {
 		id := c.Params("postId")
 		postID, err := uuid.Parse(id)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 		}
 
 		bookmarks, err := db.Bookmarks.GetBookmarksByIDs(postID)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
 		resp := response.CreateBookmarksResponse(bookmarks)
@@ -52,6 +61,16 @@ func getBookmarksByPostID(c *fiber.Ctx) error {
 	*/
 }
 
+// @Summary Get bookmark
+// @Description Retrieve a specific bookmark
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Bookmark ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /bookmarks/{id} [get]
 func getBookmark(c *fiber.Ctx) error {
 	return nil
 	/*
@@ -59,19 +78,29 @@ func getBookmark(c *fiber.Ctx) error {
 		bookmarkID, err := uuid.Parse(bookmarkId)
 		if err != nil {
 			log.Error().Err(err).Msg("Error parsing bookmark ID: " + bookmarkId)
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 		}
 
 		bookmark, err := db.Bookmarks.GetBookmarkByID(&bookmarkID)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
 		return c.JSON(response.CreateBookmarkResponse(bookmark))
 	*/
 }
 
-func createBookmark(c *fiber.Ctx) error {
+// @Summary Get bookmark
+// @Description Retrieve a specific bookmark
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Bookmark ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /bookmarks/{id} [get]
+func addBookmarkToPost(c *fiber.Ctx) error {
 	return nil
 	/*
 		userID, err := getUserID(c)
@@ -94,7 +123,17 @@ func createBookmark(c *fiber.Ctx) error {
 	*/
 }
 
-func deleteBookmark(c *fiber.Ctx) error {
+// @Summary Delete bookmark
+// @Description Delete a bookmark from a post
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Bookmark ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /bookmarks/{id} [delete]
+func removeBookmarkFromPost(c *fiber.Ctx) error {
 	/*
 		userID, err := getUserID(c)
 		if err != nil {

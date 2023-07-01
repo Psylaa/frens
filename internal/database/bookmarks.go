@@ -54,11 +54,23 @@ func (br *BookmarkRepo) GetCountByPostID(postID *uuid.UUID) (int, error) {
 	return count, nil
 }
 
-func (br *BookmarkRepo) CreateBookmark(userID, postID uuid.UUID) (*Bookmark, error) {
+func (br *BookmarkRepo) GetCountByUserID(userID *uuid.UUID) (int, error) {
+	var count int
+	if err := br.db.
+		Model(&Bookmark{}).
+		Where("user_id = ?", userID).
+		Count(&count).
+		Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (br *BookmarkRepo) CreateBookmark(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error) {
 	newBookmark := &Bookmark{
 		BaseModel: BaseModel{ID: uuid.New()},
-		UserID:    userID,
-		PostID:    postID,
+		UserID:    *userID,
+		PostID:    *postID,
 	}
 
 	if err := br.db.Create(newBookmark).Error; err != nil {
@@ -68,18 +80,21 @@ func (br *BookmarkRepo) CreateBookmark(userID, postID uuid.UUID) (*Bookmark, err
 	return newBookmark, nil
 }
 
-func (br *BookmarkRepo) DeleteByID(userID, postID uuid.UUID) error {
+func (br *BookmarkRepo) DeleteByID(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error) {
 	var bookmark Bookmark
-	if err := br.db.Where("user_id = ? AND status_id = ?", userID, postID).First(&bookmark).Error; err != nil {
+	if err := br.db.
+		Where("user_id = ? AND status_id = ?", userID, postID).
+		First(&bookmark).
+		Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return gorm.ErrRecordNotFound
+			return nil, gorm.ErrRecordNotFound
 		}
-		return err
+		return nil, err
 	}
 
 	if err := br.db.Delete(&bookmark).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &bookmark, nil
 }

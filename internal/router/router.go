@@ -61,9 +61,9 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
-				return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
+				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 			}
-			return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrInvalidToken))
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
 
@@ -89,6 +89,12 @@ func (r *Router) addProtectedRoutes() {
 	// Login
 	r.App.Get("/login/verify", verifyUserToken)
 
+	// Bookmarks
+	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
+	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
+	r.App.Post("/posts/:postId/bookmarks", addBookmarkToPost)
+	r.App.Delete("/posts/:postId/bookmarks", removeBookmarkFromPost)
+
 	// Users
 	r.App.Get("/users", retrieveAllUsers)
 	r.App.Post("/users", registerUser)
@@ -103,12 +109,6 @@ func (r *Router) addProtectedRoutes() {
 		// Files
 		r.App.Post("/files", uploadFile)
 		r.App.Delete("/files/:filename", deleteFile)
-
-		// Bookmarks
-		r.App.Get("/bookmarks/:bookmarkId", retrieveBookmarkById)
-		r.App.Get("/posts/:postId/bookmarks", retrievePostBookmarks)
-		r.App.Post("/posts/:postId/bookmarks", addBookmarkToPost)
-		r.App.Delete("/posts/:postId/bookmarks", removeBookmarkFromPost)
 
 		// Likes
 		r.App.Get("/posts/:id/likes", retrievePostLikes)

@@ -16,6 +16,92 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/bookmarks/{id}": {
+            "get": {
+                "description": "Retrieve a specific bookmark",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmarks"
+                ],
+                "summary": "Get bookmark",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bookmark ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a bookmark from a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmarks"
+                ],
+                "summary": "Delete bookmark",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bookmark ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/statuses/{id}/bookmarks": {
             "get": {
                 "description": "Retrieve bookmarks for a specific post",
@@ -42,7 +128,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.BookmarkResp"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -50,51 +148,38 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "response.BookmarkResp": {
+        "response.Error": {
+            "type": "object"
+        },
+        "response.Meta": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.Response": {
             "type": "object",
             "properties": {
                 "data": {
+                    "description": "Can be an array or a single data object"
+                },
+                "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/response.BookmarkResp_Data"
+                        "$ref": "#/definitions/response.Error"
                     }
                 },
                 "included": {
+                    "description": "Recursive types must be pointers",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/response.BookmarkResp_Included"
+                        "$ref": "#/definitions/response.Response"
                     }
                 },
-                "links": {
-                    "$ref": "#/definitions/response.BookmarkResp_Links"
-                }
-            }
-        },
-        "response.BookmarkResp_Data": {
-            "type": "object",
-            "properties": {
-                "attributes": {
-                    "$ref": "#/definitions/response.BookmarkResp_DataAttributes"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.BookmarkResp_DataAttributes": {
-            "type": "object"
-        },
-        "response.BookmarkResp_Included": {
-            "type": "object"
-        },
-        "response.BookmarkResp_Links": {
-            "type": "object",
-            "properties": {
-                "self": {
-                    "type": "string"
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
                 }
             }
         }

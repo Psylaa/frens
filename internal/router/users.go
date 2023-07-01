@@ -9,7 +9,7 @@ func retrieveAllUsers(c *fiber.Ctx) error {
 	/*
 		users, err := db.Users.GetUsers()
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
 		return c.Status(fiber.StatusOK).JSON(response.GenerateUsersResponse(users))
@@ -21,14 +21,14 @@ func retrieveUserDetails(c *fiber.Ctx) error {
 	/*
 		id, err := uuid.Parse(c.Params("id"))
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
 		logger.Log.Debug().Msgf("Successfully parsed user ID: %v", id)
 
 		user, err := db.Users.GetUser(id)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error getting user")
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 		logger.Log.Debug().Msgf("Successfully retrieved user: %v", user)
 
@@ -48,13 +48,13 @@ func registerUser(c *fiber.Ctx) error {
 
 		if err := c.BodyParser(&body); err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing request body")
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
 
 		user, err := db.Users.CreateUser(body.Username, body.Email, body.Password)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error creating user: " + err.Error())
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
 		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
@@ -73,18 +73,18 @@ func updateUserDetails(c *fiber.Ctx) error {
 
 		if err := c.BodyParser(&body); err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing request body")
-			return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
 
 		userId, err := getUserID(c)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.GenerateErrorResponse(response.ErrUnauthorized))
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
 		}
 
 		if body.Bio != nil {
 			if err := db.Users.UpdateBio(userId, body.Bio); err != nil {
 				logger.Log.Error().Err(err).Msg("Error updating bio")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 			}
 		}
 
@@ -92,11 +92,11 @@ func updateUserDetails(c *fiber.Ctx) error {
 			ppUUID, err := uuid.Parse(*body.ProfilePictureID)
 			if err != nil {
 				logger.Log.Error().Err(err).Msg("Error parsing ProfilePictureID")
-				return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidUUID))
+				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
 			}
 			if err := db.Users.UpdateProfilePicture(userId, &ppUUID); err != nil {
 				logger.Log.Error().Err(err).Msg("Error updating profile picture")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 			}
 		}
 
@@ -104,18 +104,18 @@ func updateUserDetails(c *fiber.Ctx) error {
 			ciUUID, err := uuid.Parse(*body.CoverImageID)
 			if err != nil {
 				logger.Log.Error().Err(err).Msg("Error parsing CoverImageID")
-				return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidUUID))
+				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
 			}
 			if err := db.Users.UpdateCoverImage(userId, &ciUUID); err != nil {
 				logger.Log.Error().Err(err).Msg("Error updating cover image")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 			}
 		}
 
 		// Retrieve updated user
 		user, err := db.Users.GetUser(userId)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
 		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
