@@ -7,6 +7,7 @@ import (
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +21,7 @@ import (
 
 var cfg *config.Config
 var db *database.Database
+var srv *service.Service
 
 // Structure representing the router
 type Router struct {
@@ -37,23 +39,24 @@ type Router struct {
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080
 // @BasePath /
-func NewRouter(configuration *config.Config, database *database.Database) *Router {
+func NewRouter(configuration *config.Config, database *database.Database, service *service.Service) *Router {
 	cfg = configuration
 	db = database
+	srv = service
 
 	app := fiber.New(fiber.Config{})
-
 	r := &Router{cfg, app}
-	r.setupMiddleware()
-	r.setupRoutes()
 
-	return r
-}
+	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: &logger.Log,
+	}))
+	r.App.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
-func (r *Router) setupRoutes() {
-	r.addUnauthRoutes()
+	r.addPublicRoutes()
 
-	// Middleware for JWT authentication
 	r.App.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -64,80 +67,69 @@ func (r *Router) setupRoutes() {
 		},
 	}))
 
-	// Add authenticated routes
-	r.AuthRoutes()
-	r.ActivityPubRoutes()
+	r.addProtectedRoutes()
+	r.addActivityPubRoutes()
+
+	return r
 }
 
-func (r *Router) setupMiddleware() {
-	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
-		Logger: &logger.Log,
-	}))
-	r.App.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
-}
-
-func (r *Router) addUnauthRoutes() {
+func (r *Router) addPublicRoutes() {
 	r.App.Get("/swagger/*", swagger.HandlerDefault)
 
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
 	r.App.Get("/feeds/explore", getExploreFeed)
-	r.App.Get("/users/:id", getUser)
 	r.App.Get("/posts", GetPostsByUserID)
 	r.App.Get("/posts/:id", getPost)
 
-	logger.Log.Info().Msg("Added unauthenticated routes")
+	logger.Log.Info().Msg("Added public routes routes")
 }
 
-func (r *Router) AuthRoutes() {
+func (r *Router) addProtectedRoutes() {
 	// Login
-	r.App.Get("/login/verify", verifyToken)
+	r.App.Get("/login/verify", verifyUserToken)
 
 	// Users
-	r.App.Get("/users", getUsers)
-	r.App.Patch("/users/", updateUser)
-	r.App.Get("/users/:id", getUser)
-	r.App.Post("/users", createUser)
+	r.App.Get("/users", retrieveAllUsers)
+	r.App.Post("/users", registerUser)
+	r.App.Patch("/users/", updateUserDetails)
+	r.App.Get("/users/:id", retrieveUserDetails)
 
-	// Statuses
-	r.App.Post("/posts", createPost)
-	r.App.Delete("/posts/:id", deletePost)
+	/*
+		// Posts
+		r.App.Post("/posts", createNewPost)
+		r.App.Delete("/posts/:id", removePost)
 
-	// Files
-	r.App.Post("/files", createFile)
-	r.App.Delete("/files/:filename", deleteFile)
+		// Files
+		r.App.Post("/files", uploadFile)
+		r.App.Delete("/files/:filename", deleteFile)
 
-	// Bookmarks
-	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
-	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
-	r.App.Post("/posts/:postId/bookmarks", createBookmark)
-	r.App.Delete("/posts/:postId/bookmarks", deleteBookmark)
-	r.App.Get("/posts/:postId/bookmarks/:userId", hasUserBookmarked)
-	//r.App.Get("/users/:userId/bookmarks", getUserBookmarks)
+		// Bookmarks
+		r.App.Get("/bookmarks/:bookmarkId", retrieveBookmarkById)
+		r.App.Get("/posts/:postId/bookmarks", retrievePostBookmarks)
+		r.App.Post("/posts/:postId/bookmarks", addBookmarkToPost)
+		r.App.Delete("/posts/:postId/bookmarks", removeBookmarkFromPost)
 
-	// Likes
-	r.App.Get("/posts/:id/likes", getLikes)
-	r.App.Post("/posts/:id/likes", createLike)
-	r.App.Delete("/posts/:id/likes", deleteLike)
-	r.App.Get("/posts/:id/likes/:userId", hasUserLiked)
+		// Likes
+		r.App.Get("/posts/:id/likes", retrievePostLikes)
+		r.App.Post("/posts/:id/likes", addLikeToPost)
+		r.App.Delete("/posts/:id/likes", removeLikeFromPost)
+		r.App.Get("/posts/:id/likes/:userId", checkUserLike)
 
-	// Feed
-	r.App.Get("/feeds/chronological", getChronologicalFeed)
-	r.App.Get("/feeds/algorithmic", getChronologicalFeed)
+		// Feed
+		r.App.Get("/feeds/chronological", retrieveChronologicalFeed)
+		r.App.Get("/feeds/algorithmic", retrieveAlgorithmicFeed)
 
-	// Follows
-	r.App.Get("/users/:id/followers", getFollows)
-	r.App.Get("/users/:id/following", getFollowing)
-	r.App.Post("/users/:id/followers", createFollow)
-	r.App.Delete("/users/:id/followers", deleteFollow)
-
-	logger.Log.Info().Msg("Authenticated routes added")
+		// Follows
+		r.App.Get("/users/:id/followers", retrieveFollowers)
+		r.App.Get("/users/:id/following", retrieveFollowing)
+		r.App.Post("/users/:id/followers", addFollower)
+		r.App.Delete("/users/:id/followers", removeFollower)
+	*/
+	logger.Log.Info().Msg("Protected routes added")
 }
 
-func (r *Router) ActivityPubRoutes() {
+func (r *Router) addActivityPubRoutes() {
 	//r.App.Get("/users/:username", activitypub.GetUserProfile)
 	//r.App.Post("/users/:username/inbox", activitypub.HandleInbox)
 	//r.App.Get("/users/:username/outbox", activitypub.HandleOutbox)

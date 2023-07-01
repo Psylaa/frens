@@ -7,36 +7,36 @@ import (
 
 type Like struct {
 	BaseModel
-	UserID   uuid.UUID `json:"userId"`
-	StatusID uuid.UUID `json:"statusId"`
+	UserID uuid.UUID `json:"userId"`
+	PostID uuid.UUID `json:"postId"`
 }
 
 type LikeRepo struct {
 	db *gorm.DB
 }
 
-func (lr *LikeRepo) GetLikes(statusID uuid.UUID) ([]*Like, error) {
+func (lr *LikeRepo) GetLikes(postID uuid.UUID) ([]*Like, error) {
 	var likes []*Like
-	if err := lr.db.Where("status_id = ?", statusID).Find(&likes).Error; err != nil {
+	if err := lr.db.Where("status_id = ?", postID).Find(&likes).Error; err != nil {
 		return nil, err
 	}
 
 	return likes, nil
 }
 
-func (lr *LikeRepo) GetLikeCount(statusID uuid.UUID) (*int, error) {
+func (lr *LikeRepo) GetLikeCount(postID uuid.UUID) (*int, error) {
 	var count int
-	if err := lr.db.Model(&Like{}).Where("status_id = ?", statusID).Count(&count).Error; err != nil {
+	if err := lr.db.Model(&Like{}).Where("status_id = ?", postID).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	return &count, nil
 }
 
-func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
+func (lr *LikeRepo) CreateLike(userID, postID uuid.UUID) (*Like, error) {
 	newLike := &Like{
 		BaseModel: BaseModel{ID: uuid.New()},
 		UserID:    userID,
-		StatusID:  statusID,
+		PostID:    postID,
 	}
 
 	if err := lr.db.Create(newLike).Error; err != nil {
@@ -46,9 +46,9 @@ func (lr *LikeRepo) CreateLike(userID, statusID uuid.UUID) (*Like, error) {
 	return newLike, nil
 }
 
-func (lr *LikeRepo) DeleteLike(userID, statusID uuid.UUID) error {
+func (lr *LikeRepo) DeleteLike(userID, postID uuid.UUID) error {
 	var like Like
-	if err := lr.db.Where("user_id = ? AND status_id = ?", userID, statusID).First(&like).Error; err != nil {
+	if err := lr.db.Where("user_id = ? AND status_id = ?", userID, postID).First(&like).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return gorm.ErrRecordNotFound
 		}
@@ -62,9 +62,9 @@ func (lr *LikeRepo) DeleteLike(userID, statusID uuid.UUID) error {
 	return nil
 }
 
-func (lr *LikeRepo) HasUserLiked(userID, statusID uuid.UUID) (bool, error) {
+func (lr *LikeRepo) HasUserLiked(userID, postID uuid.UUID) (bool, error) {
 	var count int
-	if err := lr.db.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, statusID).Count(&count).Error; err != nil {
+	if err := lr.db.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, postID).Count(&count).Error; err != nil {
 		return false, err
 	}
 

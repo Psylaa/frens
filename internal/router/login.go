@@ -40,6 +40,6 @@ func login(c *fiber.Ctx) error {
 }
 
 // verifyToken handles the HTTP request for token verification.
-func verifyToken(c *fiber.Ctx) error {
+func verifyUserToken(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }

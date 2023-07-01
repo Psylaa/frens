@@ -18,6 +18,7 @@ type Response struct {
 	Data     interface{} `json:"data,omitempty"` // Can be an array or a single data object
 	Errors   []Error     `json:"errors,omitempty"`
 	Included []*Response `json:"included,omitempty"` // Recursive types must be pointers
+	Meta     Meta        `json:"meta,omitempty"`
 }
 
 type Links struct {
@@ -27,6 +28,7 @@ type Links struct {
 	Followers      string `json:"followers,omitempty"`
 	ProfilePicture string `json:"profilePicture,omitempty"`
 	CoverImage     string `json:"coverImage,omitempty"`
+	Owner          string `json:"owner,omitempty"`
 }
 
 type Data struct {
@@ -50,6 +52,7 @@ type Error struct {
 }
 
 type Meta struct {
+	Count int `json:"count,omitempty"`
 }
 
 var baseURL string
@@ -64,16 +67,17 @@ func GenerateErrorResponse(err APIResponseErr) *ErrResp {
 	}
 }
 
-func CreateUserResponse(user *database.User) *Response {
-	selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID)
-	postsLink := fmt.Sprintf("%s/users/%s/posts", baseURL, user.ID)
-	followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
-	followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
-	ppLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.ProfilePicture.ID, user.ProfilePicture.Extension)
-	ciLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverImage.ID, user.CoverImage.Extension)
+func CreateUserResponse(users []*database.User) *Response {
+	var data []Data
+	for _, user := range users {
+		selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID)
+		postsLink := fmt.Sprintf("%s/users/%s/posts", baseURL, user.ID)
+		followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
+		followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
+		ppLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.ProfilePicture.ID, user.ProfilePicture.Extension)
+		ciLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverImage.ID, user.CoverImage.Extension)
 
-	return &Response{
-		Data: Data{
+		data = append(data, Data{
 			Type:       UserType,
 			ID:         user.ID,
 			Attributes: Attributes{},
@@ -86,23 +90,33 @@ func CreateUserResponse(user *database.User) *Response {
 				CoverImage:     ciLink,
 			},
 		},
+		)
+	}
+
+	return &Response{
+		Data: data,
 	}
 }
 
-func CreateBookmarkResponse(bookmark *database.Bookmark) *Response {
-	return &Response{
-		Data: Data{
-			Type:       BookmarkType,
-			ID:         bookmark.ID,
-			Attributes: Attributes{},
-			Relationships: Relationships{
-				Owner: &Response{
-					//Data: []Data{CreateUserResponse(&bookmark.Owner)},
-				},
-			},
+func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
+	var data []Data
+	for _, b := range bookmark {
+		selfLink := fmt.Sprintf("%s/bookmarks/%s", baseURL, b.ID)
+		ownerLink := fmt.Sprintf("%s/users/%s", baseURL, b.Owner.ID)
+
+		data = append(data, Data{
+			Type:          BookmarkType,
+			ID:            b.ID,
+			Attributes:    Attributes{},
+			Relationships: Relationships{},
 			Links: Links{
-				Self: baseURL + "/bookmarks/" + bookmark.ID.String(),
+				Self:  selfLink,
+				Owner: ownerLink,
 			},
-		},
+		})
+	}
+
+	return &Response{
+		Data: data,
 	}
 }

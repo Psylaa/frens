@@ -7,12 +7,12 @@ import (
 
 func getLikes(c *fiber.Ctx) error {
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	postID, err := uuid.Parse(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	likes, err := db.Likes.GetLikes(statusID)
+	likes, err := db.Likes.GetLikes(postID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -27,13 +27,13 @@ func createLike(c *fiber.Ctx) error {
 	}
 
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	postID, err := uuid.Parse(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
 	// Check if user has already liked this status
-	userHasLiked, err := db.Likes.HasUserLiked(userID, statusID)
+	userHasLiked, err := db.Likes.HasUserLiked(userID, postID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -42,7 +42,7 @@ func createLike(c *fiber.Ctx) error {
 	}
 
 	// Create the like
-	if _, err := db.Likes.CreateLike(userID, statusID); err != nil {
+	if _, err := db.Likes.CreateLike(userID, postID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -56,12 +56,12 @@ func deleteLike(c *fiber.Ctx) error {
 	}
 
 	id := c.Params("id")
-	statusID, err := uuid.Parse(id)
+	postID, err := uuid.Parse(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	if err := db.Likes.DeleteLike(userID, statusID); err != nil {
+	if err := db.Likes.DeleteLike(userID, postID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -75,12 +75,12 @@ func hasUserLiked(c *fiber.Ctx) error {
 	}
 
 	id := c.Params("id")
-	statusId, err := uuid.Parse(id)
+	postId, err := uuid.Parse(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	liked, err := db.Likes.HasUserLiked(userId, statusId)
+	liked, err := db.Likes.HasUserLiked(userId, postId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

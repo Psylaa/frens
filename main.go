@@ -9,6 +9,7 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/router"
+	"github.com/bwoff11/frens/internal/service"
 )
 
 func main() {
@@ -30,7 +31,11 @@ func main() {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
+	// Create service
+	srv := service.New(db)
+
 	// Initialize router and start the server
-	router := router.NewRouter(cfg, db)
+	// Router only uses the db temporarily until migration to service is complete
+	router := router.NewRouter(cfg, db, srv)
 	router.Run()
 }
