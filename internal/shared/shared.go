@@ -1,5 +1,7 @@
 package shared
 
+import "github.com/google/uuid"
+
 type Privacy string
 
 const (
@@ -28,3 +30,15 @@ const (
 	ErrMissingToken  APIResponseErr = "missing or malformed token"
 	ErrAlreadyExists APIResponseErr = "already exists"
 )
+
+func UUIDsFromStrings(ids []string) ([]uuid.UUID, error) {
+	var uuids []uuid.UUID
+	for _, id := range ids {
+		uuid, err := uuid.Parse(id)
+		if err != nil {
+			return nil, err
+		}
+		uuids = append(uuids, uuid)
+	}
+	return uuids, nil
+}

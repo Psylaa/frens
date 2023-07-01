@@ -15,6 +15,10 @@ func getPost(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
+	logger.Log.Debug().
+		Str("package", "router").
+		Str("func", "getPost").
+		Msgf("successfully parsed provided post id into uuid: %v", postID)
 
 	post, err := db.Posts.GetPost(postID)
 	switch err {
@@ -23,6 +27,10 @@ func getPost(c *fiber.Ctx) error {
 	case gorm.ErrRecordNotFound:
 		return c.Status(fiber.StatusNotFound).JSON(response.GenerateErrorResponse(response.ErrNotFound))
 	default:
+		logger.Log.Error().Err(err).
+			Str("package", "router").
+			Str("func", "getPost").
+			Msg("unknown error fetching post from database")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}
 
@@ -32,7 +40,6 @@ func getPost(c *fiber.Ctx) error {
 // getPosts handles the HTTP request to fetch all posts by a user.
 func GetPostsByUserID(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Query("userId"))
-	logger.Log.Debug().Msgf("userID: %v", userID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
 	}
@@ -48,13 +55,16 @@ func GetPostsByUserID(c *fiber.Ctx) error {
 // createPost handles the HTTP request to create a new post.
 func createPost(c *fiber.Ctx) error {
 	var body struct {
-		Text    string         `json:"text"`
-		Privacy shared.Privacy `json:"privacy"`
+		Text     string         `json:"text"`
+		Privacy  shared.Privacy `json:"privacy"`
+		MediaIDs []string       `json:"mediaIds"`
 	}
 	if err := c.BodyParser(&body); err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidBody))
 	}
 
+	// Set default privacy to public if not provided.
 	if body.Privacy == "" {
 		body.Privacy = shared.PrivacyPublic
 	}
@@ -65,7 +75,19 @@ func createPost(c *fiber.Ctx) error {
 	}
 	logger.Log.Debug().Msgf("userID: %v", userID)
 
-	post, err := db.Posts.CreatePost(userID, body.Text, body.Privacy)
+	// Convert the media IDs to UUIDs.
+	mediaIDs, err := shared.UUIDsFromStrings(body.MediaIDs)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response.GenerateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Convert the media IDs files
+	mediaFiles, err := db.Files.GetFiles(mediaIDs)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
+	}
+
+	post, err := db.Posts.CreatePost(userID, body.Text, body.Privacy, mediaFiles)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.GenerateErrorResponse(response.ErrInternal))
 	}

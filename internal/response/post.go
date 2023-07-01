@@ -35,7 +35,8 @@ type PostResp_DataAttributes struct {
 }
 
 type PostResp_DataRelationships struct {
-	Author UserResp `json:"author"`
+	Author UserResp        `json:"author"`
+	Media  []database.File `json:"media"`
 }
 
 type PostResp_Included struct {
@@ -56,20 +57,21 @@ func GeneratePostResponse(post *database.Post) *PostResp {
 				ID:         post.ID,
 				Attributes: generatePostAttributes(post),
 				Relationships: PostResp_DataRelationships{
-					Author: *GenerateUserResponse(post.Author),
+					Author: *GenerateUserResponse(&post.Author),
+					Media:  post.Media,
 				},
 			},
 		},
 	}
 }
 
-func GeneratePostsResponse(posts []*database.Post) *PostResp {
+func GeneratePostsResponse(posts []database.Post) *PostResp {
 	postsResp := PostResp{
 		Data: make([]PostResp_Data, 0, len(posts)),
 	}
 
 	for _, post := range posts {
-		postResp := GeneratePostResponse(post)
+		postResp := GeneratePostResponse(&post)
 		postsResp.Data = append(postsResp.Data, postResp.Data[0])
 	}
 

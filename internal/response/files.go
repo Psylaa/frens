@@ -31,7 +31,7 @@ type FileResp_Included struct {
 }
 
 func GenerateFileResponse(file *database.File) *FileResp {
-	selfLink := fmt.Sprintf("/files/%s", file.ID)
+	selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
 
 	return &FileResp{
 		Links: FileResp_Links{
