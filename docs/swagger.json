@@ -1,0 +1,90 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/statuses/{id}/bookmarks": {
+            "get": {
+                "description": "Retrieve bookmarks for a specific post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmarks"
+                ],
+                "summary": "Get post bookmarks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BookmarkResp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "response.BookmarkResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.BookmarkResp_Data"
+                    }
+                },
+                "included": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.BookmarkResp_Included"
+                    }
+                },
+                "links": {
+                    "$ref": "#/definitions/response.BookmarkResp_Links"
+                }
+            }
+        },
+        "response.BookmarkResp_Data": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/response.BookmarkResp_DataAttributes"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.BookmarkResp_DataAttributes": {
+            "type": "object"
+        },
+        "response.BookmarkResp_Included": {
+            "type": "object"
+        },
+        "response.BookmarkResp_Links": {
+            "type": "object",
+            "properties": {
+                "self": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

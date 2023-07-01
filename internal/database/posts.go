@@ -42,6 +42,7 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 		Preload("Author").
 		Preload("Author.ProfilePicture").
 		Preload("Author.CoverImage").
+		Preload("Media").
 		Order("created_at desc").
 		Find(&posts, "author_id = ?", userID).Error; err != nil {
 		return nil, err
@@ -56,6 +57,7 @@ func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, lim
 		Preload("Author").
 		Preload("Author.ProfilePicture").
 		Preload("Author.CoverImage").
+		Preload("Media").
 		Where("author_id IN (?) AND created_at < ?", userIDs, cursor).
 		Order("created_at desc").
 		Limit(limit).
@@ -72,6 +74,7 @@ func (pr *PostRepo) GetLatestPublicPosts(limit int) ([]Post, error) {
 		Preload("Author").
 		Preload("Author.ProfilePicture").
 		Preload("Author.CoverImage").
+		Preload("Media").
 		Where("privacy = ?", "public").
 		Order("created_at desc").
 		Limit(limit).

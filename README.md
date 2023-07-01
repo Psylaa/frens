@@ -2,13 +2,9 @@
 Welcome to Frens, a decentralized social networking platform engineered for performance, scalability, and respect for user privacy. Our platform is lightweight yet robust, built on Go, and is dedicated to providing an enhanced social media experience that prioritizes user control over data.
 
 ## Key Features
-Decentralized Infrastructure: Frens promotes user data ownership with a decentralized structure.
-High Performance: Leveraging the efficiency of Go, Frens ensures top-level performance and speed.
-Scalability: Frens supports horizontal scalability to accommodate growing networks without compromising performance.
-Rich Media Support: Share a wide array of content types - text, images, videos, and more.
-Privacy Centric: We value your privacy, and design our features with this priority in mind.
-User-Friendly API: Our clear, intuitive API makes development a breeze.
-Robust Moderation Tools: We equip you with a comprehensive suite of moderation tools for effective content management.
+One of the biggest blockers to the widespread adoption of decentralized social media is esoteric API standards. Therefore, we have chosen to stricly adhere to the JSON API specification, which is widely used and well-documented. This allows developers to easily integrate Frens into their existing applications, and makes it easy for users to migrate their data to Frens.
+
+Additionally, the API is fully documented with swagger, which allows for easy integration into any application.
 
 ## Comprehensive Documentation in Our Wiki
 Our extensive wiki is your primary resource for all things Frens. Whether you're a user looking to get the most out of the Frens platform, a developer eager to dive into our code, or a curious onlooker who wants to understand our design philosophy and AI integration strategy, the wiki has you covered.

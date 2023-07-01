@@ -1,0 +1,57 @@
+definitions:
+  response.BookmarkResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.BookmarkResp_Data'
+        type: array
+      included:
+        items:
+          $ref: '#/definitions/response.BookmarkResp_Included'
+        type: array
+      links:
+        $ref: '#/definitions/response.BookmarkResp_Links'
+    type: object
+  response.BookmarkResp_Data:
+    properties:
+      attributes:
+        $ref: '#/definitions/response.BookmarkResp_DataAttributes'
+      id:
+        type: string
+      type:
+        type: string
+    type: object
+  response.BookmarkResp_DataAttributes:
+    type: object
+  response.BookmarkResp_Included:
+    type: object
+  response.BookmarkResp_Links:
+    properties:
+      self:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /statuses/{id}/bookmarks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve bookmarks for a specific post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BookmarkResp'
+      summary: Get post bookmarks
+      tags:
+      - Bookmarks
+swagger: "2.0"

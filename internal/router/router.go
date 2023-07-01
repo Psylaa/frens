@@ -11,8 +11,11 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/swagger"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
+	_ "github.com/bwoff11/frens/docs" // For swagger docs
 )
 
 var cfg *config.Config
@@ -24,21 +27,24 @@ type Router struct {
 	App    *fiber.App
 }
 
+// @title Fiber Example API
+// @version 1.0
+// @description This is a sample swagger for Fiber
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.email fiber@swagger.io
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:8080
+// @BasePath /
 func NewRouter(configuration *config.Config, database *database.Database) *Router {
 	cfg = configuration
 	db = database
 
 	app := fiber.New(fiber.Config{})
 
-	app.Use(fiberzerolog.New(fiberzerolog.Config{
-		Logger: &logger.Log,
-	}))
-	app.Use(cors.New(cors.Config{
-		//AllowOrigins: cfg.Server.AllowOrigins,
-		AllowOrigins: "*",
-	}))
-
 	r := &Router{cfg, app}
+	r.setupMiddleware()
 	r.setupRoutes()
 
 	return r
@@ -63,8 +69,19 @@ func (r *Router) setupRoutes() {
 	r.ActivityPubRoutes()
 }
 
+func (r *Router) setupMiddleware() {
+	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: &logger.Log,
+	}))
+	r.App.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+}
+
 func (r *Router) addUnauthRoutes() {
-	// Unauthenticated routes
+	r.App.Get("/swagger/*", swagger.HandlerDefault)
+
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
 	r.App.Get("/feeds/explore", getExploreFeed)
@@ -94,16 +111,18 @@ func (r *Router) AuthRoutes() {
 	r.App.Delete("/files/:filename", deleteFile)
 
 	// Bookmarks
-	r.App.Get("/statuses/:id/bookmarks", getBookmarks)
-	r.App.Post("/statuses/:id/bookmarks", createBookmark)
-	r.App.Delete("/statuses/:id/bookmarks", deleteBookmark)
-	r.App.Get("/statuses/:id/bookmarks/:userId", hasUserBookmarked)
+	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
+	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
+	r.App.Post("/posts/:postId/bookmarks", createBookmark)
+	r.App.Delete("/posts/:postId/bookmarks", deleteBookmark)
+	r.App.Get("/posts/:postId/bookmarks/:userId", hasUserBookmarked)
+	//r.App.Get("/users/:userId/bookmarks", getUserBookmarks)
 
 	// Likes
-	r.App.Get("/statuses/:id/likes", getLikes)
-	r.App.Post("/statuses/:id/likes", createLike)
-	r.App.Delete("/statuses/:id/likes", deleteLike)
-	r.App.Get("/statuses/:id/likes/:userId", hasUserLiked)
+	r.App.Get("/posts/:id/likes", getLikes)
+	r.App.Post("/posts/:id/likes", createLike)
+	r.App.Delete("/posts/:id/likes", deleteLike)
+	r.App.Get("/posts/:id/likes/:userId", hasUserLiked)
 
 	// Feed
 	r.App.Get("/feeds/chronological", getChronologicalFeed)

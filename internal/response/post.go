@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 )
 
 type PostResp struct {
-	Links    PostResp_Links      `json:"links,omitempty"`
 	Data     []PostResp_Data     `json:"data,omitempty"`
 	Included []PostResp_Included `json:"included,omitempty"`
 }
@@ -44,14 +42,8 @@ type PostResp_Included struct {
 }
 
 func GeneratePostResponse(post *database.Post) *PostResp {
-	selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
-	authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
 
 	resp := &PostResp{
-		Links: PostResp_Links{
-			Self:   selfLink,
-			Author: authorLink,
-		},
 		Data: []PostResp_Data{
 			{
 				Type:       "post",

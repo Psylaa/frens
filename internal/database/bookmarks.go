@@ -1,6 +1,8 @@
 package database
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -9,15 +11,37 @@ type Bookmark struct {
 	BaseModel
 	UserID   uuid.UUID `json:"userId"`
 	StatusID uuid.UUID `json:"statusId"`
+	Owner    User      `gorm:"foreignKey:UserID" json:"owner"`
 }
 
 type BookmarkRepo struct {
 	db *gorm.DB
 }
 
-func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]*Bookmark, error) {
+func (br *BookmarkRepo) GetBookmarkByID(bookmarkID *uuid.UUID) (*Bookmark, error) {
+	var bookmark Bookmark
+	if err := br.db.
+		Preload("Owner").
+		Where("id = ?", bookmarkID).
+		First(&bookmark).
+		Error; err != nil {
+		return nil, err
+	}
+
+	log.Println(bookmark.Owner)
+	log.Println(bookmark.Owner)
+	log.Println(bookmark.Owner)
+
+	return &bookmark, nil
+}
+
+func (br *BookmarkRepo) GetBookmarksByIDs(statusID uuid.UUID) ([]*Bookmark, error) {
 	var bookmarks []*Bookmark
-	if err := br.db.Where("status_id = ?", statusID).Find(&bookmarks).Error; err != nil {
+	if err := br.db.
+		Preload("Owner").
+		Where("status_id = ?", statusID).
+		Find(&bookmarks).
+		Error; err != nil {
 		return nil, err
 	}
 
@@ -26,7 +50,11 @@ func (br *BookmarkRepo) GetBookmarks(statusID uuid.UUID) ([]*Bookmark, error) {
 
 func (br *BookmarkRepo) GetBookmarkCount(statusID uuid.UUID) (int, error) {
 	var count int
-	if err := br.db.Model(&Bookmark{}).Where("status_id = ?", statusID).Count(&count).Error; err != nil {
+	if err := br.db.
+		Model(&Bookmark{}).
+		Where("status_id = ?", statusID).
+		Count(&count).
+		Error; err != nil {
 		return 0, err
 	}
 	return count, nil
