@@ -49,20 +49,11 @@ func GenerateFileResponse(file *database.File) *FileResp {
 	}
 }
 
-func GeneratesFilesResponse(files []*database.File) *FileResp {
-	var data []FileResp_Data
-
+func GenerateFilesResponse(files []database.File) []*FileResp {
+	fileResps := make([]*FileResp, 0, len(files))
 	for _, file := range files {
-		data = append(data, FileResp_Data{
-			Type: "file",
-			ID:   file.ID.String(),
-			Attributes: FileResp_DataAttributes{
-				Extension: file.Extension,
-			},
-		})
+		fileResps = append(fileResps, GenerateFileResponse(&file))
 	}
 
-	return &FileResp{
-		Data: data,
-	}
+	return fileResps
 }

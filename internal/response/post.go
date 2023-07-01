@@ -2,6 +2,7 @@ package response
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -24,7 +25,7 @@ type PostResp_Data struct {
 	Type          string                     `json:"type"`
 	ID            uuid.UUID                  `json:"id,omitempty"`
 	Attributes    PostResp_DataAttributes    `json:"attributes"`
-	Relationships PostResp_DataRelationships `json:"relationships,omitempty"`
+	Relationships PostResp_DataRelationships `json:"relationships"`
 }
 
 type PostResp_DataAttributes struct {
@@ -35,8 +36,8 @@ type PostResp_DataAttributes struct {
 }
 
 type PostResp_DataRelationships struct {
-	Author UserResp        `json:"author"`
-	Media  []database.File `json:"media"`
+	Author UserResp    `json:"author"`
+	Media  []*FileResp `json:"media"`
 }
 
 type PostResp_Included struct {
@@ -46,7 +47,7 @@ func GeneratePostResponse(post *database.Post) *PostResp {
 	selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
 	authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
 
-	return &PostResp{
+	resp := &PostResp{
 		Links: PostResp_Links{
 			Self:   selfLink,
 			Author: authorLink,
@@ -58,11 +59,14 @@ func GeneratePostResponse(post *database.Post) *PostResp {
 				Attributes: generatePostAttributes(post),
 				Relationships: PostResp_DataRelationships{
 					Author: *GenerateUserResponse(&post.Author),
-					Media:  post.Media,
+					Media:  GenerateFilesResponse(post.Media),
 				},
 			},
 		},
 	}
+
+	log.Println(resp)
+	return resp
 }
 
 func GeneratePostsResponse(posts []database.Post) *PostResp {
@@ -84,19 +88,5 @@ func generatePostAttributes(post *database.Post) PostResp_DataAttributes {
 		UpdatedAt: post.UpdatedAt,
 		Privacy:   post.Privacy,
 		Text:      post.Text,
-	}
-}
-
-func generateUserResponseData(user *database.User) UserResp_Data {
-	return UserResp_Data{
-		Type: "user",
-		ID:   user.ID,
-		Attributes: UserResp_DataAttributes{
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-			Username:  user.Username,
-			Bio:       user.Bio,
-			Privacy:   user.Privacy,
-		},
 	}
 }
