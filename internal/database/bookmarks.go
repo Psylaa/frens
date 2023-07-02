@@ -42,6 +42,19 @@ func (br *BookmarkRepo) GetByPostID(postID *uuid.UUID) ([]*Bookmark, error) {
 	return bookmarks, nil
 }
 
+func (br *BookmarkRepo) GetByUserID(userID *uuid.UUID) ([]*Bookmark, error) {
+	var bookmarks []*Bookmark
+	if err := br.db.
+		Preload("Owner").
+		Where("user_id = ?", userID).
+		Find(&bookmarks).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return bookmarks, nil
+}
+
 func (br *BookmarkRepo) GetCountByPostID(postID *uuid.UUID) (int, error) {
 	var count int
 	if err := br.db.

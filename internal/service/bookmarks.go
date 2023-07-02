@@ -10,7 +10,7 @@ import (
 
 type BookmarkRepo struct{}
 
-func (br *BookmarkRepo) GetByBookmarkID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
+func (br *BookmarkRepo) GetByID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
 	logger.DebugLogRequestRecieved("service", "bookmark", "GetByBookmarkID")
 
 	// Get bookmark from database
@@ -21,6 +21,19 @@ func (br *BookmarkRepo) GetByBookmarkID(c *fiber.Ctx, bookmarkID *uuid.UUID) err
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
+}
+
+func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
+	logger.DebugLogRequestRecieved("service", "bookmark", "GetByUserID")
+
+	// Get bookmarks from database
+	bookmarks, err := db.Bookmarks.GetByUserID(userID)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "bookmark", "GetByUserID", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse(bookmarks))
 }
 
 func (br *BookmarkRepo) GetByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
@@ -61,6 +74,19 @@ func (br *BookmarkRepo) GetCountByUserID(c *fiber.Ctx, userID *uuid.UUID) error 
 
 	resp := response.CreateCountResponse(count)
 	return c.Status(fiber.StatusOK).JSON(resp)
+}
+
+func (br *BookmarkRepo) Create(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
+	logger.DebugLogRequestRecieved("service", "bookmark", "Create")
+
+	// Create bookmark in database
+	bookmark, err := db.Bookmarks.Create(userID, postID)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "bookmark", "Create", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
 }
 
 func (br *BookmarkRepo) DeleteByID(c *fiber.Ctx, userID *uuid.UUID, bookmarkID *uuid.UUID) error {
