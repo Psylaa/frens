@@ -12,11 +12,8 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/swagger"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-
-	_ "github.com/bwoff11/frens/docs" // For swagger docs
 )
 
 var cfg *config.Config
@@ -29,16 +26,6 @@ type Router struct {
 	App    *fiber.App
 }
 
-// @title Fiber Example API
-// @version 1.0
-// @description This is a sample swagger for Fiber
-// @termsOfService http://swagger.io/terms/
-// @contact.name API Support
-// @contact.email fiber@swagger.io
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:8080
-// @BasePath /
 func NewRouter(configuration *config.Config, database *database.Database, service *service.Service) *Router {
 	cfg = configuration
 	db = database
@@ -74,8 +61,6 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 }
 
 func (r *Router) addPublicRoutes() {
-	r.App.Get("/swagger/*", swagger.HandlerDefault)
-
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
 	r.App.Get("/feeds/explore", getExploreFeed)

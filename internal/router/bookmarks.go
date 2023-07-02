@@ -8,16 +8,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// @Summary Get bookmark by ID
-// @Description Retrieve a specific bookmark by its ID
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param id path string true "Bookmark ID"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Router /bookmarks/{id} [get]
 func getBookmarkByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "bookmark", "getBookmarkByID")
 
@@ -31,16 +21,6 @@ func getBookmarkByID(c *fiber.Ctx) error {
 	return srv.Bookmarks.GetByBookmarkID(c, &bookmarkID)
 }
 
-// @Summary Get post bookmarks
-// @Description Retrieve bookmarks for a specific post
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param id path string true "Post ID"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Router /posts/{id}/bookmarks [get]
 func getBookmarksByPostID(c *fiber.Ctx) error {
 	return nil
 
@@ -90,16 +70,6 @@ func getBookmark(c *fiber.Ctx) error {
 	*/
 }
 
-// @Summary Get bookmark
-// @Description Retrieve a specific bookmark
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param id path string true "Bookmark ID"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Router /bookmarks/{id} [get]
 func createBookmark(c *fiber.Ctx) error {
 	return nil
 	/*
@@ -123,16 +93,6 @@ func createBookmark(c *fiber.Ctx) error {
 	*/
 }
 
-// @Summary Delete bookmark
-// @Description Delete a bookmark from a post
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param id path string true "Bookmark ID"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Router /bookmarks/{id} [delete]
 func deleteBookmark(c *fiber.Ctx) error {
 	/*
 		userID, err := getUserID(c)
