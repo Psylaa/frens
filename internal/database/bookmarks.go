@@ -111,3 +111,22 @@ func (br *BookmarkRepo) DeleteByID(userID *uuid.UUID, postID *uuid.UUID) (*Bookm
 
 	return &bookmark, nil
 }
+
+func (br *BookmarkRepo) DeleteByUserAndPostID(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error) {
+	var bookmark Bookmark
+	if err := br.db.
+		Where("user_id = ? AND status_id = ?", userID, postID).
+		First(&bookmark).
+		Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, gorm.ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	if err := br.db.Delete(&bookmark).Error; err != nil {
+		return nil, err
+	}
+
+	return &bookmark, nil
+}

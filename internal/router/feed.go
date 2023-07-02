@@ -6,7 +6,7 @@ import (
 
 // getChronologicalFeed returns a list of posts from the users that the
 // authenticated user is following, in chronological order.
-func getChronologicalFeed(c *fiber.Ctx) error {
+func getChronoFeed(c *fiber.Ctx) error {
 	/*
 		// Get the user ID from the JWT.
 		userID, err := getUserID(c)
@@ -54,6 +54,10 @@ func getChronologicalFeed(c *fiber.Ctx) error {
 
 		return c.JSON(response.GeneratePostsResponse(posts))
 	*/
+	return nil
+}
+
+func getAlgoFeed(c *fiber.Ctx) error {
 	return nil
 }
 

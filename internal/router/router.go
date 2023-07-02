@@ -67,55 +67,65 @@ func (r *Router) addPublicRoutes() {
 
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
-	r.App.Get("/feeds/explore", getExploreFeed)
-	r.App.Get("/posts", GetPostsByUserID)
-	r.App.Get("/posts/:id", getPost)
 
 	logger.Log.Info().Msg("Added public routes routes")
 }
 
+// Order - Type - Get, Post, Patch, Delete - Alphabetical
 func (r *Router) addProtectedRoutes() {
 	// Login
 	r.App.Get("/login/verify", verifyUserToken)
 
 	// Bookmarks
 	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
+	r.App.Delete("/bookmarks/:bookmarkId", deleteBookmarkByID)
+
 	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
-	r.App.Post("/posts/:postId/bookmarks", createBookmark)
-	r.App.Delete("/posts/:postId/bookmarks", deleteBookmark)
+	r.App.Get("/posts/:postId/bookmarks/count", getBookmarksCountByPostID) // same as getBookmarksByPostID but only returns count
+	r.App.Post("/posts/:postId/bookmarks", createBookmarkbyPostID)         // userId from token
+	r.App.Delete("/posts/:postId/bookmarks", deleteBookmarkByPostID)       // only callable by owner
+
+	r.App.Get("/users/:userId/bookmarks", getBookmarksByUserID)            // only callable by owner
+	r.App.Get("/users/:userId/bookmarks/count", getBookmarksCountByUserID) // same as getBookmarksByUserID but only returns count
+
+	// Likes
+	r.App.Get("/likes/:likeId", getLikeByID)
+	r.App.Delete("/likes/:likeId", deleteLikeByID)
+
+	r.App.Get("/posts/:postId/likes", getLikesByPostID)
+	r.App.Get("/posts/:postId/likes/count", getLikesCountByPostID) // same as getLikesByPostID but only returns count
+	r.App.Post("/posts/:postId/likes", createLikeByPostID)         // userId from token
+	r.App.Delete("/posts/:postId/likes", deleteLikeByPostID)       // only callable by owner
+
+	r.App.Get("/users/:userId/likes", getLikesByUserID)            // Callable by anyone
+	r.App.Get("/users/:userId/likes/count", getLikesCountByUserID) // same as getLikesByUserID but only returns count
 
 	// Users
-	r.App.Get("/users", getUsers)
+	r.App.Get("/users", getUsers) // Probably should make this an admin only route
 	r.App.Post("/users", createUser)
-	r.App.Patch("/users/", updateUser)
-	r.App.Get("/users/:userId", getUser)
+	r.App.Patch("/users", updateUser)
+	r.App.Get("/users/:userId", getUserByID)
 
 	// Posts
+	r.App.Get("/posts/:postId", getPostByID)
 	r.App.Post("/posts", createPost)
 	r.App.Delete("/posts/:id", deletePost)
 
-	/*
+	// Files
+	r.App.Post("/files", createFile)
+	r.App.Delete("/files/:filename", deleteFile)
 
-		// Files
-		r.App.Post("/files", uploadFile)
-		r.App.Delete("/files/:filename", deleteFile)
+	// Feed
+	r.App.Get("/feeds/chronological", getChronoFeed)
+	r.App.Get("/feeds/algorithmic", getAlgoFeed)
+	r.App.Get("/feeds/explore", getExploreFeed)
 
-		// Likes
-		r.App.Get("/posts/:id/likes", retrievePostLikes)
-		r.App.Post("/posts/:id/likes", addLikeToPost)
-		r.App.Delete("/posts/:id/likes", removeLikeFromPost)
-		r.App.Get("/posts/:id/likes/:userId", checkUserLike)
+	// Follows
+	r.App.Get("/users/:userId/followers", getFollowersByUserID)
+	r.App.Get("/users/:userId/following", getFollowingByUserID)
+	r.App.Post("/users/:userId/followers", createFollowByUserID)
+	r.App.Delete("/users/:userId/followers", deleteFollowerByUserID)
 
-		// Feed
-		r.App.Get("/feeds/chronological", retrieveChronologicalFeed)
-		r.App.Get("/feeds/algorithmic", retrieveAlgorithmicFeed)
-
-		// Follows
-		r.App.Get("/users/:id/followers", retrieveFollowers)
-		r.App.Get("/users/:id/following", retrieveFollowing)
-		r.App.Post("/users/:id/followers", addFollower)
-		r.App.Delete("/users/:id/followers", removeFollower)
-	*/
 	logger.Log.Info().Msg("Protected routes added")
 }
 

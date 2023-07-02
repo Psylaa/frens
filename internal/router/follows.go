@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func getFollows(c *fiber.Ctx) error {
+func getFollowersByUserID(c *fiber.Ctx) error {
 	/*
 		id := c.Params("id")
 		userID, err := uuid.Parse(id)
@@ -22,7 +22,7 @@ func getFollows(c *fiber.Ctx) error {
 	return nil
 }
 
-func createFollow(c *fiber.Ctx) error {
+func createFollowByUserID(c *fiber.Ctx) error {
 	/*
 		sourceID, err := getUserID(c)
 		if err != nil {
@@ -55,7 +55,7 @@ func createFollow(c *fiber.Ctx) error {
 	return nil
 }
 
-func deleteFollow(c *fiber.Ctx) error {
+func deleteFollowerByUserID(c *fiber.Ctx) error {
 	/*
 		SourceID, err := getUserID(c)
 		if err != nil {
@@ -87,7 +87,7 @@ func deleteFollow(c *fiber.Ctx) error {
 	return nil
 }
 
-func getFollowing(c *fiber.Ctx) error {
+func getFollowingByUserID(c *fiber.Ctx) error {
 	/*
 		id := c.Params("id")
 		userID, err := uuid.Parse(id)

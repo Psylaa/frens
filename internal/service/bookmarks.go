@@ -102,3 +102,16 @@ func (br *BookmarkRepo) DeleteByID(c *fiber.Ctx, userID *uuid.UUID, bookmarkID *
 
 	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
 }
+
+func (br *BookmarkRepo) DeleteByUserAndPostID(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
+	logger.DebugLogRequestRecieved("service", "bookmark", "DeleteByUserAndPostID")
+
+	// Delete bookmark from database
+	bookmark, err := db.Bookmarks.DeleteByUserAndPostID(userID, postID)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "bookmark", "DeleteByUserAndPostID", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
+}

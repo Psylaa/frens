@@ -20,7 +20,7 @@ func getUsers(c *fiber.Ctx) error {
 	return nil
 }
 
-func getUser(c *fiber.Ctx) error {
+func getUserByID(c *fiber.Ctx) error {
 	userID, err := uuid.Parse(c.Params("userId"))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing userID")

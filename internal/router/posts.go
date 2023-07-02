@@ -10,7 +10,7 @@ import (
 )
 
 // getPost handles the HTTP request to fetch a specific post.
-func getPost(c *fiber.Ctx) error {
+func getPostByID(c *fiber.Ctx) error {
 	return nil
 	/*
 		postID, err := uuid.Parse(c.Params("id"))
