@@ -2,8 +2,10 @@ package response
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 )
 
@@ -16,9 +18,9 @@ const (
 
 type Response struct {
 	Data     interface{} `json:"data,omitempty"` // Can be an array or a single data object
-	Errors   []Error     `json:"errors,omitempty"`
+	Errors   []*RespErr  `json:"errors,omitempty"`
 	Included []*Response `json:"included,omitempty"` // Recursive types must be pointers
-	Meta     Meta        `json:"meta,omitempty"`
+	Meta     *Meta       `json:"meta,omitempty"`
 }
 
 type Links struct {
@@ -40,12 +42,17 @@ type Data struct {
 }
 
 type Attributes struct {
+	CreatedAt time.Time      `json:"createdAt,omitempty"`
+	UpdatedAt time.Time      `json:"updatedAt,omitempty"`
+	Privacy   shared.Privacy `json:"privacy,omitempty"`
+	Text      string         `json:"text,omitempty"`
 }
 
 type Relationships struct {
 	Author *Response `json:"author,omitempty"` // Recursive types must be pointers
 	Owner  *Response `json:"owner,omitempty"`  // Recursive types must be pointers
 	User   *Response `json:"user,omitempty"`   // Recursive types must be pointers
+	Media  *Response `json:"media,omitempty"`  // Recursive types must be pointers
 }
 
 type Error struct {
@@ -61,15 +68,15 @@ func Init(baseUrl string) {
 	baseURL = baseUrl
 }
 
-func CreateErrorResponse(err APIResponseErr) *ErrResp {
-	return &ErrResp{
-		Error: err,
+func CreateErrorResponse(err RespErr) *Response {
+	return &Response{
+		Errors: []*RespErr{&err},
 	}
 }
 
 func CreateCountResponse(count int) *Response {
 	return &Response{
-		Meta: Meta{
+		Meta: &Meta{
 			Count: count,
 		},
 	}
@@ -120,6 +127,56 @@ func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
 			Links: Links{
 				Self:  selfLink,
 				Owner: ownerLink,
+			},
+		})
+	}
+
+	return &Response{
+		Data: data,
+	}
+}
+
+func CreatePostsResponse(posts []*database.Post) *Response {
+	var data []Data
+	for _, post := range posts {
+		selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
+		//authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
+
+		data = append(data, Data{
+			Type: UserType,
+			ID:   post.ID,
+			Attributes: Attributes{
+				CreatedAt: post.CreatedAt,
+				UpdatedAt: post.UpdatedAt,
+				Privacy:   post.Privacy,
+				Text:      post.Text,
+			},
+			Relationships: Relationships{
+				Author: CreateUserResponse([]*database.User{&post.Author}),
+				Media:  GenerateFilesResponse(post.Media),
+			},
+			Links: Links{
+				Self: selfLink,
+			},
+		})
+	}
+
+	return &Response{
+		Data: data,
+	}
+}
+
+func GenerateFilesResponse(files []*database.File) *Response {
+	var data []Data
+	for _, file := range files {
+		selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
+
+		data = append(data, Data{
+			Type:       "file",
+			ID:         file.ID,
+			Attributes: Attributes{},
+			Links: Links{
+				Self: selfLink,
 			},
 		})
 	}

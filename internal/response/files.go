@@ -48,12 +48,3 @@ func GenerateFileResponse(file *database.File) *FileResp {
 		},
 	}
 }
-
-func GenerateFilesResponse(files []database.File) []*FileResp {
-	fileResps := make([]*FileResp, 0, len(files))
-	for _, file := range files {
-		fileResps = append(fileResps, GenerateFileResponse(&file))
-	}
-
-	return fileResps
-}

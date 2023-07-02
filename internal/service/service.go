@@ -4,6 +4,7 @@ import "github.com/bwoff11/frens/internal/database"
 
 type Service struct {
 	Bookmarks *BookmarkRepo
+	Posts     *PostRepo
 }
 
 var db *database.Database

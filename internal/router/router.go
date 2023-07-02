@@ -92,8 +92,8 @@ func (r *Router) addProtectedRoutes() {
 	// Bookmarks
 	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
 	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
-	r.App.Post("/posts/:postId/bookmarks", addBookmarkToPost)
-	r.App.Delete("/posts/:postId/bookmarks", removeBookmarkFromPost)
+	r.App.Post("/posts/:postId/bookmarks", createBookmark)
+	r.App.Delete("/posts/:postId/bookmarks", deleteBookmark)
 
 	// Users
 	r.App.Get("/users", retrieveAllUsers)
@@ -101,10 +101,11 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Patch("/users/", updateUserDetails)
 	r.App.Get("/users/:id", retrieveUserDetails)
 
+	// Posts
+	r.App.Post("/posts", createPost)
+	r.App.Delete("/posts/:id", deletePost)
+
 	/*
-		// Posts
-		r.App.Post("/posts", createNewPost)
-		r.App.Delete("/posts/:id", removePost)
 
 		// Files
 		r.App.Post("/files", uploadFile)

@@ -46,8 +46,8 @@ func (fr *FileRepo) GetFile(id uuid.UUID) (*File, error) {
 	return &file, nil
 }
 
-func (fr *FileRepo) GetFiles(ids []uuid.UUID) ([]File, error) {
-	var files []File
+func (fr *FileRepo) GetFiles(ids []uuid.UUID) ([]*File, error) {
+	var files []*File
 	if err := fr.db.Where("id IN (?)", ids).Find(&files).Error; err != nil {
 		return nil, err
 	}

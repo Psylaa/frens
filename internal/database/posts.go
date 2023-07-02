@@ -15,7 +15,7 @@ type Post struct {
 	AuthorID uuid.UUID      `json:"authorId"`
 	Privacy  shared.Privacy `json:"privacy"`
 	Text     string         `json:"text"`
-	Media    []File         `gorm:"foreignKey:PostID;AssociationForeignKey:ID" json:"media"`
+	Media    []*File        `gorm:"foreignKey:PostID;AssociationForeignKey:ID" json:"media"`
 }
 
 type PostRepo struct {
@@ -86,7 +86,7 @@ func (pr *PostRepo) GetLatestPublicPosts(limit int) ([]Post, error) {
 	return posts, nil
 }
 
-func (pr *PostRepo) CreatePost(authorID uuid.UUID, text string, privacy shared.Privacy, media []File) (*Post, error) {
+func (pr *PostRepo) CreatePost(authorID uuid.UUID, text string, privacy shared.Privacy, media []*File) (*Post, error) {
 	post := Post{
 		BaseModel: BaseModel{ID: uuid.New()},
 		AuthorID:  authorID,

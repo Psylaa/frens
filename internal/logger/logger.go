@@ -24,10 +24,10 @@ func DebugLogRequestRecieved(pack string, repo string, method string) {
 		Msg("request received")
 }
 
-func DebugLogRequestCompleted(pack string, repo string, method string) {
-	Log.Debug().
+func ErrorLogRequestError(pack string, repo string, method string, err error) {
+	Log.Error().Err(err).
 		Str("package", pack).
 		Str("repo", repo).
 		Str("method", method).
-		Msg("request completed")
+		Msg("error handling request")
 }

@@ -1,21 +1,23 @@
 package response
 
-type APIResponseErr string
+type RespErr string
 
 const (
-	ErrForbidden     APIResponseErr = "forbidden"
-	ErrInternal      APIResponseErr = "internal server error"
-	ErrInvalidCursor APIResponseErr = "invalid cursor"
-	ErrInvalidID     APIResponseErr = "invalid id"
-	ErrInvalidToken  APIResponseErr = "invalid token"
-	ErrInvalidUUID   APIResponseErr = "invalid uuid"
-	ErrMissingToken  APIResponseErr = "missing or malformed token"
-	ErrNotFound      APIResponseErr = "not found"
-	ErrUnauthorized  APIResponseErr = "unauthorized"
-	ErrExists        APIResponseErr = "already exists"
-	ErrInvalidBody   APIResponseErr = "invalid body"
+	ErrForbidden        RespErr = "forbidden"
+	ErrInternal         RespErr = "internal server error"
+	ErrInvalidCursor    RespErr = "invalid cursor"
+	ErrInvalidID        RespErr = "invalid id"
+	ErrInvalidToken     RespErr = "invalid token"
+	ErrInvalidUUID      RespErr = "invalid uuid"
+	ErrMissingToken     RespErr = "missing or malformed token"
+	ErrNotFound         RespErr = "not found"
+	ErrUnauthorized     RespErr = "unauthorized"
+	ErrExists           RespErr = "already exists"
+	ErrInvalidBody      RespErr = "invalid body"
+	ErrInvalidMediaUUID RespErr = "unable to parse provided media ids into uuids"
+	ErrMediaIDsNotFound RespErr = "unable to find media with provided ids"
 )
 
 type ErrResp struct {
-	Error APIResponseErr `json:"error"`
+	Error RespErr `json:"error"`
 }

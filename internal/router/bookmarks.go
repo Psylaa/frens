@@ -100,7 +100,7 @@ func getBookmark(c *fiber.Ctx) error {
 // @Failure 400 {object} response.Response
 // @Failure 500 {object} response.Response
 // @Router /bookmarks/{id} [get]
-func addBookmarkToPost(c *fiber.Ctx) error {
+func createBookmark(c *fiber.Ctx) error {
 	return nil
 	/*
 		userID, err := getUserID(c)
@@ -133,7 +133,7 @@ func addBookmarkToPost(c *fiber.Ctx) error {
 // @Failure 400 {object} response.Response
 // @Failure 500 {object} response.Response
 // @Router /bookmarks/{id} [delete]
-func removeBookmarkFromPost(c *fiber.Ctx) error {
+func deleteBookmark(c *fiber.Ctx) error {
 	/*
 		userID, err := getUserID(c)
 		if err != nil {
