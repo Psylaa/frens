@@ -73,14 +73,14 @@ func createPost(c *fiber.Ctx) error {
 	}
 
 	// Convert the media IDs to UUIDs.
-	var mediaIDs []uuid.UUID
+	var mediaIDs []*uuid.UUID
 	for _, id := range body.MediaIDs {
 		mediaID, err := uuid.Parse(id)
 		if err != nil {
 			logger.Log.Error().Err(err).Interface("id", id).Msg("error parsing media id")
 			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidMediaUUID))
 		}
-		mediaIDs = append(mediaIDs, mediaID)
+		mediaIDs = append(mediaIDs, &mediaID)
 	}
 
 	// Get the user ID from the JWT.

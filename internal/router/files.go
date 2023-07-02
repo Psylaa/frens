@@ -19,24 +19,7 @@ func createFile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return srv.Files.Create(c, userId, file)
-
-	ext := filepath.Ext(file.Filename)
-
-	fileData, err := db.Files.CreateFile(userId, ext)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	if err := os.MkdirAll(cfg.Storage.Local.Path, os.ModePerm); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	if err := c.SaveFile(file, filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	return c.JSON(response.GenerateFileResponse(fileData))
+	return srv.Files.Create(c, &userId, file)
 }
 
 func retrieveFile(c *fiber.Ctx) error {

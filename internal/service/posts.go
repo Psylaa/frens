@@ -27,7 +27,7 @@ func (pr *PostRepo) Create(
 	userID uuid.UUID,
 	text string,
 	privacy shared.Privacy,
-	mediaIDs []uuid.UUID) error {
+	mediaIDs []*uuid.UUID) error {
 	logger.DebugLogRequestRecieved("service", "post", "Create")
 
 	// Set default privacy to public if not provided.
@@ -36,7 +36,7 @@ func (pr *PostRepo) Create(
 	}
 
 	// Convert the media IDs files
-	mediaFiles, err := db.Files.GetFiles(mediaIDs)
+	mediaFiles, err := db.Files.GetManyByID(mediaIDs)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "post", "Create", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

@@ -21,7 +21,7 @@ type FileRepo struct {
 	db *gorm.DB
 }
 
-func (fr *FileRepo) Get(fileID *uuid.UUID) (*File, error) {
+func (fr *FileRepo) GetByID(fileID *uuid.UUID) (*File, error) {
 	log.Println("GetFile")
 	var file File
 	if err := fr.db.Where("id = ?", fileID).First(&file).Error; err != nil {
@@ -34,7 +34,7 @@ func (fr *FileRepo) Get(fileID *uuid.UUID) (*File, error) {
 	return &file, nil
 }
 
-func (fr *FileRepo) GetMany(fileIDs []*uuid.UUID) ([]*File, error) {
+func (fr *FileRepo) GetManyByID(fileIDs []*uuid.UUID) ([]*File, error) {
 	var files []*File
 	if err := fr.db.Where("id IN (?)", fileIDs).Find(&files).Error; err != nil {
 		return nil, err
