@@ -43,7 +43,7 @@ func (ur *UserRepo) GetUsers() ([]*User, error) {
 	return users, nil
 }
 
-func (ur *UserRepo) GetUserByUsername(username string) (*User, error) {
+func (ur *UserRepo) GetUserByUsername(username *string) (*User, error) {
 	var user User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
@@ -72,14 +72,14 @@ func (ur *UserRepo) CreateUser(username string, email string, password string) (
 	return &newUser, nil
 }
 
-func (ur *UserRepo) VerifyUser(username string, password string) (*User, error) {
+func (ur *UserRepo) VerifyUser(username *string, password *string) (*User, error) {
 	user, err := ur.GetUserByUsername(username)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return nil, errors.New("username not found")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(*password)); err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error comparing passwords: %s", err.Error())
 		return nil, errors.New("invalid password")
 	}

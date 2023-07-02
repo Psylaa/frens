@@ -10,6 +10,7 @@ import (
 type Service struct {
 	Bookmarks *BookmarkRepo
 	Files     *FilesRepo
+	Login     *LoginRepo
 	Posts     *PostRepo
 	Users     *UserRepo
 }

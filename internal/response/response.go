@@ -43,11 +43,12 @@ type Data struct {
 
 type Attributes struct {
 	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
+	UpdatedAt *time.Time     `json:"updatedAt"`
 	ExpiresAt *time.Time     `json:"expiresAt,omitempty"`
 	Extenion  *string        `json:"extension,omitempty"`
 	Privacy   shared.Privacy `json:"privacy,omitempty"`
 	Text      string         `json:"text,omitempty"`
+	Token     string         `json:"token,omitempty"`
 }
 
 type Relationships struct {
@@ -111,7 +112,7 @@ func CreateUsersResponse(users []*database.User) *Response {
 			ID:   user.ID,
 			Attributes: Attributes{
 				CreatedAt: user.CreatedAt,
-				UpdatedAt: user.UpdatedAt,
+				UpdatedAt: &user.UpdatedAt,
 			},
 			Links: Links{
 				Self:      selfLink,
@@ -164,7 +165,7 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 			ID:   post.ID,
 			Attributes: Attributes{
 				CreatedAt: post.CreatedAt,
-				UpdatedAt: post.UpdatedAt,
+				UpdatedAt: &post.UpdatedAt,
 				Privacy:   post.Privacy,
 				Text:      post.Text,
 			},
@@ -193,7 +194,7 @@ func CreateFilesResponse(files []*database.File) *Response {
 			ID:   file.ID,
 			Attributes: Attributes{
 				CreatedAt: file.CreatedAt,
-				UpdatedAt: file.UpdatedAt,
+				UpdatedAt: &file.UpdatedAt,
 				Extenion:  &file.Extension,
 			},
 			Links: Links{
@@ -204,5 +205,24 @@ func CreateFilesResponse(files []*database.File) *Response {
 
 	return &Response{
 		Data: data,
+	}
+}
+
+func CreateLoginResponse(userId uuid.UUID, token string, expirationDate time.Time) *Response {
+	return &Response{
+		Data: []Data{
+			{
+				Type: "login",
+				ID:   userId,
+				Attributes: Attributes{
+					CreatedAt: time.Now(),
+					ExpiresAt: &expirationDate,
+					Token:     token,
+				},
+				Links: Links{
+					Self: fmt.Sprintf("%s/login", baseURL),
+				},
+			},
+		},
 	}
 }
