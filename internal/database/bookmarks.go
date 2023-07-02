@@ -66,7 +66,7 @@ func (br *BookmarkRepo) GetCountByUserID(userID *uuid.UUID) (int, error) {
 	return count, nil
 }
 
-func (br *BookmarkRepo) CreateBookmark(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error) {
+func (br *BookmarkRepo) Create(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error) {
 	newBookmark := &Bookmark{
 		BaseModel: BaseModel{ID: uuid.New()},
 		UserID:    *userID,

@@ -1,11 +1,13 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 )
 
 // getUsers handles the HTTP request to fetch all users.
-func retrieveAllUsers(c *fiber.Ctx) error {
+func getUsers(c *fiber.Ctx) error {
 	/*
 		users, err := db.Users.GetUsers()
 		if err != nil {
@@ -17,7 +19,7 @@ func retrieveAllUsers(c *fiber.Ctx) error {
 	return nil
 }
 
-func retrieveUserDetails(c *fiber.Ctx) error {
+func getUser(c *fiber.Ctx) error {
 	/*
 		id, err := uuid.Parse(c.Params("id"))
 		if err != nil {
@@ -38,37 +40,28 @@ func retrieveUserDetails(c *fiber.Ctx) error {
 }
 
 // createUser handles the HTTP request to create a new user.
-func registerUser(c *fiber.Ctx) error {
-	/*
-		var body struct {
-			Username string `json:"username"`
-			Email    string `json:"email"`
-			Password string `json:"password"`
-		}
+func createUser(c *fiber.Ctx) error {
+	var body struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
-		if err := c.BodyParser(&body); err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing request body")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-		}
+	if err := c.BodyParser(&body); err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
 
-		user, err := db.Users.CreateUser(body.Username, body.Email, body.Password)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error creating user: " + err.Error())
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-
-		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
-	*/
-	return nil
+	return srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
 // updateUser handles the HTTP request to update a user's details.
-func updateUserDetails(c *fiber.Ctx) error {
+func updateUser(c *fiber.Ctx) error {
 	/*
 		var body struct {
 			Bio              *string `json:"bio"`
-			ProfilePictureID *string `json:"profilePictureId"`
-			CoverImageID     *string `json:"coverImageId"`
+			AvatarID *string `json:"avatarId"`
+			CoverID     *string `json:"coverId"`
 		}
 
 		if err := c.BodyParser(&body); err != nil {
@@ -88,25 +81,25 @@ func updateUserDetails(c *fiber.Ctx) error {
 			}
 		}
 
-		if body.ProfilePictureID != nil {
-			ppUUID, err := uuid.Parse(*body.ProfilePictureID)
+		if body.AvatarID != nil {
+			ppUUID, err := uuid.Parse(*body.AvatarID)
 			if err != nil {
-				logger.Log.Error().Err(err).Msg("Error parsing ProfilePictureID")
+				logger.Log.Error().Err(err).Msg("Error parsing AvatarID")
 				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
 			}
-			if err := db.Users.UpdateProfilePicture(userId, &ppUUID); err != nil {
+			if err := db.Users.UpdateAvatar(userId, &ppUUID); err != nil {
 				logger.Log.Error().Err(err).Msg("Error updating profile picture")
 				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 			}
 		}
 
-		if body.CoverImageID != nil {
-			ciUUID, err := uuid.Parse(*body.CoverImageID)
+		if body.CoverID != nil {
+			ciUUID, err := uuid.Parse(*body.CoverID)
 			if err != nil {
-				logger.Log.Error().Err(err).Msg("Error parsing CoverImageID")
+				logger.Log.Error().Err(err).Msg("Error parsing CoverID")
 				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
 			}
-			if err := db.Users.UpdateCoverImage(userId, &ciUUID); err != nil {
+			if err := db.Users.UpdateCover(userId, &ciUUID); err != nil {
 				logger.Log.Error().Err(err).Msg("Error updating cover image")
 				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 			}

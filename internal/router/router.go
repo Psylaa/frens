@@ -67,6 +67,9 @@ func (r *Router) addPublicRoutes() {
 	r.App.Get("/posts", GetPostsByUserID)
 	r.App.Get("/posts/:id", getPost)
 
+	r.App.Static("/files/default-avatar.png", "./assets/default-avatar.png")
+	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
+
 	logger.Log.Info().Msg("Added public routes routes")
 }
 
@@ -81,10 +84,10 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Delete("/posts/:postId/bookmarks", deleteBookmark)
 
 	// Users
-	r.App.Get("/users", retrieveAllUsers)
-	r.App.Post("/users", registerUser)
-	r.App.Patch("/users/", updateUserDetails)
-	r.App.Get("/users/:id", retrieveUserDetails)
+	r.App.Get("/users", getUsers)
+	r.App.Post("/users", createUser)
+	r.App.Patch("/users/", updateUser)
+	r.App.Get("/users/:id", getUser)
 
 	// Posts
 	r.App.Post("/posts", createPost)

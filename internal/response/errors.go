@@ -3,19 +3,28 @@ package response
 type RespErr string
 
 const (
-	ErrForbidden        RespErr = "forbidden"
-	ErrInternal         RespErr = "internal server error"
-	ErrInvalidCursor    RespErr = "invalid cursor"
-	ErrInvalidID        RespErr = "invalid id"
-	ErrInvalidToken     RespErr = "invalid token"
-	ErrInvalidUUID      RespErr = "invalid uuid"
-	ErrMissingToken     RespErr = "missing or malformed token"
-	ErrNotFound         RespErr = "not found"
-	ErrUnauthorized     RespErr = "unauthorized"
-	ErrExists           RespErr = "already exists"
+	ErrExists       RespErr = "already exists"
+	ErrForbidden    RespErr = "forbidden"
+	ErrInternal     RespErr = "internal server error"
+	ErrUnauthorized RespErr = "unauthorized"
+
 	ErrInvalidBody      RespErr = "invalid body"
+	ErrInvalidCursor    RespErr = "invalid cursor"
+	ErrInvalidEmail     RespErr = "email is not valid"
+	ErrInvalidID        RespErr = "invalid id"
 	ErrInvalidMediaUUID RespErr = "unable to parse provided media ids into uuids"
-	ErrMediaIDsNotFound RespErr = "unable to find media with provided ids"
+	ErrInvalidPassword  RespErr = "password is not valid"
+	ErrInvalidToken     RespErr = "invalid token"
+	ErrInvalidUsername  RespErr = "username is not valid"
+	ErrInvalidUUID      RespErr = "invalid uuid"
+
+	ErrMissingMedia RespErr = "unable to find media with provided ids"
+	ErrMissingToken RespErr = "missing or malformed token"
+
+	ErrNotFound RespErr = "not found"
+
+	ErrTakenEmail    RespErr = "email is already in use"
+	ErrTakenUsername RespErr = "username is already in use"
 )
 
 type ErrResp struct {

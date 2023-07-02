@@ -12,15 +12,15 @@ import (
 
 type User struct {
 	BaseModel
-	Username         string         `gorm:"unique" json:"username"`
-	Email            string         `json:"email"`
-	Bio              string         `json:"bio"`
-	Password         string         `json:"-"`
-	ProfilePicture   File           `gorm:"foreignKey:ProfilePictureID" json:"profilePicture"`
-	ProfilePictureID uuid.UUID      `json:"-"`
-	CoverImage       File           `gorm:"foreignKey:CoverImageID" json:"coverImage"`
-	CoverImageID     uuid.UUID      `json:"-"`
-	Privacy          shared.Privacy `json:"privacy"`
+	Username string `gorm:"unique"`
+	Email    string
+	Bio      string
+	Password string
+	Avatar   File `gorm:"foreignKey:AvatarID"`
+	AvatarID uuid.UUID
+	Cover    File `gorm:"foreignKey:CoverID"`
+	CoverID  uuid.UUID
+	Privacy  shared.Privacy
 }
 
 type UserRepo struct {
@@ -29,7 +29,7 @@ type UserRepo struct {
 
 func (ur *UserRepo) GetUser(id uuid.UUID) (*User, error) {
 	var user User
-	if err := ur.db.Preload("ProfilePicture").Preload("CoverImage").Where("id = ?", id).First(&user).Error; err != nil {
+	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -37,7 +37,7 @@ func (ur *UserRepo) GetUser(id uuid.UUID) (*User, error) {
 
 func (ur *UserRepo) GetUsers() ([]*User, error) {
 	var users []*User
-	if err := ur.db.Preload("ProfilePicture").Preload("CoverImage").Find(&users).Error; err != nil {
+	if err := ur.db.Preload("Avatar").Preload("Cover").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -45,7 +45,7 @@ func (ur *UserRepo) GetUsers() ([]*User, error) {
 
 func (ur *UserRepo) GetUserByUsername(username string) (*User, error) {
 	var user User
-	if err := ur.db.Preload("ProfilePicture").Preload("CoverImage").Where("username = ?", username).First(&user).Error; err != nil {
+	if err := ur.db.Preload("Avatar").Preload("Cover").Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -104,7 +104,7 @@ func (ur *UserRepo) UpdateBio(id uuid.UUID, bio *string) error {
 	return nil
 }
 
-func (ur *UserRepo) UpdateProfilePicture(userId uuid.UUID, profilePictureID *uuid.UUID) error {
+func (ur *UserRepo) UpdateAvatar(userId uuid.UUID, profilePictureID *uuid.UUID) error {
 	user, err := ur.GetUser(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -114,23 +114,23 @@ func (ur *UserRepo) UpdateProfilePicture(userId uuid.UUID, profilePictureID *uui
 	if profilePictureID != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Updating profile picture to %s", profilePictureID)
 
-		var newProfilePicture File
-		if err := ur.db.First(&newProfilePicture, "id = ?", profilePictureID).Error; err != nil {
+		var newAvatar File
+		if err := ur.db.First(&newAvatar, "id = ?", profilePictureID).Error; err != nil {
 			logger.Log.Debug().Str("package", "database").Msgf("Profile picture not found: %s", err.Error())
 			return err
 		}
 
-		if err := ur.db.Model(&newProfilePicture).Updates(File{ID: *profilePictureID}).Error; err != nil {
+		if err := ur.db.Model(&newAvatar).Updates(File{ID: *profilePictureID}).Error; err != nil {
 			return err
 		}
 
-		user.ProfilePicture = newProfilePicture
+		user.Avatar = newAvatar
 		if err := ur.db.Save(&user).Error; err != nil {
 			return err
 		}
 	} else {
 		logger.Log.Debug().Str("package", "database").Msgf("Profile picture is nil")
-		user.ProfilePictureID = uuid.Nil
+		user.AvatarID = uuid.Nil
 		if err := ur.db.Save(&user).Error; err != nil {
 			return err
 		}
@@ -139,7 +139,7 @@ func (ur *UserRepo) UpdateProfilePicture(userId uuid.UUID, profilePictureID *uui
 	return nil
 }
 
-func (ur *UserRepo) UpdateCoverImage(userId uuid.UUID, coverImageID *uuid.UUID) error {
+func (ur *UserRepo) UpdateCover(userId uuid.UUID, coverID *uuid.UUID) error {
 	user, err := ur.GetUser(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -147,30 +147,42 @@ func (ur *UserRepo) UpdateCoverImage(userId uuid.UUID, coverImageID *uuid.UUID) 
 	}
 	logger.Log.Debug().Str("package", "database").Msgf("Retrieved user for cover image update: %s", user.ID)
 
-	if coverImageID != nil {
-		logger.Log.Debug().Str("package", "database").Msgf("Updating cover image to %s", coverImageID)
+	if coverID != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Updating cover image to %s", coverID)
 
-		var newCoverImage File
-		if err := ur.db.First(&newCoverImage, "id = ?", coverImageID).Error; err != nil {
+		var newCover File
+		if err := ur.db.First(&newCover, "id = ?", coverID).Error; err != nil {
 			logger.Log.Debug().Str("package", "database").Msgf("Cover image not found: %s", err.Error())
 			return err
 		}
 
-		if err := ur.db.Model(&newCoverImage).Updates(File{ID: *coverImageID}).Error; err != nil {
+		if err := ur.db.Model(&newCover).Updates(File{ID: *coverID}).Error; err != nil {
 			return err
 		}
 
-		user.CoverImage = newCoverImage
+		user.Cover = newCover
 		if err := ur.db.Save(&user).Error; err != nil {
 			return err
 		}
 	} else {
 		logger.Log.Debug().Str("package", "database").Msgf("Cover image is nil")
-		user.CoverImageID = uuid.Nil
+		user.CoverID = uuid.Nil
 		if err := ur.db.Save(&user).Error; err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+func (ur *UserRepo) UsernameExists(username string) bool {
+	var count int64
+	ur.db.Model(&User{}).Where("username = ?", username).Count(&count)
+	return count > 0
+}
+
+func (ur *UserRepo) EmailExists(email string) bool {
+	var count int64
+	ur.db.Model(&User{}).Where("email = ?", email).Count(&count)
+	return count > 0
 }
