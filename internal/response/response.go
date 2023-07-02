@@ -42,8 +42,9 @@ type Data struct {
 }
 
 type Attributes struct {
-	CreatedAt time.Time      `json:"createdAt,omitempty"`
-	UpdatedAt time.Time      `json:"updatedAt,omitempty"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	ExpiresAt *time.Time     `json:"expiresAt,omitempty"`
 	Privacy   shared.Privacy `json:"privacy,omitempty"`
 	Text      string         `json:"text,omitempty"`
 }

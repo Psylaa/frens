@@ -19,6 +19,8 @@ func createFile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
+	return srv.Files.Create(c, userId, file)
+
 	ext := filepath.Ext(file.Filename)
 
 	fileData, err := db.Files.CreateFile(userId, ext)

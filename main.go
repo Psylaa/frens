@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// Create service
-	srv := service.New(db)
+	srv := service.New(db, cfg)
 
 	// Initialize router and start the server
 	// Router only uses the db temporarily until migration to service is complete
