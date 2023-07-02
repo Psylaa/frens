@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -51,6 +52,7 @@ func (fr *FileRepo) GetByUserID(userID *uuid.UUID) ([]File, error) {
 }
 
 func (fr *FileRepo) Create(file *File) (*File, error) {
+	logger.DebugLogRequestRecieved("database", "files", "Create")
 	if err := fr.db.Create(file).Error; err != nil {
 		return nil, err
 	}
@@ -61,6 +63,10 @@ func (fr *FileRepo) Update(file *File) error {
 	return fr.db.Save(file).Error
 }
 
-func (fr *FileRepo) Delete(file *File) error {
+func (fr *FileRepo) DeleteByFile(file *File) error {
 	return fr.db.Delete(file).Error
+}
+
+func (fr *FileRepo) DeleteByID(fileID *uuid.UUID) error {
+	return fr.db.Where("id = ?", fileID).Delete(&File{}).Error
 }

@@ -66,7 +66,7 @@ func (r *Router) addPublicRoutes() {
 	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
 
 	r.App.Post("/login", login)
-	r.App.Get("/files/:filename", retrieveFile)
+	r.App.Get("/files/:fileId", retrieveFileByID)
 
 	logger.Log.Info().Msg("Added public routes routes")
 }
@@ -113,7 +113,7 @@ func (r *Router) addProtectedRoutes() {
 
 	// Files
 	r.App.Post("/files", createFile)
-	r.App.Delete("/files/:filename", deleteFile)
+	r.App.Delete("/files/:fileId", deleteFileByID)
 
 	// Feed
 	r.App.Get("/feeds/chronological", getChronoFeed)

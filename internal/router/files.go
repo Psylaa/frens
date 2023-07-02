@@ -1,44 +1,131 @@
 package router
 
 import (
-	"os"
 	"path/filepath"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func createFile(c *fiber.Ctx) error {
+
+	// Get the user ID from the request
 	userId, err := getUserID(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 	}
 
+	// Get the file from the request
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return srv.Files.Create(c, &userId, file)
-}
-
-func retrieveFile(c *fiber.Ctx) error {
-	filePath := filepath.Join(cfg.Storage.Local.Path, c.Params("filename"))
-	if _, err := os.Stat(filePath); err != nil {
-		if os.IsNotExist(err) {
-			return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
-		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-	}
-	return c.SendFile(filePath)
-}
-
-func deleteFile(c *fiber.Ctx) error {
-	filePath := filepath.Join(cfg.Storage.Local.Path, c.Params("filename"))
-	err := os.Remove(filePath)
-	if err != nil {
+	// Validate both exist
+	if userId == uuid.Nil || file == nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
-	return c.SendStatus(fiber.StatusOK)
+
+	return srv.Files.Create(c, userId, file)
+}
+
+func retrieveFileByID(c *fiber.Ctx) error {
+	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
+
+	// Get the file name from the request
+	filename := c.Params("fileId")
+	if filename == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotProvided))
+	}
+	logger.Log.Debug().
+		Str("package", "router").
+		Str("router", "files").
+		Str("method", "retrieveFile").
+		Str("file_id", filename).
+		Msg("Got file ID from request")
+
+	// If extension is provided, remove it
+	var fileId string
+	if filepath.Ext(filename) != "" {
+		fileId = filename[:len(filename)-len(filepath.Ext(filename))]
+		logger.Log.Debug().
+			Str("package", "router").
+			Str("router", "files").
+			Str("method", "retrieveFile").
+			Str("file_id", fileId).
+			Msg("Removed file extension")
+	} else {
+		fileId = filename
+	}
+
+	// Convert the file ID to a UUID
+	fileIdUUID, err := uuid.Parse(fileId)
+	if err != nil {
+		logger.Log.Debug().
+			Str("package", "router").
+			Str("router", "files").
+			Str("method", "retrieveFile").
+			Str("file_id", fileId).
+			Msg("Failed to convert file ID to UUID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotUUID))
+	}
+	logger.Log.Debug().
+		Str("package", "router").
+		Str("router", "files").
+		Str("method", "retrieveFile").
+		Str("file_id", fileIdUUID.String()).
+		Msg("Converted file ID to UUID")
+
+	// Send the request to the service package
+	return srv.Files.RetrieveByID(c, &fileIdUUID)
+}
+
+func deleteFileByID(c *fiber.Ctx) error {
+	logger.DebugLogRequestRecieved("router", "files", "deleteFile")
+
+	// Get the file name from the request
+	filename := c.Params("fileId")
+	logger.Log.Debug().
+		Str("package", "router").
+		Str("router", "files").
+		Str("method", "retrieveFile").
+		Str("file_id", filename).
+		Msg("Got file ID from request")
+
+	// If extension is provided, remove it
+	var fileId string
+	if filepath.Ext(filename) != "" {
+		fileId = filename[:len(filename)-len(filepath.Ext(filename))]
+		logger.Log.Debug().
+			Str("package", "router").
+			Str("router", "files").
+			Str("method", "retrieveFile").
+			Str("file_id", fileId).
+			Msg("Removed file extension")
+	} else {
+		fileId = filename
+	}
+
+	// Convert the file ID to a UUID
+	fileIdUUID, err := uuid.Parse(fileId)
+	if err != nil {
+		logger.Log.Error().
+			Str("package", "router").
+			Str("router", "files").
+			Str("method", "retrieveFile").
+			Str("file_id", fileId).
+			Msg("Failed to convert file ID to UUID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidFileID))
+	}
+	logger.Log.Debug().
+		Str("package", "router").
+		Str("router", "files").
+		Str("method", "retrieveFile").
+		Str("file_id", fileIdUUID.String()).
+		Msg("Converted file ID to UUID")
+
+	// Send the request to the service package
+	return srv.Files.DeleteByID(c, &fileIdUUID)
 }

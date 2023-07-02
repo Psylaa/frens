@@ -45,6 +45,7 @@ type Attributes struct {
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	ExpiresAt *time.Time     `json:"expiresAt,omitempty"`
+	Extenion  *string        `json:"extension,omitempty"`
 	Privacy   shared.Privacy `json:"privacy,omitempty"`
 	Text      string         `json:"text,omitempty"`
 }
@@ -169,7 +170,7 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 			},
 			Relationships: &Relationships{
 				Author: CreateUsersResponse([]*database.User{&post.Author}),
-				Media:  GenerateFilesResponse(post.Media),
+				Media:  CreateFilesResponse(post.Media),
 			},
 			Links: Links{
 				Self: selfLink,
@@ -182,15 +183,19 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 	}
 }
 
-func GenerateFilesResponse(files []*database.File) *Response {
+func CreateFilesResponse(files []*database.File) *Response {
 	var data []Data
 	for _, file := range files {
 		selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
 
 		data = append(data, Data{
-			Type:       "file",
-			ID:         file.ID,
-			Attributes: Attributes{},
+			Type: "file",
+			ID:   file.ID,
+			Attributes: Attributes{
+				CreatedAt: file.CreatedAt,
+				UpdatedAt: file.UpdatedAt,
+				Extenion:  &file.Extension,
+			},
 			Links: Links{
 				Self: selfLink,
 			},
