@@ -24,13 +24,13 @@ type Response struct {
 }
 
 type Links struct {
-	Self           string `json:"self"`
-	Posts          string `json:"posts,omitempty"`
-	Following      string `json:"following,omitempty"`
-	Followers      string `json:"followers,omitempty"`
-	ProfilePicture string `json:"profilePicture,omitempty"`
-	CoverImage     string `json:"coverImage,omitempty"`
-	Owner          string `json:"owner,omitempty"`
+	Self      string `json:"self"`
+	Posts     string `json:"posts,omitempty"`
+	Following string `json:"following,omitempty"`
+	Followers string `json:"followers,omitempty"`
+	Avatar    string `json:"avatar,omitempty"`
+	Cover     string `json:"cover,omitempty"`
+	Owner     string `json:"owner,omitempty"`
 }
 
 type Data struct {
@@ -82,27 +82,39 @@ func CreateCountResponse(count int) *Response {
 	}
 }
 
-func CreateUserResponse(users []*database.User) *Response {
+func CreateUsersResponse(users []*database.User) *Response {
 	var data []Data
 	for _, user := range users {
 		selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID)
 		postsLink := fmt.Sprintf("%s/users/%s/posts", baseURL, user.ID)
 		followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
 		followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
-		ppLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.ProfilePicture.ID, user.ProfilePicture.Extension)
-		ciLink := fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverImage.ID, user.CoverImage.Extension)
+
+		var avatarLink string
+		if user.AvatarID == uuid.Nil {
+			avatarLink = fmt.Sprintf("%s/files/default-avatar.png", baseURL)
+		} else {
+			avatarLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.AvatarID, user.Avatar.Extension)
+		}
+
+		var coverLink string
+		if user.CoverID == uuid.Nil {
+			coverLink = fmt.Sprintf("%s/files/default-cover.png", baseURL)
+		} else {
+			coverLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverID, user.Cover.Extension)
+		}
 
 		data = append(data, Data{
 			Type:       UserType,
 			ID:         user.ID,
 			Attributes: Attributes{},
 			Links: Links{
-				Self:           selfLink,
-				Posts:          postsLink,
-				Following:      followingLink,
-				Followers:      followersLink,
-				ProfilePicture: ppLink,
-				CoverImage:     ciLink,
+				Self:      selfLink,
+				Posts:     postsLink,
+				Following: followingLink,
+				Followers: followersLink,
+				Avatar:    avatarLink,
+				Cover:     coverLink,
 			},
 		},
 		)
@@ -152,7 +164,7 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 				Text:      post.Text,
 			},
 			Relationships: Relationships{
-				Author: CreateUserResponse([]*database.User{&post.Author}),
+				Author: CreateUsersResponse([]*database.User{&post.Author}),
 				Media:  GenerateFilesResponse(post.Media),
 			},
 			Links: Links{
