@@ -27,7 +27,7 @@ type UserRepo struct {
 	db *gorm.DB
 }
 
-func (ur *UserRepo) GetUser(id uuid.UUID) (*User, error) {
+func (ur *UserRepo) GetUserByID(id *uuid.UUID) (*User, error) {
 	var user User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
@@ -87,8 +87,8 @@ func (ur *UserRepo) VerifyUser(username string, password string) (*User, error) 
 	return user, nil
 }
 
-func (ur *UserRepo) UpdateBio(id uuid.UUID, bio *string) error {
-	user, err := ur.GetUser(id)
+func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
+	user, err := ur.GetUserByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -104,8 +104,8 @@ func (ur *UserRepo) UpdateBio(id uuid.UUID, bio *string) error {
 	return nil
 }
 
-func (ur *UserRepo) UpdateAvatar(userId uuid.UUID, profilePictureID *uuid.UUID) error {
-	user, err := ur.GetUser(userId)
+func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID) error {
+	user, err := ur.GetUserByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -139,8 +139,8 @@ func (ur *UserRepo) UpdateAvatar(userId uuid.UUID, profilePictureID *uuid.UUID) 
 	return nil
 }
 
-func (ur *UserRepo) UpdateCover(userId uuid.UUID, coverID *uuid.UUID) error {
-	user, err := ur.GetUser(userId)
+func (ur *UserRepo) UpdateCover(userId *uuid.UUID, coverID *uuid.UUID) error {
+	user, err := ur.GetUserByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -175,13 +175,13 @@ func (ur *UserRepo) UpdateCover(userId uuid.UUID, coverID *uuid.UUID) error {
 	return nil
 }
 
-func (ur *UserRepo) UsernameExists(username string) bool {
+func (ur *UserRepo) UsernameExists(username *string) bool {
 	var count int64
 	ur.db.Model(&User{}).Where("username = ?", username).Count(&count)
 	return count > 0
 }
 
-func (ur *UserRepo) EmailExists(email string) bool {
+func (ur *UserRepo) EmailExists(email *string) bool {
 	var count int64
 	ur.db.Model(&User{}).Where("email = ?", email).Count(&count)
 	return count > 0

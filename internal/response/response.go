@@ -34,11 +34,11 @@ type Links struct {
 }
 
 type Data struct {
-	Type          DataType      `json:"type"`
-	ID            uuid.UUID     `json:"id"`
-	Attributes    Attributes    `json:"attributes"`
-	Relationships Relationships `json:"relationships"`
-	Links         Links         `json:"links"`
+	Type          DataType       `json:"type"`
+	ID            uuid.UUID      `json:"id"`
+	Attributes    Attributes     `json:"attributes"`
+	Relationships *Relationships `json:"relationships,omitempty"`
+	Links         Links          `json:"links"`
 }
 
 type Attributes struct {
@@ -105,9 +105,12 @@ func CreateUsersResponse(users []*database.User) *Response {
 		}
 
 		data = append(data, Data{
-			Type:       UserType,
-			ID:         user.ID,
-			Attributes: Attributes{},
+			Type: UserType,
+			ID:   user.ID,
+			Attributes: Attributes{
+				CreatedAt: user.CreatedAt,
+				UpdatedAt: user.UpdatedAt,
+			},
 			Links: Links{
 				Self:      selfLink,
 				Posts:     postsLink,
@@ -135,7 +138,7 @@ func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
 			Type:          BookmarkType,
 			ID:            b.ID,
 			Attributes:    Attributes{},
-			Relationships: Relationships{},
+			Relationships: &Relationships{},
 			Links: Links{
 				Self:  selfLink,
 				Owner: ownerLink,
@@ -163,7 +166,7 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 				Privacy:   post.Privacy,
 				Text:      post.Text,
 			},
-			Relationships: Relationships{
+			Relationships: &Relationships{
 				Author: CreateUsersResponse([]*database.User{&post.Author}),
 				Media:  GenerateFilesResponse(post.Media),
 			},

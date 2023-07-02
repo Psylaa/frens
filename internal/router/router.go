@@ -88,7 +88,7 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Get("/users", getUsers)
 	r.App.Post("/users", createUser)
 	r.App.Patch("/users/", updateUser)
-	r.App.Get("/users/:id", getUser)
+	r.App.Get("/users/:userId", getUser)
 
 	// Posts
 	r.App.Post("/posts", createPost)

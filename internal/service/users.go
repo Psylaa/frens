@@ -7,12 +7,23 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type UserRepo struct{}
 
-func (ur *UserRepo) GetByID(userID string) error {
-	return nil
+func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
+	logger.DebugLogRequestRecieved("service", "user", "GetByID")
+
+	// Get user from database
+	user, err := db.Users.GetUserByID(userID)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "user", "GetByID", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Return the user
+	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{user}))
 }
 
 func (ur *UserRepo) GetByUsername(username string) error {
@@ -63,13 +74,13 @@ func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password
 	logger.DebugLogRequestRecieved("service", "user", "Create")
 
 	// Check if username is taken
-	if db.Users.UsernameExists(username) {
+	if db.Users.UsernameExists(&username) {
 		logger.ErrorLogRequestError("service", "user", "Create", errors.New(string(response.ErrTakenUsername)))
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenUsername))
 	}
 
 	// Check if email is taken
-	if db.Users.EmailExists(email) {
+	if db.Users.EmailExists(&email) {
 		logger.ErrorLogRequestError("service", "user", "Create", errors.New(string(response.ErrTakenEmail)))
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenEmail))
 	}

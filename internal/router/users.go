@@ -4,6 +4,7 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // getUsers handles the HTTP request to fetch all users.
@@ -20,23 +21,13 @@ func getUsers(c *fiber.Ctx) error {
 }
 
 func getUser(c *fiber.Ctx) error {
-	/*
-		id, err := uuid.Parse(c.Params("id"))
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-		}
-		logger.Log.Debug().Msgf("Successfully parsed user ID: %v", id)
+	userID, err := uuid.Parse(c.Params("userId"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing userID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
 
-		user, err := db.Users.GetUser(id)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting user")
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.Log.Debug().Msgf("Successfully retrieved user: %v", user)
-
-		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
-	*/
-	return nil
+	return srv.Users.GetByID(c, &userID)
 }
 
 // createUser handles the HTTP request to create a new user.
