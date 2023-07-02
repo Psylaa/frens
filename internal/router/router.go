@@ -61,14 +61,15 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 }
 
 func (r *Router) addPublicRoutes() {
+
+	r.App.Static("/files/default-avatar.png", "./assets/default-avatar.png")
+	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
+
 	r.App.Post("/login", login)
 	r.App.Get("/files/:filename", retrieveFile)
 	r.App.Get("/feeds/explore", getExploreFeed)
 	r.App.Get("/posts", GetPostsByUserID)
 	r.App.Get("/posts/:id", getPost)
-
-	r.App.Static("/files/default-avatar.png", "./assets/default-avatar.png")
-	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
 
 	logger.Log.Info().Msg("Added public routes routes")
 }
