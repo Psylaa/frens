@@ -11,27 +11,49 @@ import (
 
 type Post struct {
 	BaseModel
-	Author   User           `gorm:"foreignKey:AuthorID" json:"author"`
-	AuthorID uuid.UUID      `json:"authorId"`
-	Privacy  shared.Privacy `json:"privacy"`
-	Text     string         `json:"text"`
-	Media    []*File        `gorm:"foreignKey:PostID;AssociationForeignKey:ID" json:"media"`
+	Author       User `gorm:"foreignKey:AuthorID"`
+	AuthorID     uuid.UUID
+	Privacy      shared.Privacy
+	Text         string
+	Media        []*File `gorm:"foreignKey:PostID;AssociationForeignKey:ID" json:"media"`
+	IsLiked      bool    `gorm:"-"` // This is a virtual field that is not stored in the database
+	IsBookmarked bool    `gorm:"-"` // This is a virtual field that is not stored in the database
 }
 
 type PostRepo struct {
-	db *gorm.DB
+	db        *gorm.DB
+	Likes     *LikeRepo
+	Bookmarks *BookmarkRepo
 }
 
-func (pr *PostRepo) GetByID(id uuid.UUID) (*Post, error) {
+func (pr *PostRepo) GetByID(requestorID *uuid.UUID, postID *uuid.UUID) (*Post, error) {
 	var post Post
 	if err := pr.db.
 		Preload("Author").
 		Preload("Author.Avatar").
 		Preload("Author.Cover").
 		Preload("Media").
-		First(&post, "id = ?", id).Error; err != nil {
+		First(&post, "id = ?", postID).Error; err != nil {
 		return nil, err
 	}
+
+	// Get is liked
+	likeExists, err := pr.Likes.Exists(requestorID, postID)
+	if err != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Error checking if post is liked: %s", err.Error())
+		return nil, err
+	}
+
+	// Get is bookmarked
+	bookmarkExists, err := pr.Bookmarks.Exists(requestorID, postID)
+	if err != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Error checking if post is bookmarked: %s", err.Error())
+		return nil, err
+	}
+
+	// Set virtual fields
+	post.IsLiked = likeExists
+	post.IsBookmarked = bookmarkExists
 
 	return &post, nil
 }

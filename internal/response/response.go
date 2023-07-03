@@ -50,9 +50,9 @@ type Attributes struct {
 	Text          string         `json:"text,omitempty"`
 	Token         string         `json:"token,omitempty"`
 	Username      string         `json:"username,omitempty"`
-	HasLiked      bool           `json:"hasLiked,omitempty"`
-	HasBookmarked bool           `json:"hasBookmarked,omitempty"`
-	IsFollowing   bool           `json:"isFollowing,omitempty"`
+	HasLiked      *bool          `json:"hasLiked,omitempty"`      // Pointer so its not ommited if false
+	HasBookmarked *bool          `json:"hasBookmarked,omitempty"` // Pointer so its not ommited if false
+	IsFollowing   *bool          `json:"isFollowing,omitempty"`   // Pointer so its not ommited if false
 }
 
 type Relationships struct {
@@ -169,12 +169,12 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 			Type: UserType,
 			ID:   post.ID,
 			Attributes: Attributes{
-				CreatedAt: post.CreatedAt,
-				UpdatedAt: &post.UpdatedAt,
-				Privacy:   post.Privacy,
-				Text:      post.Text,
-				//HasLiked:      hasliked,
-				//HasBookmarked: hasBookmarked,
+				CreatedAt:     post.CreatedAt,
+				UpdatedAt:     &post.UpdatedAt,
+				Privacy:       post.Privacy,
+				Text:          post.Text,
+				HasLiked:      &post.IsLiked,
+				HasBookmarked: &post.IsBookmarked,
 			},
 			Relationships: &Relationships{
 				Author: CreateUsersResponse([]*database.User{&post.Author}),

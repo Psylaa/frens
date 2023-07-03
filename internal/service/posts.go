@@ -43,6 +43,8 @@ func (pr *PostRepo) Create(
 	mediaIDs []*uuid.UUID) error {
 	logger.DebugLogRequestRecieved("service", "post", "Create")
 
+	requestorId := c.Locals("requestorId").(*uuid.UUID)
+
 	// Set default privacy to public if not provided.
 	if privacy == "" {
 		privacy = shared.PrivacyPublic
@@ -63,7 +65,7 @@ func (pr *PostRepo) Create(
 	}
 
 	// Retrieve the post so we can return the author's information.
-	post, err = db.Posts.GetByID(post.ID)
+	post, err = db.Posts.GetByID(requestorId, &post.ID)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "post", "Create", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
