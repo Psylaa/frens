@@ -49,6 +49,6 @@ func main() {
 
 	// Initialize router and start the server
 	// Router only uses the db temporarily until migration to service is complete
-	router := router.NewRouter(cfg, db, srv)
+	router := router.New(cfg, db, srv)
 	router.Run()
 }
