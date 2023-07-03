@@ -6,7 +6,6 @@ import (
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 )
 
 // getPost handles the HTTP request to fetch a specific post.
@@ -38,6 +37,27 @@ func getPostByID(c *fiber.Ctx) error {
 
 		return c.JSON(response.GeneratePostResponse(post))
 	*/
+}
+
+func getPostsByUserID(c *fiber.Ctx) error {
+	logger.DebugLogRequestRecieved("router", "posts", "getPostsByUserID")
+
+	// Get the user id from the request
+	userID, err := uuid.Parse(c.Params("userId"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing userID: %v")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+	logger.Log.Debug().Msgf("successfully parsed provided user id into uuid: %v", userID)
+
+	// Check to make sure userID is not empty
+	if userID == uuid.Nil {
+		logger.Log.Error().Msg("userID was parsed as nil")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Send to service package
+	return srv.Posts.GetByUserID(c, &userID)
 }
 
 // getPosts handles the HTTP request to fetch all posts by a user.
@@ -94,36 +114,37 @@ func createPost(c *fiber.Ctx) error {
 
 // deletePost handles the HTTP request to delete a post.
 func deletePost(c *fiber.Ctx) error {
-	// Parse the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Get the user ID from the JWT.
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	}
-
-	// First, check if the post exists and belongs to the user.
-	post, err := db.Posts.GetPost(postID)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
+	/*
+		// Parse the post ID from the URL parameter.
+		postID, err := uuid.Parse(c.Params("id"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 		}
-	}
 
-	// Check if the user owns the post.
-	if post.AuthorID != userID {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
-	}
+		// Get the user ID from the JWT.
+		userID, err := getUserID(c)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		}
 
-	// Delete the post.
-	err = db.Posts.DeletePost(postID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
+		// First, check if the post exists and belongs to the user.
+		post, err := db.Posts.GetPost(postID)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
+			}
+		}
 
+		// Check if the user owns the post.
+		if post.AuthorID != userID {
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
+		}
+
+		// Delete the post.
+		err = db.Posts.DeletePost(postID)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+		}
+	*/
 	return c.SendStatus(fiber.StatusNoContent)
 }

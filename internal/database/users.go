@@ -181,6 +181,12 @@ func (ur *UserRepo) UsernameExists(username *string) bool {
 	return count > 0
 }
 
+func (ur *UserRepo) Exists(id *uuid.UUID) bool {
+	var count int64
+	ur.db.Model(&User{}).Where("id = ?", id).Count(&count)
+	return count > 0
+}
+
 func (ur *UserRepo) EmailExists(email *string) bool {
 	var count int64
 	ur.db.Model(&User{}).Where("email = ?", email).Count(&count)

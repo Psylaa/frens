@@ -31,5 +31,5 @@ func (l *LoginRepo) Login(c *fiber.Ctx, body *string, password *string) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(response.CreateLoginResponse(user.ID, token, expiryDate))
+	return c.Status(fiber.StatusOK).JSON(response.CreateLoginResponse(user, token, expiryDate))
 }

@@ -49,6 +49,7 @@ type Attributes struct {
 	Privacy   shared.Privacy `json:"privacy,omitempty"`
 	Text      string         `json:"text,omitempty"`
 	Token     string         `json:"token,omitempty"`
+	Username  string         `json:"username,omitempty"`
 }
 
 type Relationships struct {
@@ -113,6 +114,7 @@ func CreateUsersResponse(users []*database.User) *Response {
 			Attributes: Attributes{
 				CreatedAt: user.CreatedAt,
 				UpdatedAt: &user.UpdatedAt,
+				Username:  user.Username,
 			},
 			Links: Links{
 				Self:      selfLink,
@@ -208,16 +210,17 @@ func CreateFilesResponse(files []*database.File) *Response {
 	}
 }
 
-func CreateLoginResponse(userId uuid.UUID, token string, expirationDate time.Time) *Response {
+func CreateLoginResponse(user *database.User, token string, expirationDate time.Time) *Response {
 	return &Response{
 		Data: []Data{
 			{
 				Type: "login",
-				ID:   userId,
+				ID:   user.ID,
 				Attributes: Attributes{
 					CreatedAt: time.Now(),
 					ExpiresAt: &expirationDate,
 					Token:     token,
+					Username:  user.Username,
 				},
 				Links: Links{
 					Self: fmt.Sprintf("%s/login", baseURL),

@@ -22,7 +22,7 @@ type PostRepo struct {
 	db *gorm.DB
 }
 
-func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
+func (pr *PostRepo) GetByID(id uuid.UUID) (*Post, error) {
 	var post Post
 	if err := pr.db.
 		Preload("Author").
@@ -36,8 +36,8 @@ func (pr *PostRepo) GetPost(id uuid.UUID) (*Post, error) {
 	return &post, nil
 }
 
-func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
-	var posts []Post
+func (pr *PostRepo) GetByUserID(userID *uuid.UUID) ([]*Post, error) {
+	var posts []*Post
 	if err := pr.db.
 		Preload("Author").
 		Preload("Author.Avatar").
@@ -51,7 +51,7 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 	return posts, nil
 }
 
-func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]*Post, error) {
+func (pr *PostRepo) GetByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]*Post, error) {
 	var posts []*Post
 	if err := pr.db.
 		Preload("Author").
@@ -68,7 +68,7 @@ func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, lim
 	return posts, nil
 }
 
-func (pr *PostRepo) GetLatestPublicPosts(limit int) ([]Post, error) {
+func (pr *PostRepo) GetLatestPublic(limit int) ([]Post, error) {
 	var posts []Post
 	err := pr.db.
 		Preload("Author").
@@ -86,7 +86,7 @@ func (pr *PostRepo) GetLatestPublicPosts(limit int) ([]Post, error) {
 	return posts, nil
 }
 
-func (pr *PostRepo) CreatePost(authorID uuid.UUID, text string, privacy shared.Privacy, media []*File) (*Post, error) {
+func (pr *PostRepo) Create(authorID uuid.UUID, text string, privacy shared.Privacy, media []*File) (*Post, error) {
 	post := Post{
 		BaseModel: BaseModel{ID: uuid.New()},
 		AuthorID:  authorID,
@@ -107,7 +107,7 @@ func (pr *PostRepo) CreatePost(authorID uuid.UUID, text string, privacy shared.P
 	return &post, nil
 }
 
-func (pr *PostRepo) DeletePost(postID uuid.UUID) error {
+func (pr *PostRepo) Delete(postID uuid.UUID) error {
 	err := pr.db.Delete(&Post{}, "id = ?", postID).Error
 	if err != nil {
 		logger.Log.Error().

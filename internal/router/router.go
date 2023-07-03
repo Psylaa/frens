@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
@@ -12,6 +13,7 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -40,6 +42,11 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 	r.App.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+	}))
+
+	app.Use(limiter.New(limiter.Config{
+		Max:        1000,
+		Expiration: 30 * time.Second,
 	}))
 
 	r.addPublicRoutes()
@@ -110,6 +117,7 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Get("/posts/:postId", getPostByID)
 	r.App.Post("/posts", createPost)
 	r.App.Delete("/posts/:id", deletePost)
+	r.App.Get("/users/:userId/posts", getPostsByUserID)
 
 	// Files
 	r.App.Post("/files", createFile)
