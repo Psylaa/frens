@@ -39,7 +39,7 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 	}))
 	r.App.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
 	r.addPublicRoutes()

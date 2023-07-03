@@ -9,6 +9,7 @@ import (
 
 type Service struct {
 	Bookmarks *BookmarkRepo
+	Feed      *FeedRepo
 	Files     *FilesRepo
 	Login     *LoginRepo
 	Posts     *PostRepo

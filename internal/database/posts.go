@@ -51,8 +51,8 @@ func (pr *PostRepo) GetPostsByUserID(userID uuid.UUID) ([]Post, error) {
 	return posts, nil
 }
 
-func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]Post, error) {
-	var posts []Post
+func (pr *PostRepo) GetPostsByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit int) ([]*Post, error) {
+	var posts []*Post
 	if err := pr.db.
 		Preload("Author").
 		Preload("Author.Avatar").

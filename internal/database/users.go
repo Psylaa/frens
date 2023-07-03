@@ -27,7 +27,7 @@ type UserRepo struct {
 	db *gorm.DB
 }
 
-func (ur *UserRepo) GetUserByID(id *uuid.UUID) (*User, error) {
+func (ur *UserRepo) GetByID(id *uuid.UUID) (*User, error) {
 	var user User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (ur *UserRepo) VerifyUser(username *string, password *string) (*User, error
 }
 
 func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
-	user, err := ur.GetUserByID(userId)
+	user, err := ur.GetByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -105,7 +105,7 @@ func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
 }
 
 func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID) error {
-	user, err := ur.GetUserByID(userId)
+	user, err := ur.GetByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -140,7 +140,7 @@ func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID)
 }
 
 func (ur *UserRepo) UpdateCover(userId *uuid.UUID, coverID *uuid.UUID) error {
-	user, err := ur.GetUserByID(userId)
+	user, err := ur.GetByID(userId)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
