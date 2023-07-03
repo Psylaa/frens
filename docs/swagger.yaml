@@ -11,5 +11,24 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Frens API
   version: "1.0"
-paths: {}
+paths:
+  /bookmarks/{bookmarkId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the details of a specific bookmark based on the provided ID
+      parameters:
+      - description: Bookmark ID
+        in: path
+        name: bookmarkId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve a bookmark by ID
+      tags:
+      - Bookmarks
 swagger: "2.0"

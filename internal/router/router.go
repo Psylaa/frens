@@ -16,7 +16,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	fiberSwagger "github.com/swaggo/fiber-swagger"
+
+	"github.com/gofiber/swagger"
 )
 
 var cfg *config.Config
@@ -37,6 +38,16 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 	app := fiber.New(fiber.Config{})
 	r := &Router{cfg, app}
 
+	r.addPublicMiddleware()
+	r.addPublicRoutes()
+	r.addAuthMiddleware()
+	r.addProtectedRoutes()
+	r.addActivityPubRoutes()
+
+	return r
+}
+
+func (r *Router) addPublicMiddleware() {
 	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: &logger.Log,
 	}))
@@ -44,14 +55,21 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
-	app.Use(limiter.New(limiter.Config{
+	r.App.Use(limiter.New(limiter.Config{
 		Max:        1000,
 		Expiration: 30 * time.Second,
 	}))
+	r.App.Use(func(c *fiber.Ctx) error {
+		requestorId, err := getUserIDFromToken(c)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		}
+		c.Locals("requestorId", requestorId)
+		return c.Next()
+	})
+}
 
-	r.addPublicRoutes()
-
-	// Add JWT middleware / authentication
+func (r *Router) addAuthMiddleware() {
 	r.App.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -61,21 +79,6 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
-
-	// Add requestorID to context
-	r.App.Use(func(c *fiber.Ctx) error {
-		requestorId, err := getUserIDFromToken(c)
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-		}
-		c.Locals("requestorId", requestorId)
-		return c.Next()
-	})
-
-	r.addProtectedRoutes()
-	r.addActivityPubRoutes()
-
-	return r
 }
 
 func (r *Router) addPublicRoutes() {
@@ -84,7 +87,7 @@ func (r *Router) addPublicRoutes() {
 	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
 
 	r.App.Post("/login", login)
-	r.App.Get("/swagger/*", fiberSwagger.WrapHandler)
+	r.App.Get("/swagger/*", swagger.HandlerDefault)
 
 	logger.Log.Info().Msg("Added public routes routes")
 }
@@ -94,7 +97,6 @@ func (r *Router) addProtectedRoutes() {
 	// Login
 	r.App.Get("/login/verify", verifyUserToken)
 
-	// Bookmarks
 	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
 	r.App.Delete("/bookmarks/:bookmarkId", deleteBookmarkByID)
 

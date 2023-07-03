@@ -5,8 +5,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+
+	_ "github.com/bwoff11/frens/docs"
 )
 
+// @Summary Retrieve a bookmark by ID
+// @Description Get the details of a specific bookmark based on the provided ID
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param bookmarkId path string true "Bookmark ID"
+// @Security ApiKeyAuth
+// @Router /bookmarks/{bookmarkId} [get]
 func getBookmarkByID(c *fiber.Ctx) error {
 	bookmarkId := c.Params("bookmarkId")
 	bookmarkID, err := uuid.Parse(bookmarkId)
