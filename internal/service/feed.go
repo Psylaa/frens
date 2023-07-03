@@ -16,7 +16,7 @@ func (f *FeedRepo) GetChrono(c *fiber.Ctx, userID *uuid.UUID, cursor time.Time) 
 	logger.DebugLogRequestRecieved("service", "feed", "GetChrono")
 
 	// Get user from database
-	user, err := db.Users.GetByID(userID)
+	user, err := db.Users.GetByID(userID, userID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting user")
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())

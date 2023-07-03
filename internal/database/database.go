@@ -59,6 +59,6 @@ func New(cfg *config.Config) (*Database, error) {
 		Follows:   &FollowRepo{db: db},
 		Likes:     &LikeRepo{db: db},
 		Posts:     &PostRepo{db: db},
-		Users:     &UserRepo{db: db},
+		Users:     &UserRepo{db: db, Follows: &FollowRepo{db: db}}, // Give users its own instance of FollowRepo so it can use its methods
 	}, nil
 }

@@ -18,8 +18,10 @@ func (fr *FilesRepo) GetByID(c *fiber.Ctx) error {
 	return nil
 }
 
-func (fr *FilesRepo) Create(c *fiber.Ctx, userID uuid.UUID, file *multipart.FileHeader) error {
+func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	logger.DebugLogRequestRecieved("service", "files", "Create")
+
+	requestorId := c.Locals("requestorId").(*uuid.UUID)
 
 	// Get extension of file
 	ext := filepath.Ext(file.Filename)
@@ -30,13 +32,13 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, userID uuid.UUID, file *multipart.File
 		Str("service", "files").
 		Str("method", "Create").
 		Str("file_extension", ext).
-		Str("user_id", userID.String()).
+		Str("user_id", requestorId.String()).
 		Msg("Creating file object")
 
 	fileObj := &database.File{
 		ID:        uuid.New(),
 		Extension: ext,
-		UserID:    userID,
+		UserID:    *requestorId,
 	}
 
 	// Create file record in database

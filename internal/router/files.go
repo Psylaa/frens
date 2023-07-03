@@ -11,24 +11,18 @@ import (
 
 func createFile(c *fiber.Ctx) error {
 
-	// Get the user ID from the request
-	userId, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	}
-
 	// Get the file from the request
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	// Validate both exist
-	if userId == uuid.Nil || file == nil {
+	// Validate file exists
+	if file == nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return srv.Files.Create(c, userId, file)
+	return srv.Files.Create(c, file)
 }
 
 func retrieveFileByID(c *fiber.Ctx) error {

@@ -38,7 +38,6 @@ func (pr *PostRepo) GetReplies() {
 
 func (pr *PostRepo) Create(
 	c *fiber.Ctx,
-	userID uuid.UUID,
 	text string,
 	privacy shared.Privacy,
 	mediaIDs []*uuid.UUID) error {
@@ -57,7 +56,7 @@ func (pr *PostRepo) Create(
 	}
 
 	// Create post in database
-	post, err := db.Posts.Create(userID, text, privacy, mediaFiles)
+	post, err := db.Posts.Create(*c.Locals("requestorId").(*uuid.UUID), text, privacy, mediaFiles)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "post", "Create", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

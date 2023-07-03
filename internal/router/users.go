@@ -21,6 +21,8 @@ func getUsers(c *fiber.Ctx) error {
 }
 
 func getUserByID(c *fiber.Ctx) error {
+
+	// Get the user ID from the params
 	userID, err := uuid.Parse(c.Params("userId"))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing userID")

@@ -103,13 +103,7 @@ func createPost(c *fiber.Ctx) error {
 		mediaIDs = append(mediaIDs, &mediaID)
 	}
 
-	// Get the user ID from the JWT.
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	}
-
-	return srv.Posts.Create(c, userID, body.Text, body.Privacy, mediaIDs)
+	return srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
 }
 
 // deletePost handles the HTTP request to delete a post.

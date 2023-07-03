@@ -16,7 +16,7 @@ func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
 	logger.DebugLogRequestRecieved("service", "user", "GetByID")
 
 	// Get user from database
-	user, err := db.Users.GetByID(userID)
+	user, err := db.Users.GetByID(c.Locals("requestorId").(*uuid.UUID), userID)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "user", "GetByID", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

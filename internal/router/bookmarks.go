@@ -30,12 +30,8 @@ func getBookmarksByPostID(c *fiber.Ctx) error {
 }
 
 func getBookmarksByUserID(c *fiber.Ctx) error {
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-	}
-
-	return srv.Bookmarks.GetByUserID(c, &userID)
+	// Since this is only callable by owner, we can get the user ID from the token
+	return srv.Bookmarks.GetByUserID(c, c.Locals("requestorId").(*uuid.UUID))
 }
 
 func getBookmarksCountByPostID(c *fiber.Ctx) error {
@@ -50,20 +46,11 @@ func getBookmarksCountByPostID(c *fiber.Ctx) error {
 }
 
 func getBookmarksCountByUserID(c *fiber.Ctx) error {
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-	}
-
-	return srv.Bookmarks.GetCountByUserID(c, &userID)
+	// Since this is only callable by owner, we can get the user ID from the token
+	return srv.Bookmarks.GetCountByUserID(c, c.Locals("requestorId").(*uuid.UUID))
 }
 
 func createBookmarkbyPostID(c *fiber.Ctx) error {
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-	}
-
 	postId := c.Params("postId")
 	postID, err := uuid.Parse(postId)
 	if err != nil {
@@ -71,15 +58,10 @@ func createBookmarkbyPostID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 	}
 
-	return srv.Bookmarks.Create(c, &userID, &postID)
+	return srv.Bookmarks.Create(c, c.Locals("requestorID").(*uuid.UUID), &postID)
 }
 
 func deleteBookmarkByID(c *fiber.Ctx) error {
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-	}
-
 	bookmarkId := c.Params("bookmarkId")
 	bookmarkID, err := uuid.Parse(bookmarkId)
 	if err != nil {
@@ -87,16 +69,10 @@ func deleteBookmarkByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 	}
 
-	return srv.Bookmarks.DeleteByID(c, &userID, &bookmarkID)
+	return srv.Bookmarks.DeleteByID(c, c.Locals("requestorId").(*uuid.UUID), &bookmarkID)
 }
 
 func deleteBookmarkByPostID(c *fiber.Ctx) error {
-
-	// Get user ID from token
-	userID, err := getUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-	}
 
 	// Get post ID from request
 	id := c.Params("id")
@@ -106,5 +82,5 @@ func deleteBookmarkByPostID(c *fiber.Ctx) error {
 	}
 
 	// Send request to service
-	return srv.Bookmarks.DeleteByUserAndPostID(c, &userID, &postID)
+	return srv.Bookmarks.DeleteByUserAndPostID(c, c.Locals("requestorId").(*uuid.UUID), &postID)
 }

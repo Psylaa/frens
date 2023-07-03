@@ -73,7 +73,7 @@ func (fr *FollowRepo) GetFollowing(sourceID uuid.UUID) ([]*Follow, error) {
 	return following, nil
 }
 
-func (fr *FollowRepo) DoesFollowExist(sourceID, targetID uuid.UUID) (bool, error) {
+func (fr *FollowRepo) Exists(sourceID *uuid.UUID, targetID *uuid.UUID) (bool, error) {
 	var follow Follow
 	if err := fr.db.Where("source_id = ? AND target_id = ?", sourceID, targetID).First(&follow).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

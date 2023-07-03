@@ -43,7 +43,6 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
-
 	app.Use(limiter.New(limiter.Config{
 		Max:        1000,
 		Expiration: 30 * time.Second,
@@ -51,6 +50,7 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 
 	r.addPublicRoutes()
 
+	// Add JWT middleware / authentication
 	r.App.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -60,6 +60,16 @@ func NewRouter(configuration *config.Config, database *database.Database, servic
 			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
+
+	// Add requestorID to context
+	r.App.Use(func(c *fiber.Ctx) error {
+		requestorId, err := getUserIDFromToken(c)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		}
+		c.Locals("requestorId", requestorId)
+		return c.Next()
+	})
 
 	r.addProtectedRoutes()
 	r.addActivityPubRoutes()
@@ -151,17 +161,44 @@ func (r *Router) Run() {
 	}
 }
 
-func getUserID(c *fiber.Ctx) (uuid.UUID, error) {
+// In many, many functions, the requestors userID is required.
+// This function will get the userID from the token and return it as a pointer.
+// It can then be added to the context and used in any function that requires it.
+func getUserIDFromToken(c *fiber.Ctx) (*uuid.UUID, error) {
+
+	// Parse claims from token
 	if c.Locals("user") == nil {
 		logger.Log.Warn().Msg("no user in context of provided token")
-		return uuid.Nil, fmt.Errorf("no user in context")
+		return nil, fmt.Errorf("no user in context")
 	}
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	sub, ok := claims["sub"].(string)
 	if !ok {
 		logger.Log.Warn().Msg("no sub claim in token")
-		return uuid.Nil, fmt.Errorf("no sub claim in token")
+		return nil, fmt.Errorf("no sub claim in token")
 	}
-	return uuid.Parse(sub)
+
+	// Parse user id as uuid
+	userUUID, err := uuid.Parse(sub)
+	if err != nil {
+		logger.Log.Warn().Msg("invalid sub claim in token")
+		return nil, fmt.Errorf("invalid sub claim in token")
+	}
+	// Convert to pointer
+	uuidPtr := &userUUID
+
+	// Validate uuid is not nil (a bit redundant but whatever)
+	if userUUID == uuid.Nil {
+		logger.Log.Warn().Msg("invalid sub claim in token")
+		return nil, fmt.Errorf("invalid sub claim in token")
+	}
+
+	// Verify user exists
+	if exists := db.Users.Exists(uuidPtr); exists == false {
+		logger.Log.Warn().Msg("user does not exist")
+		return nil, fmt.Errorf("user does not exist")
+	}
+
+	return uuidPtr, nil
 }

@@ -11,13 +11,6 @@ import (
 
 func getChronoFeed(c *fiber.Ctx) error {
 
-	// Get the user ID from the JWT
-	userID, err := getUserID(c)
-	if err != nil || userID == uuid.Nil {
-		logger.Log.Error().Err(err).Msg("Error getting user ID")
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
 	// Get the cursor from the query string
 	cursorString := c.Query("cursor")
 	var cursor time.Time
@@ -32,7 +25,7 @@ func getChronoFeed(c *fiber.Ctx) error {
 		}
 	}
 
-	return srv.Feed.GetChrono(c, &userID, cursor)
+	return srv.Feed.GetChrono(c, c.Locals("requestorId").(*uuid.UUID), cursor)
 }
 
 func getAlgoFeed(c *fiber.Ctx) error {

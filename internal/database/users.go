@@ -12,26 +12,34 @@ import (
 
 type User struct {
 	BaseModel
-	Username string `gorm:"unique"`
-	Email    string
-	Bio      string
-	Password string
-	Avatar   File `gorm:"foreignKey:AvatarID"`
-	AvatarID uuid.UUID
-	Cover    File `gorm:"foreignKey:CoverID"`
-	CoverID  uuid.UUID
-	Privacy  shared.Privacy
+	Username    string `gorm:"unique"`
+	Email       string
+	Bio         string
+	Password    string
+	Avatar      File `gorm:"foreignKey:AvatarID"`
+	AvatarID    uuid.UUID
+	Cover       File `gorm:"foreignKey:CoverID"`
+	CoverID     uuid.UUID
+	Privacy     shared.Privacy
+	IsFollowing bool `gorm:"-"` // Not stored in database
 }
 
 type UserRepo struct {
-	db *gorm.DB
+	db      *gorm.DB
+	Follows *FollowRepo
 }
 
-func (ur *UserRepo) GetByID(id *uuid.UUID) (*User, error) {
+func (ur *UserRepo) GetByID(requestorID *uuid.UUID, toLookupID *uuid.UUID) (*User, error) {
 	var user User
-	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", id).First(&user).Error; err != nil {
+	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", toLookupID).First(&user).Error; err != nil {
 		return nil, err
 	}
+	isFollowing, err := ur.Follows.Exists(requestorID, toLookupID)
+	if err != nil {
+		logger.Log.Debug().Str("package", "database").Msgf("Error checking if user is following: %s", err.Error())
+		return nil, err
+	}
+	user.IsFollowing = isFollowing
 	return &user, nil
 }
 
@@ -88,7 +96,7 @@ func (ur *UserRepo) VerifyUser(username *string, password *string) (*User, error
 }
 
 func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
-	user, err := ur.GetByID(userId)
+	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own bio, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -105,7 +113,7 @@ func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
 }
 
 func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID) error {
-	user, err := ur.GetByID(userId)
+	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own profile picture, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err
@@ -140,7 +148,7 @@ func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID)
 }
 
 func (ur *UserRepo) UpdateCover(userId *uuid.UUID, coverID *uuid.UUID) error {
-	user, err := ur.GetByID(userId)
+	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own cover image, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
 		return err

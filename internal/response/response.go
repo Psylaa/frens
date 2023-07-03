@@ -42,14 +42,17 @@ type Data struct {
 }
 
 type Attributes struct {
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt *time.Time     `json:"updatedAt"`
-	ExpiresAt *time.Time     `json:"expiresAt,omitempty"`
-	Extenion  *string        `json:"extension,omitempty"`
-	Privacy   shared.Privacy `json:"privacy,omitempty"`
-	Text      string         `json:"text,omitempty"`
-	Token     string         `json:"token,omitempty"`
-	Username  string         `json:"username,omitempty"`
+	CreatedAt     time.Time      `json:"createdAt"`
+	UpdatedAt     *time.Time     `json:"updatedAt"`
+	ExpiresAt     *time.Time     `json:"expiresAt,omitempty"`
+	Extenion      *string        `json:"extension,omitempty"`
+	Privacy       shared.Privacy `json:"privacy,omitempty"`
+	Text          string         `json:"text,omitempty"`
+	Token         string         `json:"token,omitempty"`
+	Username      string         `json:"username,omitempty"`
+	HasLiked      bool           `json:"hasLiked,omitempty"`
+	HasBookmarked bool           `json:"hasBookmarked,omitempty"`
+	IsFollowing   bool           `json:"isFollowing,omitempty"`
 }
 
 type Relationships struct {
@@ -170,6 +173,8 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 				UpdatedAt: &post.UpdatedAt,
 				Privacy:   post.Privacy,
 				Text:      post.Text,
+				//HasLiked:      hasliked,
+				//HasBookmarked: hasBookmarked,
 			},
 			Relationships: &Relationships{
 				Author: CreateUsersResponse([]*database.User{&post.Author}),
