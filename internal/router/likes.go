@@ -2,6 +2,10 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 )
 
 func getLikeByID(c *fiber.Ctx) error {
@@ -34,7 +38,22 @@ func getLikesCountByPostID(c *fiber.Ctx) error {
 }
 
 func createLikeByPostID(c *fiber.Ctx) error {
-	return nil
+
+	// Get post ID from the params
+	postID := c.Params("postId")
+	if postID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
+
+	// Convert the post ID to a UUID
+	postUUID, err := uuid.Parse(postID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing post ID to UUID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
+
+	// Send the request to the service
+	return srv.Likes.Create(c, &postUUID)
 }
 
 func deleteLikeByPostID(c *fiber.Ctx) error {
@@ -47,38 +66,6 @@ func getLikesByUserID(c *fiber.Ctx) error {
 
 func getLikesCountByUserID(c *fiber.Ctx) error {
 	return nil
-}
-
-func createLike(c *fiber.Ctx) error {
-	return nil
-	/*
-		userID, err := getUserID(c)
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID in token"})
-		}
-
-		id := c.Params("id")
-		postID, err := uuid.Parse(id)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
-		}
-
-		// Check if user has already liked this status
-		userHasLiked, err := db.Likes.HasUserLiked(userID, postID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		if userHasLiked {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "User has already liked this status"})
-		}
-
-		// Create the like
-		if _, err := db.Likes.CreateLike(userID, postID); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-
-		return c.SendStatus(fiber.StatusOK)
-	*/
 }
 
 func deleteLike(c *fiber.Ctx) error {

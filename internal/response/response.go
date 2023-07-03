@@ -14,6 +14,7 @@ type DataType string
 const (
 	UserType     DataType = "user"
 	BookmarkType DataType = "bookmark"
+	LikeType     DataType = "like"
 )
 
 type Response struct {
@@ -42,17 +43,17 @@ type Data struct {
 }
 
 type Attributes struct {
-	CreatedAt     time.Time      `json:"createdAt"`
-	UpdatedAt     *time.Time     `json:"updatedAt"`
-	ExpiresAt     *time.Time     `json:"expiresAt,omitempty"`
-	Extenion      *string        `json:"extension,omitempty"`
-	Privacy       shared.Privacy `json:"privacy,omitempty"`
-	Text          string         `json:"text,omitempty"`
-	Token         string         `json:"token,omitempty"`
-	Username      string         `json:"username,omitempty"`
-	HasLiked      *bool          `json:"hasLiked,omitempty"`      // Pointer so its not ommited if false
-	HasBookmarked *bool          `json:"hasBookmarked,omitempty"` // Pointer so its not ommited if false
-	IsFollowing   *bool          `json:"isFollowing,omitempty"`   // Pointer so its not ommited if false
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    *time.Time     `json:"updatedAt"`
+	ExpiresAt    *time.Time     `json:"expiresAt,omitempty"`
+	Extenion     *string        `json:"extension,omitempty"`
+	Privacy      shared.Privacy `json:"privacy,omitempty"`
+	Text         string         `json:"text,omitempty"`
+	Token        string         `json:"token,omitempty"`
+	Username     string         `json:"username,omitempty"`
+	IsLiked      *bool          `json:"isLiked,omitempty"`      // Pointer so its not ommited if false
+	IsBookmarked *bool          `json:"isBookmarked,omitempty"` // Pointer so its not ommited if false
+	IsFollowing  *bool          `json:"isFollowing,omitempty"`  // Pointer so its not ommited if false
 }
 
 type Relationships struct {
@@ -60,6 +61,7 @@ type Relationships struct {
 	Owner  *Response `json:"owner,omitempty"`  // Recursive types must be pointers
 	User   *Response `json:"user,omitempty"`   // Recursive types must be pointers
 	Media  *Response `json:"media,omitempty"`  // Recursive types must be pointers
+	Post   *Response `json:"post,omitempty"`   // Recursive types must be pointers
 }
 
 type Error struct {
@@ -169,12 +171,12 @@ func CreatePostsResponse(posts []*database.Post) *Response {
 			Type: UserType,
 			ID:   post.ID,
 			Attributes: Attributes{
-				CreatedAt:     post.CreatedAt,
-				UpdatedAt:     &post.UpdatedAt,
-				Privacy:       post.Privacy,
-				Text:          post.Text,
-				HasLiked:      &post.IsLiked,
-				HasBookmarked: &post.IsBookmarked,
+				CreatedAt:    post.CreatedAt,
+				UpdatedAt:    &post.UpdatedAt,
+				Privacy:      post.Privacy,
+				Text:         post.Text,
+				IsLiked:      &post.IsLiked,
+				IsBookmarked: &post.IsBookmarked,
 			},
 			Relationships: &Relationships{
 				Author: CreateUsersResponse([]*database.User{&post.Author}),
@@ -232,5 +234,34 @@ func CreateLoginResponse(user *database.User, token string, expirationDate time.
 				},
 			},
 		},
+	}
+}
+
+func CreateLikesResponse(user *database.User, post *database.Post, likes []*database.Like) *Response {
+	var data []Data
+	for _, like := range likes {
+		selfLink := fmt.Sprintf("%s/likes/%s", baseURL, like.ID)
+		ownerLink := fmt.Sprintf("%s/users/%s", baseURL, like.UserID)
+
+		data = append(data, Data{
+			Type: LikeType,
+			ID:   like.ID,
+			Attributes: Attributes{
+				CreatedAt: like.CreatedAt,
+				UpdatedAt: &like.UpdatedAt,
+			},
+			Relationships: &Relationships{
+				Owner: CreateUsersResponse([]*database.User{user}),
+				Post:  CreatePostsResponse([]*database.Post{post}),
+			},
+			Links: Links{
+				Self:  selfLink,
+				Owner: ownerLink,
+			},
+		})
+	}
+
+	return &Response{
+		Data: data,
 	}
 }

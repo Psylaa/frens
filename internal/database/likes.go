@@ -32,11 +32,11 @@ func (lr *LikeRepo) GetCountByPostID(postID uuid.UUID) (*int, error) {
 	return &count, nil
 }
 
-func (lr *LikeRepo) Create(userID, postID uuid.UUID) (*Like, error) {
+func (lr *LikeRepo) Create(userID *uuid.UUID, postID *uuid.UUID) (*Like, error) {
 	newLike := &Like{
 		BaseModel: BaseModel{ID: uuid.New()},
-		UserID:    userID,
-		PostID:    postID,
+		UserID:    *userID,
+		PostID:    *postID,
 	}
 
 	if err := lr.db.Create(newLike).Error; err != nil {
@@ -64,7 +64,7 @@ func (lr *LikeRepo) Delete(userID, postID uuid.UUID) error {
 
 func (lr *LikeRepo) Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error) {
 	var count int
-	if err := lr.db.Model(&Like{}).Where("user_id = ? AND status_id = ?", userID, postID).Count(&count).Error; err != nil {
+	if err := lr.db.Model(&Like{}).Where("user_id = ? AND post_id = ?", userID, postID).Count(&count).Error; err != nil {
 		return false, err
 	}
 

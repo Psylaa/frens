@@ -11,6 +11,7 @@ type Service struct {
 	Bookmarks *BookmarkRepo
 	Feed      *FeedRepo
 	Files     *FilesRepo
+	Likes     *LikeRepo
 	Login     *LoginRepo
 	Posts     *PostRepo
 	Users     *UserRepo

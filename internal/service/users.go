@@ -1,8 +1,6 @@
 package service
 
 import (
-	"errors"
-
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -18,9 +16,10 @@ func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
 	// Get user from database
 	user, err := db.Users.GetByID(c.Locals("requestorId").(*uuid.UUID), userID)
 	if err != nil {
-		logger.ErrorLogRequestError("service", "user", "GetByID", err)
+		logger.ErrorLogRequestError("service", "user", "GetByID", "user not found", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
+	logger.DebugLogRequestUpdate("service", "user", "GetByID", "user found")
 
 	// Return the user
 	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{user}))
@@ -75,22 +74,25 @@ func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password
 
 	// Check if username is taken
 	if db.Users.UsernameExists(&username) {
-		logger.ErrorLogRequestError("service", "user", "Create", errors.New(string(response.ErrTakenUsername)))
+		logger.ErrorLogRequestError("service", "user", "Create", "username taken", nil)
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenUsername))
 	}
+	logger.DebugLogRequestUpdate("service", "user", "Create", "username available")
 
 	// Check if email is taken
 	if db.Users.EmailExists(&email) {
-		logger.ErrorLogRequestError("service", "user", "Create", errors.New(string(response.ErrTakenEmail)))
+		logger.ErrorLogRequestError("service", "user", "Create", "email taken", nil)
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenEmail))
 	}
+	logger.DebugLogRequestUpdate("service", "user", "Create", "email available")
 
 	// Create user in database
 	user, err := db.Users.CreateUser(username, email, password)
 	if err != nil {
-		logger.ErrorLogRequestError("service", "user", "Create", err)
+		logger.ErrorLogRequestError("service", "user", "Create", "error creating user", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
+	logger.DebugLogRequestUpdate("service", "user", "Create", "user created")
 
 	// Return the user
 	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{user}))

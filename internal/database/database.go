@@ -49,7 +49,7 @@ func New(cfg *config.Config) (*Database, error) {
 	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index
-	db.Model(&Like{}).AddUniqueIndex("idx_user_status", "user_id", "status_id")
+	//db.Model(&Like{}).AddUniqueIndex("idx_user_post", "user_id", "post_id")
 	logger.Log.Info().Msg("Created unique index for Like")
 
 	return &Database{
