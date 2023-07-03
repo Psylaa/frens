@@ -57,7 +57,22 @@ func createLikeByPostID(c *fiber.Ctx) error {
 }
 
 func deleteLikeByPostID(c *fiber.Ctx) error {
-	return nil
+
+	// Get post ID from the params
+	postID := c.Params("postId")
+	if postID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
+
+	// Convert the post ID to a UUID
+	postUUID, err := uuid.Parse(postID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing post ID to UUID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
+
+	// Send the request to the service
+	return srv.Likes.Delete(c, &postUUID)
 }
 
 func getLikesByUserID(c *fiber.Ctx) error {
