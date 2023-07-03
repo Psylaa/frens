@@ -117,8 +117,8 @@ func (r *Router) addProtectedRoutes() {
 
 	// Feed
 	r.App.Get("/feeds/chronological", getChronoFeed)
-	r.App.Get("/feeds/algorithmic", getAlgoFeed)
-	r.App.Get("/feeds/explore", getExploreFeed)
+	r.App.Get("/feeds/algorithmic", getChronoFeed) // temp
+	r.App.Get("/feeds/explore", getChronoFeed)     // temp
 
 	// Follows
 	r.App.Get("/users/:userId/followers", getFollowersByUserID)

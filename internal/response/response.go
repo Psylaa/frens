@@ -17,7 +17,7 @@ const (
 )
 
 type Response struct {
-	Data     interface{} `json:"data,omitempty"` // Can be an array or a single data object
+	Data     []Data      `json:"data,omitempty"` // Can be an array or a single data object
 	Errors   []*RespErr  `json:"errors,omitempty"`
 	Included []*Response `json:"included,omitempty"` // Recursive types must be pointers
 	Meta     *Meta       `json:"meta,omitempty"`
