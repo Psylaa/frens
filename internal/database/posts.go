@@ -87,6 +87,26 @@ func (pr *PostRepo) GetByUserIDs(userIDs []uuid.UUID, cursor time.Time, limit in
 		return nil, err
 	}
 
+	// Get is liked
+	for _, post := range posts {
+		likeExists, err := pr.Likes.Exists(&post.AuthorID, &post.ID)
+		if err != nil {
+			logger.Log.Debug().Str("package", "database").Msgf("Error checking if post is liked: %s", err.Error())
+			return nil, err
+		}
+		post.IsLiked = likeExists
+	}
+
+	// Get is bookmarked
+	for _, post := range posts {
+		bookmarkExists, err := pr.Bookmarks.Exists(&post.AuthorID, &post.ID)
+		if err != nil {
+			logger.Log.Debug().Str("package", "database").Msgf("Error checking if post is bookmarked: %s", err.Error())
+			return nil, err
+		}
+		post.IsBookmarked = bookmarkExists
+	}
+
 	return posts, nil
 }
 

@@ -144,6 +144,11 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Post("/users/:userId/followers", createFollowByUserID)
 	r.App.Delete("/users/:userId/followers", deleteFollowerByUserID)
 
+	// Future possible routes
+	// r.App.Get("/posts/:postId/likes/user/:userId", checkIfPostIsLikedByUser)
+	// r.App.Get("/posts/:postId/bookmarks/user/:userId", checkIfPostIsBookmarkedByUser)
+	// r.App.Get("/users/:userId/followers/user/:userId", checkIfUserIsFollowedByUser)
+
 	logger.Log.Info().Msg("Protected routes added")
 }
 
