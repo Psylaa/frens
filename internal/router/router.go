@@ -16,6 +16,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 var cfg *config.Config
@@ -83,7 +84,7 @@ func (r *Router) addPublicRoutes() {
 	r.App.Static("/files/default-cover.png", "./assets/default-cover.png")
 
 	r.App.Post("/login", login)
-	r.App.Get("/files/:fileId", retrieveFileByID)
+	r.App.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 	logger.Log.Info().Msg("Added public routes routes")
 }
@@ -114,7 +115,7 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Post("/posts/:postId/likes", createLikeByPostID)         // userId from token
 	r.App.Delete("/posts/:postId/likes", deleteLikeByPostID)       // only callable by owner
 
-	r.App.Get("/users/:userId/likes", getLikesByUserID)            // Callable by anyone
+	r.App.Get("/users/:userId/likes", getLikesByUserID)            // only callable by owner
 	r.App.Get("/users/:userId/likes/count", getLikesCountByUserID) // same as getLikesByUserID but only returns count
 
 	// Users
@@ -130,6 +131,7 @@ func (r *Router) addProtectedRoutes() {
 	r.App.Get("/users/:userId/posts", getPostsByUserID)
 
 	// Files
+	r.App.Get("/files/:fileId", retrieveFileByID)
 	r.App.Post("/files", createFile)
 	r.App.Delete("/files/:fileId", deleteFileByID)
 

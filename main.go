@@ -12,6 +12,19 @@ import (
 	"github.com/bwoff11/frens/internal/service"
 )
 
+// @title Frens API
+// @version 1.0
+// @description ActivityPub social network API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Frens Repo
+// @contact.url http://www.github.com/bwoff11/frens
+
+// @license.name MIT License
+// @license.url http://www.github.com/bwoff11/frens/docs/LICENSE.md
+
+// @host frens.moe
+// @BasePath /v1
 func main() {
 	// Read the config
 	cfg, err := config.ReadConfig("config.yaml")

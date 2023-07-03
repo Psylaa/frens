@@ -1,0 +1,15 @@
+basePath: /v1
+host: frens.moe
+info:
+  contact:
+    name: Frens Repo
+    url: http://www.github.com/bwoff11/frens
+  description: ActivityPub social network API
+  license:
+    name: MIT License
+    url: http://www.github.com/bwoff11/frens/docs/LICENSE.md
+  termsOfService: http://swagger.io/terms/
+  title: Frens API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

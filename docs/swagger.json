@@ -1,0 +1,20 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "ActivityPub social network API",
+        "title": "Frens API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Frens Repo",
+            "url": "http://www.github.com/bwoff11/frens"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "http://www.github.com/bwoff11/frens/docs/LICENSE.md"
+        },
+        "version": "1.0"
+    },
+    "host": "frens.moe",
+    "basePath": "/v1",
+    "paths": {}
+}
