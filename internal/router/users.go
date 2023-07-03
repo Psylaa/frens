@@ -80,9 +80,9 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 	return ur.Srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
-// @Summary Get a user by ID
-// @Description Fetch a specific user by their ID.
-// @Tags Bookmarks
+// @Summary Update a user
+// @Description Update a user.
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param id path string true "User ID"

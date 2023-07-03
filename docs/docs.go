@@ -31,7 +31,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get the bookmarks for the user based on the provided token",
+                "description": "Get bookmarks",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,14 +41,19 @@ const docTemplate = `{
                 "tags": [
                     "Bookmarks"
                 ],
-                "summary": "Get the bookmarks for self",
+                "summary": "Get bookmarks",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "User ID",
                         "name": "userId",
-                        "in": "path",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Count",
+                        "name": "count",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -116,97 +121,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/bookmarks/count": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get the count of bookmarks for the user based on the provided token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Bookmarks"
-                ],
-                "summary": "Get the count of bookmarks for self",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
         "/bookmarks/{bookmarkId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get the details of a specific bookmark based on the provided ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Bookmarks"
-                ],
-                "summary": "Retrieve a bookmark by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bookmark ID",
-                        "name": "bookmarkId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -396,7 +311,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/files/{fileId}": {
+        "/files/{:fileId}": {
             "get": {
                 "security": [
                     {
@@ -434,7 +349,9 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            },
+            }
+        },
+        "/files/{fileId}": {
             "delete": {
                 "security": [
                     {
@@ -506,21 +423,15 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "{\"error\":\"Invalid ID\"}",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "Bad Request"
                     },
                     "500": {
-                        "description": "{\"error\":\"Internal server error\"}",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "Internal Server Error"
                     }
                 }
             }
         },
-        "/follows/{id}": {
+        "/follows/{userId}": {
             "post": {
                 "security": [
                     {
@@ -633,16 +544,14 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            }
-        },
-        "/likes/{likeId}": {
-            "get": {
+            },
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get the details of a specific like based on the provided ID",
+                "description": "Create a new like for a user based on the provided token",
                 "consumes": [
                     "application/json"
                 ],
@@ -652,34 +561,21 @@ const docTemplate = `{
                 "tags": [
                     "Likes"
                 ],
-                "summary": "Retrieve a specific like by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Like ID",
-                        "name": "likeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Create a like",
                 "responses": {
                     "200": {
                         "description": "OK"
                     },
-                    "400": {
-                        "description": "Bad Request"
-                    },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
                     },
                     "500": {
                         "description": "Internal Server Error"
                     }
                 }
-            },
+            }
+        },
+        "/likes/{likeId}": {
             "delete": {
                 "security": [
                     {
@@ -725,6 +621,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/login": {
+            "post": {
+                "description": "Authenticate a user and return a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/posts": {
             "post": {
                 "description": "Create a new post.",
@@ -735,7 +683,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "posts"
+                    "Posts"
                 ],
                 "summary": "Create a post",
                 "responses": {
@@ -761,7 +709,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "posts"
+                    "Posts"
                 ],
                 "summary": "Get a post by ID",
                 "parameters": [
@@ -797,7 +745,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "posts"
+                    "Posts"
                 ],
                 "summary": "Update a post",
                 "parameters": [
@@ -836,7 +784,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "posts"
+                    "Posts"
                 ],
                 "summary": "Delete a post",
                 "parameters": [
@@ -964,7 +912,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Fetch a specific user by their ID.",
+                "description": "Update a user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -972,9 +920,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Bookmarks"
+                    "Users"
                 ],
-                "summary": "Get a user by ID",
+                "summary": "Update a user",
                 "parameters": [
                     {
                         "type": "string",
@@ -1042,6 +990,37 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/verify": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Verify Token",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error"

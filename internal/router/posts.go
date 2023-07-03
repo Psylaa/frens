@@ -23,7 +23,7 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/:id", pr.getByID)
+	rtr.Get("/:", pr.get)
 	rtr.Post("", pr.create)
 	rtr.Put("/:id", pr.update)
 	rtr.Delete("/:id", pr.delete)
@@ -31,7 +31,7 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 
 // @Summary Get a post by ID
 // @Description Fetch a specific post by its ID.
-// @Tags posts
+// @Tags Posts
 // @Accept json
 // @Produce json
 // @Param id path string true "Post ID"
@@ -40,7 +40,7 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 404
 // @Failure 500
 // @Router /posts/{id} [get]
-func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
+func (pr *PostsRepo) get(c *fiber.Ctx) error {
 	return nil
 	/*
 		postID, err := uuid.Parse(c.Params("id"))
@@ -72,7 +72,7 @@ func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
 
 // @Summary Create a post
 // @Description Create a new post.
-// @Tags posts
+// @Tags Posts
 // @Accept json
 // @Produce json
 // @Success 200
@@ -108,7 +108,7 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 
 // @Summary Update a post
 // @Description Update an existing post.
-// @Tags posts
+// @Tags Posts
 // @Accept json
 // @Produce json
 // @Param id path string true "Post ID"
@@ -124,7 +124,7 @@ func (pr *PostsRepo) update(c *fiber.Ctx) error {
 
 // @Summary Delete a post
 // @Description Delete a post.
-// @Tags posts
+// @Tags Posts
 // @Accept json
 // @Produce json
 // @Param id path string true "Post ID"

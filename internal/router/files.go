@@ -24,37 +24,9 @@ func NewFilesRepo(db *database.Database, srv *service.Service) *FilesRepo {
 }
 
 func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/", fr.get)
 	rtr.Post("/", fr.create)
-	rtr.Get("/:fileId", fr.getByID)
 	rtr.Delete("/:fileId", fr.deleteByID)
-}
-
-// create handles the request to create a new file.
-// @Summary Create a new file
-// @Description Create a new file from the provided form data
-// @Tags Files
-// @Accept  multipart/form-data
-// @Produce  json
-// @Param file formData file true "File to upload"
-// @Success 200
-// @Failure 400
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /files [post]
-func (fr *FilesRepo) create(c *fiber.Ctx) error {
-
-	// Get the file from the request
-	file, err := c.FormFile("file")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	// Validate file exists
-	if file == nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	return fr.Srv.Files.Create(c, file)
 }
 
 // getByID handles the request to get a file by ID.
@@ -68,8 +40,8 @@ func (fr *FilesRepo) create(c *fiber.Ctx) error {
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /files/{fileId} [get]
-func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
+// @Router /files/{:fileId} [get]
+func (fr *FilesRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
 
 	// Get the file name from the request
@@ -118,6 +90,34 @@ func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
 
 	// Send the request to the service package
 	return fr.Srv.Files.RetrieveByID(c, &fileIdUUID)
+}
+
+// create handles the request to create a new file.
+// @Summary Create a new file
+// @Description Create a new file from the provided form data
+// @Tags Files
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param file formData file true "File to upload"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /files [post]
+func (fr *FilesRepo) create(c *fiber.Ctx) error {
+
+	// Get the file from the request
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Validate file exists
+	if file == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	return fr.Srv.Files.Create(c, file)
 }
 
 // deleteByID handles the request to delete a file by ID.

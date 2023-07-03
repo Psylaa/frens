@@ -27,12 +27,19 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/verify", lr.verifyToken)
 }
 
-// @route POST /v1/login/login
-// @description Authenticate a user with their username and password.
-// @tags login
-// @produce json
-// @success 200
-// @failure 400
+// @Summary Login
+// @Description Authenticate a user and return a JWT token
+// @Tags Login
+// @Accept  json
+// @Produce  json
+// @Param username body string true "Username"
+// @Param password body string true "Password"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /login [post]
 func (lr *LoginRepo) login(c *fiber.Ctx) error {
 	var body struct {
 		Username string `json:"username"`
@@ -49,12 +56,16 @@ func (lr *LoginRepo) login(c *fiber.Ctx) error {
 	return lr.Srv.Login.Login(c, &body.Username, &body.Password)
 }
 
-// @route GET /v1/login/verify
-// @description Verify the JWT token.
-// @tags login
-// @produce json
-// @success 200
-// @failure 400
+// @Summary Verify Token
+// @Description Verify a JWT token
+// @Tags Login
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /verify [get]
 func (lr *LoginRepo) verifyToken(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }

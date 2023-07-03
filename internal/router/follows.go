@@ -31,8 +31,8 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Produce  json
 // @Param userId path string true "User ID"
 // @Success 200
-// @Failure 400 {string} json "{"error":"Invalid ID"}"
-// @Failure 500 {string} json "{"error":"Internal server error"}"
+// @Failure 400
+// @Failure 500
 // @Security ApiKeyAuth
 // @Router /follows/ [get]
 func (fr *FollowsRepo) get(c *fiber.Ctx) error {
@@ -64,7 +64,7 @@ func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 // @Failure 409
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /follows/{id} [post]
+// @Router /follows/{userId} [post]
 func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 	/*
 		sourceID, err := getUserID(c)
@@ -109,7 +109,7 @@ func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /follows/{id} [delete]
+// @Router /follows/{userId} [delete]
 func (fr *FollowsRepo) delete(c *fiber.Ctx) error {
 	/*
 		SourceID, err := getUserID(c)
