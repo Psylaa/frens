@@ -24,7 +24,7 @@ func (br *BookmarkRepo) GetByID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
 	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
 }
 
-func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
+func (br *BookmarkRepo) GetSelf(c *fiber.Ctx, userID *uuid.UUID) error {
 	logger.DebugLogRequestRecieved("service", "bookmark", "GetByUserID")
 
 	// Get bookmarks from database

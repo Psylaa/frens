@@ -3,13 +3,33 @@ package router
 import (
 	"path/filepath"
 
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-func createFile(c *fiber.Ctx) error {
+type FilesRepo struct {
+	DB  *database.Database
+	Srv *service.Service
+}
+
+func NewFilesRepo(db *database.Database, srv *service.Service) *FilesRepo {
+	return &FilesRepo{
+		DB:  db,
+		Srv: srv,
+	}
+}
+
+func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Post("/", fr.create)
+	rtr.Get("/:fileId", fr.getByID)
+	rtr.Delete("/:fileId", fr.deleteByID)
+}
+
+func (fr *FilesRepo) create(c *fiber.Ctx) error {
 
 	// Get the file from the request
 	file, err := c.FormFile("file")
@@ -22,10 +42,10 @@ func createFile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return srv.Files.Create(c, file)
+	return fr.Srv.Files.Create(c, file)
 }
 
-func retrieveFileByID(c *fiber.Ctx) error {
+func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
 
 	// Get the file name from the request
@@ -73,10 +93,10 @@ func retrieveFileByID(c *fiber.Ctx) error {
 		Msg("Converted file ID to UUID")
 
 	// Send the request to the service package
-	return srv.Files.RetrieveByID(c, &fileIdUUID)
+	return fr.Srv.Files.RetrieveByID(c, &fileIdUUID)
 }
 
-func deleteFileByID(c *fiber.Ctx) error {
+func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "deleteFile")
 
 	// Get the file name from the request
@@ -121,5 +141,5 @@ func deleteFileByID(c *fiber.Ctx) error {
 		Msg("Converted file ID to UUID")
 
 	// Send the request to the service package
-	return srv.Files.DeleteByID(c, &fileIdUUID)
+	return fr.Srv.Files.DeleteByID(c, &fileIdUUID)
 }

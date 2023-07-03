@@ -1,14 +1,36 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
+type UsersRepo struct {
+	DB  *database.Database
+	Srv *service.Service
+}
+
+func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
+	return &UsersRepo{
+		DB:  db,
+		Srv: srv,
+	}
+}
+
+func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("", ur.get)
+	rtr.Post("", ur.create)
+	rtr.Get("/:userId", ur.getByID)
+	rtr.Put("/:userId", ur.update)
+	rtr.Delete("/:userId", ur.delete)
+}
+
 // getUsers handles the HTTP request to fetch all users.
-func getUsers(c *fiber.Ctx) error {
+func (ur *UsersRepo) get(c *fiber.Ctx) error {
 	/*
 		users, err := db.Users.GetUsers()
 		if err != nil {
@@ -20,7 +42,7 @@ func getUsers(c *fiber.Ctx) error {
 	return nil
 }
 
-func getUserByID(c *fiber.Ctx) error {
+func (ur *UsersRepo) getByID(c *fiber.Ctx) error {
 
 	// Get the user ID from the params
 	userID, err := uuid.Parse(c.Params("userId"))
@@ -29,11 +51,11 @@ func getUserByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
 	}
 
-	return srv.Users.GetByID(c, &userID)
+	return ur.Srv.Users.GetByID(c, &userID)
 }
 
 // createUser handles the HTTP request to create a new user.
-func createUser(c *fiber.Ctx) error {
+func (ur *UsersRepo) create(c *fiber.Ctx) error {
 	var body struct {
 		Username string `json:"username"`
 		Email    string `json:"email"`
@@ -45,11 +67,11 @@ func createUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
-	return srv.Users.Create(c, body.Username, body.Email, body.Password)
+	return ur.Srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
 // updateUser handles the HTTP request to update a user's details.
-func updateUser(c *fiber.Ctx) error {
+func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	/*
 		var body struct {
 			Bio              *string `json:"bio"`
@@ -106,5 +128,9 @@ func updateUser(c *fiber.Ctx) error {
 
 		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
 	*/
+	return nil
+}
+
+func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 	return nil
 }

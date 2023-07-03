@@ -1,10 +1,30 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
 
-func getFollowersByUserID(c *fiber.Ctx) error {
+type FollowsRepo struct {
+	DB  *database.Database
+	Srv *service.Service
+}
+
+func NewFollowsRepo(db *database.Database, srv *service.Service) *FollowsRepo {
+	return &FollowsRepo{
+		DB:  db,
+		Srv: srv,
+	}
+}
+
+func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/", fr.get)
+	rtr.Post("/:id", fr.create)
+	rtr.Delete("/:id", fr.delete)
+}
+
+func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 	/*
 		id := c.Params("id")
 		userID, err := uuid.Parse(id)
@@ -22,7 +42,7 @@ func getFollowersByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
-func createFollowByUserID(c *fiber.Ctx) error {
+func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 	/*
 		sourceID, err := getUserID(c)
 		if err != nil {
@@ -55,7 +75,7 @@ func createFollowByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
-func deleteFollowerByUserID(c *fiber.Ctx) error {
+func (fr *FollowsRepo) delete(c *fiber.Ctx) error {
 	/*
 		SourceID, err := getUserID(c)
 		if err != nil {
@@ -83,24 +103,6 @@ func deleteFollowerByUserID(c *fiber.Ctx) error {
 		}
 
 		return c.SendStatus(fiber.StatusOK)
-	*/
-	return nil
-}
-
-func getFollowingByUserID(c *fiber.Ctx) error {
-	/*
-		id := c.Params("id")
-		userID, err := uuid.Parse(id)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-		}
-
-		following, err := db.Follows.GetFollowing(userID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-
-		return c.JSON(response.GenerateFollowsResponse(following))
 	*/
 	return nil
 }

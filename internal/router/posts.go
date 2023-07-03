@@ -1,15 +1,31 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/service"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
+type PostsRepo struct {
+	DB  *database.Database
+	Srv *service.Service
+}
+
+func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
+	return &PostsRepo{
+		DB:  db,
+		Srv: srv,
+	}
+}
+
+func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {}
+
 // getPost handles the HTTP request to fetch a specific post.
-func getPostByID(c *fiber.Ctx) error {
+func (pr *PostsRepo) getPostByID(c *fiber.Ctx) error {
 	return nil
 	/*
 		postID, err := uuid.Parse(c.Params("id"))
@@ -39,7 +55,7 @@ func getPostByID(c *fiber.Ctx) error {
 	*/
 }
 
-func getPostsByUserID(c *fiber.Ctx) error {
+func (pr *PostsRepo) getPostsByUserID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "posts", "getPostsByUserID")
 
 	// Get the user id from the request
@@ -57,11 +73,11 @@ func getPostsByUserID(c *fiber.Ctx) error {
 	}
 
 	// Send to service package
-	return srv.Posts.GetByUserID(c, &userID)
+	return pr.Srv.Posts.GetByUserID(c, &userID)
 }
 
 // getPosts handles the HTTP request to fetch all posts by a user.
-func GetPostsByUserID(c *fiber.Ctx) error {
+func (pr *PostsRepo) GetPostsByUserID(c *fiber.Ctx) error {
 	/*
 		userID, err := uuid.Parse(c.Query("userId"))
 		if err != nil {
@@ -79,7 +95,7 @@ func GetPostsByUserID(c *fiber.Ctx) error {
 }
 
 // createPost handles the HTTP request to create a new post.
-func createPost(c *fiber.Ctx) error {
+func (pr *PostsRepo) createPost(c *fiber.Ctx) error {
 	var body struct {
 		Text     string         `json:"text"`
 		Privacy  shared.Privacy `json:"privacy"`
@@ -103,11 +119,11 @@ func createPost(c *fiber.Ctx) error {
 		mediaIDs = append(mediaIDs, &mediaID)
 	}
 
-	return srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
+	return pr.Srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
 }
 
 // deletePost handles the HTTP request to delete a post.
-func deletePost(c *fiber.Ctx) error {
+func (pr *PostsRepo) deletePost(c *fiber.Ctx) error {
 	/*
 		// Parse the post ID from the URL parameter.
 		postID, err := uuid.Parse(c.Params("id"))
