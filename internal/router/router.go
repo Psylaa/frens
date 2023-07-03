@@ -97,13 +97,14 @@ func (r *Router) addProtectedRoutes() {
 	// Login
 	r.App.Get("/login/verify", verifyUserToken)
 
+	// Bookmarks
+	// Bookmarks are private (aside from count of total bookmarks), so no route for getting bookmarks by post or user
 	r.App.Get("/bookmarks/:bookmarkId", getBookmarkByID)
 	r.App.Delete("/bookmarks/:bookmarkId", deleteBookmarkByID)
 
-	r.App.Get("/posts/:postId/bookmarks", getBookmarksByPostID)
-	r.App.Get("/posts/:postId/bookmarks/count", getBookmarksCountByPostID) // same as getBookmarksByPostID but only returns count
-	r.App.Post("/posts/:postId/bookmarks", createBookmarkbyPostID)         // userId from token
-	r.App.Delete("/posts/:postId/bookmarks", deleteBookmarkByPostID)       // only callable by owner
+	r.App.Get("/posts/:postId/bookmarks/count", getBookmarksCountByPostID)
+	r.App.Post("/posts/:postId/bookmarks", createBookmarkbyPostID)   // userId from token
+	r.App.Delete("/posts/:postId/bookmarks", deleteBookmarkByPostID) // only callable by owner
 
 	r.App.Get("/users/:userId/bookmarks", getBookmarksByUserID)            // only callable by owner
 	r.App.Get("/users/:userId/bookmarks/count", getBookmarksCountByUserID) // same as getBookmarksByUserID but only returns count

@@ -25,10 +25,50 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
       security:
       - ApiKeyAuth: []
       summary: Retrieve a bookmark by ID
+      tags:
+      - Bookmarks
+  /users/{userId}/bookmarks:
+    get:
+      consumes:
+      - application/json
+      description: Get all bookmarks for a specific user based on the provided ID.
+        Only callable by the owner.
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve all bookmarks by user ID
       tags:
       - Bookmarks
 swagger: "2.0"

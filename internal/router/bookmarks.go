@@ -15,6 +15,11 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param bookmarkId path string true "Bookmark ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
 // @Security ApiKeyAuth
 // @Router /bookmarks/{bookmarkId} [get]
 func getBookmarkByID(c *fiber.Ctx) error {
@@ -28,17 +33,19 @@ func getBookmarkByID(c *fiber.Ctx) error {
 	return srv.Bookmarks.GetByID(c, &bookmarkID)
 }
 
-func getBookmarksByPostID(c *fiber.Ctx) error {
-	postId := c.Params("postId")
-	postID, err := uuid.Parse(postId)
-	if err != nil {
-		log.Error().Err(err).Msg("Error parsing post ID: " + postId)
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	return srv.Bookmarks.GetByPostID(c, &postID)
-}
-
+// @Summary Retrieve all bookmarks by user ID
+// @Description Get all bookmarks for a specific user based on the provided ID. Only callable by the owner.
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{userId}/bookmarks [get]
 func getBookmarksByUserID(c *fiber.Ctx) error {
 	// Since this is only callable by owner, we can get the user ID from the token
 	return srv.Bookmarks.GetByUserID(c, c.Locals("requestorId").(*uuid.UUID))
