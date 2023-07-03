@@ -6,7 +6,6 @@ import (
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type UsersRepo struct {
@@ -24,12 +23,23 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("", ur.get)
 	rtr.Post("", ur.create)
-	rtr.Get("/:userId", ur.getByID)
-	rtr.Put("/:userId", ur.update)
+	rtr.Patch("/:userId", ur.update)
 	rtr.Delete("/:userId", ur.delete)
 }
 
-// getUsers handles the HTTP request to fetch all users.
+// @Summary Get a user by ID
+// @Description Fetch a specific user by their ID.
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{id} [get]
 func (ur *UsersRepo) get(c *fiber.Ctx) error {
 	/*
 		users, err := db.Users.GetUsers()
@@ -42,19 +52,19 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 	return nil
 }
 
-func (ur *UsersRepo) getByID(c *fiber.Ctx) error {
-
-	// Get the user ID from the params
-	userID, err := uuid.Parse(c.Params("userId"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing userID")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
-	}
-
-	return ur.Srv.Users.GetByID(c, &userID)
-}
-
-// createUser handles the HTTP request to create a new user.
+// @Summary Create a user
+// @Description Create a new user.
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/ [post]
 func (ur *UsersRepo) create(c *fiber.Ctx) error {
 	var body struct {
 		Username string `json:"username"`
@@ -70,7 +80,19 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 	return ur.Srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
-// updateUser handles the HTTP request to update a user's details.
+// @Summary Get a user by ID
+// @Description Fetch a specific user by their ID.
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/ [patch]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	/*
 		var body struct {
@@ -131,6 +153,19 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Delete a user
+// @Description Delete a user.
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users [delete]
 func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 	return nil
 }

@@ -22,10 +22,25 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 	}
 }
 
-func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {}
+func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/:id", pr.getByID)
+	rtr.Post("", pr.create)
+	rtr.Put("/:id", pr.update)
+	rtr.Delete("/:id", pr.delete)
+}
 
-// getPost handles the HTTP request to fetch a specific post.
-func (pr *PostsRepo) getPostByID(c *fiber.Ctx) error {
+// @Summary Get a post by ID
+// @Description Fetch a specific post by its ID.
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path string true "Post ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /posts/{id} [get]
+func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
 	return nil
 	/*
 		postID, err := uuid.Parse(c.Params("id"))
@@ -55,47 +70,16 @@ func (pr *PostsRepo) getPostByID(c *fiber.Ctx) error {
 	*/
 }
 
-func (pr *PostsRepo) getPostsByUserID(c *fiber.Ctx) error {
-	logger.DebugLogRequestRecieved("router", "posts", "getPostsByUserID")
-
-	// Get the user id from the request
-	userID, err := uuid.Parse(c.Params("userId"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing userID: %v")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-	logger.Log.Debug().Msgf("successfully parsed provided user id into uuid: %v", userID)
-
-	// Check to make sure userID is not empty
-	if userID == uuid.Nil {
-		logger.Log.Error().Msg("userID was parsed as nil")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send to service package
-	return pr.Srv.Posts.GetByUserID(c, &userID)
-}
-
-// getPosts handles the HTTP request to fetch all posts by a user.
-func (pr *PostsRepo) GetPostsByUserID(c *fiber.Ctx) error {
-	/*
-		userID, err := uuid.Parse(c.Query("userId"))
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-		}
-		logger.Log.Debug().Msgf("successfully parsed provided user id into uuid: %v", userID)
-
-		posts, err := db.Posts.GetPostsByUserID(userID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		return c.JSON(response.GeneratePostsResponse(posts))
-	*/
-	return nil
-}
-
-// createPost handles the HTTP request to create a new post.
-func (pr *PostsRepo) createPost(c *fiber.Ctx) error {
+// @Summary Create a post
+// @Description Create a new post.
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /posts [post]
+func (pr *PostsRepo) create(c *fiber.Ctx) error {
 	var body struct {
 		Text     string         `json:"text"`
 		Privacy  shared.Privacy `json:"privacy"`
@@ -122,8 +106,35 @@ func (pr *PostsRepo) createPost(c *fiber.Ctx) error {
 	return pr.Srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
 }
 
-// deletePost handles the HTTP request to delete a post.
-func (pr *PostsRepo) deletePost(c *fiber.Ctx) error {
+// @Summary Update a post
+// @Description Update an existing post.
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path string true "Post ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{id} [put]
+func (pr *PostsRepo) update(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Delete a post
+// @Description Delete a post.
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path string true "Post ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{id} [delete]
+func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	/*
 		// Parse the post ID from the URL parameter.
 		postID, err := uuid.Parse(c.Params("id"))

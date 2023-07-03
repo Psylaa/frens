@@ -24,6 +24,17 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:id", fr.delete)
 }
 
+// @Summary Retrieve user's followers
+// @Description Retrieve the followers of a user based on the provided user ID
+// @Tags Follows
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "User ID"
+// @Success 200
+// @Failure 400 {string} json "{"error":"Invalid ID"}"
+// @Failure 500 {string} json "{"error":"Internal server error"}"
+// @Security ApiKeyAuth
+// @Router /follows/ [get]
 func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 	/*
 		id := c.Params("id")
@@ -42,6 +53,18 @@ func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Follow a user
+// @Description Create a follow relationship with the target user
+// @Tags Follows
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 201
+// @Failure 400
+// @Failure 409
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /follows/{id} [post]
 func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 	/*
 		sourceID, err := getUserID(c)
@@ -75,6 +98,18 @@ func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Unfollow a user
+// @Description Delete a follow relationship with the target user
+// @Tags Follows
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /follows/{id} [delete]
 func (fr *FollowsRepo) delete(c *fiber.Ctx) error {
 	/*
 		SourceID, err := getUserID(c)

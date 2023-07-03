@@ -58,6 +58,8 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 		},
 	}
 
+	r.App.Get("/swagger/*", swagger.HandlerDefault) // Move at some point. Just needed to get it working.
+
 	r.configureMiddleware()
 	r.configureRoutes()
 
@@ -82,15 +84,10 @@ func (r *Router) configureMiddleware() {
 		Max:        1000,
 		Expiration: 30 * time.Second,
 	}))
-
-	// Requestor ID
-	r.App.Use(r.getUserIDFromTokenMiddleware)
 }
 
 func (r *Router) configureRoutes() {
 	v1 := r.App.Group("/v1")
-
-	v1.Get("/swagger/*", swagger.HandlerDefault)
 	r.Repos.Login.ConfigureRoutes(v1.Group("/login"))
 
 	r.addAuth()
@@ -123,6 +120,9 @@ func (r *Router) addAuth() {
 			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
+
+	// Requestor ID
+	r.App.Use(r.getUserIDFromTokenMiddleware)
 }
 
 // Middleware function to extract the user ID from the token, validate it, and add it to the context:

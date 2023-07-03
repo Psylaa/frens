@@ -25,14 +25,50 @@ func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:id", lr.deleteByID)
 }
 
+// @Summary Retrieve all likes for a user
+// @Description Retrieve all likes made by the user based on the provided token
+// @Tags Likes
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /likes [get]
 func (lr *LikesRepo) get(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Retrieve a specific like by ID
+// @Description Get the details of a specific like based on the provided ID
+// @Tags Likes
+// @Accept  json
+// @Produce  json
+// @Param likeId path string true "Like ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /likes/{likeId} [get]
 func (lr *LikesRepo) getByID(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Delete a like by ID
+// @Description Delete a specific like based on the provided ID
+// @Tags Likes
+// @Accept  json
+// @Produce  json
+// @Param likeId path string true "Like ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /likes/{likeId} [delete]
 func (lr *LikesRepo) deleteByID(c *fiber.Ctx) error {
 	return nil
 }

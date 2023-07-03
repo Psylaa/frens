@@ -29,6 +29,18 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:fileId", fr.deleteByID)
 }
 
+// create handles the request to create a new file.
+// @Summary Create a new file
+// @Description Create a new file from the provided form data
+// @Tags Files
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param file formData file true "File to upload"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /files [post]
 func (fr *FilesRepo) create(c *fiber.Ctx) error {
 
 	// Get the file from the request
@@ -45,6 +57,18 @@ func (fr *FilesRepo) create(c *fiber.Ctx) error {
 	return fr.Srv.Files.Create(c, file)
 }
 
+// getByID handles the request to get a file by ID.
+// @Summary Get a file by ID
+// @Description Retrieve a specific file using its ID
+// @Tags Files
+// @Accept  json
+// @Produce  json
+// @Param fileId path string true "File ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /files/{fileId} [get]
 func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
 
@@ -96,6 +120,18 @@ func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
 	return fr.Srv.Files.RetrieveByID(c, &fileIdUUID)
 }
 
+// deleteByID handles the request to delete a file by ID.
+// @Summary Delete a file by ID
+// @Description Delete a specific file using its ID
+// @Tags Files
+// @Accept  json
+// @Produce  json
+// @Param fileId path string true "File ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /files/{fileId} [delete]
 func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "deleteFile")
 
