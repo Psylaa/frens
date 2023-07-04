@@ -1,34 +1,27 @@
-# Frens
-Welcome to Frens, a decentralized social networking platform engineered for performance, scalability, and respect for user privacy. Our platform is lightweight yet robust, built on Go, and is dedicated to providing an enhanced social media experience that prioritizes user control over data.
+# Welcome to Frens
 
-## Key Features
-One of the biggest blockers to the widespread adoption of decentralized social media is esoteric API standards. Therefore, we have chosen to stricly adhere to the JSON API specification, which is widely used and well-documented. This allows developers to easily integrate Frens into their existing applications, and makes it easy for users to migrate their data to Frens.
+Welcome to Frens, a revolutionary decentralized social networking platform. Designed with a keen focus on performance, scalability, and an unwavering respect for user privacy, Frens delivers an elevated social media experience. Built with the power of Go, our platform stands as a lightweight, yet formidable solution, giving users unparalleled control over their data.
 
-Additionally, the API is fully documented with swagger, which allows for easy integration into any application.
+To get started, please check out our [wiki](https://github.com/bwoff11/frens/wiki).
+To see what we're working on, check out our [roadmap](https://github.com/users/bwoff11/projects/2/views/1).
+Or, if you're feeling adventurous, you can dive right into the [specification](https://github.com/bwoff11/frens/blob/main/docs/swagger.yaml).
 
-## Request Lifecycle
-The following section provides a detailed overview of the lifecycle of a request as it's processed by our backend service. This lifecycle comprises of several crucial stages, each playing a unique role in ensuring the successful processing and response to a client's request.
+# The Purpose
 
-1. Request Reception: The initial request is received by our server which uses the Fiber framework, building on top of the Go's native http package. The role of parsing this request falls to our router package, which is adept at unpacking the incoming request data and reformating it into a structure that our service can readily process.
+Frens was born out of a necessity to address prevalent issues in current ActivityPub implementations. Our mission is to redefine the standards and deliver an optimized user experience.
 
-2. Business Logic Execution: The service package is tasked with processing the parsed request data. It houses the majority of the business logic, including crucial operations such as duplicate checks, data validation, and interaction with the database for persistent storage.
+## User Experience and Interface
 
-3. Database Interaction: Our database package manages all interactions with the underlying persistent storage layer. It's responsible for all data manipulation tasks including creation, update, and deletion of records, ensuring data consistency and integrity.
+A server oriented towards end-users requires an intuitive and appealing frontend. With the ambition to establish more than just a standard, we're developing our own frontend, [Frens Frontend Material](https://github.com/bwoff11/frens-frontend-material). Our goal is to inspire others to create frontends, but only after we've established that it's feasible to develop an easy-to-use, aesthetically pleasing frontend. We've adopted the JSON API standard to provide developers with a consistent and reliable interface, protecting them from ever-evolving and inconsistent standards.
 
-4. Response Generation: Finally, the service package coordinates with the response package to generate an appropriate response for the client. The response package is instrumental in ensuring that our responses comply with the JSON API specification, providing a standardized format for the client to consume.
+## Performance and Sustainability
 
-In essence, each stage in this request lifecycle forms an integral part of our service, working together to provide a seamless experience for all users interacting with our backend service.
+We've observed existing implementations to be either performance-limited or too arcane for widespread contributions. Our choice of the Go programming language aims to resolve these issues. Go offers satisfactory performance and, more importantly, a codebase that is comprehensible and accessible for contributions. Furthermore, we've opted for a SQL database over a graph database. Despite the suitability of graph databases for social networks, their complexity and maintenance requirements outweigh their benefits. A SQL database, on the other hand, is easier to maintain and is more familiar to a wider audience.
 
-## Comprehensive Documentation in Our Wiki
-Our extensive wiki is your primary resource for all things Frens. Whether you're a user looking to get the most out of the Frens platform, a developer eager to dive into our code, or a curious onlooker who wants to understand our design philosophy and AI integration strategy, the wiki has you covered.
+## Adherence to Professional Standards
 
-Our wiki is meticulously organized and updated, providing a wealth of knowledge about every aspect of Frens. It serves as a roadmap, guiding you through our:
-
-Design Philosophy: Understand the principles that drive our development process and learn about our AI integration.
-API Documentation: Dive into the details of our intuitive API, with clear explanations and examples to ease your development process.
-Development Stages: Get a clear idea about our development strategy, from pre-alpha to release stages.
-And much more!
-Our commitment to transparency and education means our wiki is always growing and evolving, just like Frens itself. It's not just a manual—it's a journey into the heart of our project.
+Regrettably, certain project communities fail to meet the professional standards we believe to be essential. At Frens, we aim to be a beacon of professionalism, inclusivity, and excellence. We strive to foster a project that others can admire and learn from. To ensure this, we've drafted a Code of Conduct that respects the identities and affiliations of *all* individuals. We are committed to implementing workflows and standards that inspire confidence in the reliability and security of our platform.
 
 ## License
-Frens is released under the MIT License.
+
+Frens is released under the MIT License. We welcome contributions that align with our mission and uphold our standards.
