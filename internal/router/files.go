@@ -41,7 +41,7 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /files [get]
 func (fr *FilesRepo) get(c *fiber.Ctx) error {
-	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
+	logger.DebugLogRequestReceived("router", "files", "retrieveFile")
 
 	// Get the file name from the request
 	filename := c.Params("fileId")
@@ -132,7 +132,7 @@ func (fr *FilesRepo) create(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /files/{fileId} [delete]
 func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
-	logger.DebugLogRequestRecieved("router", "files", "deleteFile")
+	logger.DebugLogRequestReceived("router", "files", "deleteFile")
 
 	// Get the file name from the request
 	filename := c.Params("fileId")

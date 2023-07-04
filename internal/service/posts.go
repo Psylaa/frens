@@ -45,7 +45,7 @@ func (pr *PostRepo) Create(
 	text string,
 	privacy shared.Privacy,
 	mediaIDs []*uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "post", "Create")
+	logger.DebugLogRequestReceived("service", "post", "Create")
 
 	requestorId := c.Locals("requestorId").(*uuid.UUID)
 

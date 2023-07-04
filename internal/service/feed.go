@@ -13,7 +13,7 @@ import (
 type FeedRepo struct{}
 
 func (f *FeedRepo) GetChrono(c *fiber.Ctx, userID *uuid.UUID, cursor time.Time) error {
-	logger.DebugLogRequestRecieved("service", "feed", "GetChrono")
+	logger.DebugLogRequestReceived("service", "feed", "GetChrono")
 
 	// Get user from database
 	user, err := db.Users.GetByID(userID, userID)

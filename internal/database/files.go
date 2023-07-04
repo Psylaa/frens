@@ -52,7 +52,7 @@ func (fr *FileRepo) GetByUserID(userID *uuid.UUID) ([]File, error) {
 }
 
 func (fr *FileRepo) Create(file *File) (*File, error) {
-	logger.DebugLogRequestRecieved("database", "files", "Create")
+	logger.DebugLogRequestReceived("database", "files", "Create")
 	if err := fr.db.Create(file).Error; err != nil {
 		return nil, err
 	}

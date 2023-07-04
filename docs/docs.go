@@ -180,7 +180,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/feed/algo": {
+        "/feeds/algorithmic": {
             "get": {
                 "security": [
                     {
@@ -211,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/feed/chrono": {
+        "/feeds/chronological": {
             "get": {
                 "security": [
                     {
@@ -253,7 +253,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/feed/explore": {
+        "/feeds/explore": {
             "get": {
                 "security": [
                     {
@@ -636,7 +636,10 @@ const docTemplate = `{
             "post": {
                 "description": "Authenticate a user and return a JWT token",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "text/xml",
+                    "application/x-www-form-urlencoded",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -646,6 +649,20 @@ const docTemplate = `{
                 ],
                 "summary": "Login",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
                     {
                         "description": "Username",
                         "name": "username",
@@ -680,6 +697,34 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/login/verify": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Verify Token",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -1004,34 +1049,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/verify": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Verify a JWT token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Login"
-                ],
-                "summary": "Verify Token",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
                     }
                 }
             }

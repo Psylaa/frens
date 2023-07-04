@@ -16,7 +16,7 @@ func Init(level string) {
 	Log = zerolog.New(writer).With().Timestamp().Logger()
 }
 
-func DebugLogRequestRecieved(pack string, repo string, method string) {
+func DebugLogRequestReceived(pack string, repo string, method string) {
 	Log.Debug().
 		Str("package", pack).
 		Str("repo", repo).

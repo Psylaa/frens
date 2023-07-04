@@ -24,12 +24,11 @@ func NewFeedRepo(db *database.Database, srv *service.Service) *FeedRepo {
 }
 
 func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/chrono", fr.getChrono)
-	rtr.Get("/algo", fr.getAlgo)
+	rtr.Get("/chronological", fr.getChrono)
+	rtr.Get("/algorithmic", fr.getAlgo)
 	rtr.Get("/explore", fr.getExplore)
 }
 
-// getChrono handles the request to get the chronological feed for a user.
 // @Summary Get chronological feed
 // @Description Get posts in a chronological order
 // @Tags Feed
@@ -41,7 +40,7 @@ func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 401
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /feed/chrono [get]
+// @Router /feeds/chronological [get]
 func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 
 	// Get the cursor from the query string
@@ -61,7 +60,6 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 	return fr.Srv.Feed.GetChrono(c, c.Locals("requestorId").(*uuid.UUID), cursor)
 }
 
-// getAlgo handles the request to get the algorithm based feed for a user.
 // @Summary Get algorithm-based feed
 // @Description Get posts based on a particular algorithm (Not Implemented)
 // @Tags Feed
@@ -71,12 +69,11 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /feed/algo [get]
+// @Router /feeds/algorithmic [get]
 func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
 	return nil
 }
 
-// getExplore handles the request to get the explore feed for a user.
 // @Summary Get explore feed
 // @Description Get posts for the explore section (Not Implemented)
 // @Tags Feed
@@ -86,7 +83,7 @@ func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /feed/explore [get]
+// @Router /feeds/explore [get]
 func (fr *FeedRepo) getExplore(c *fiber.Ctx) error {
 	return nil
 }

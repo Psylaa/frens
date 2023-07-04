@@ -11,7 +11,7 @@ import (
 type UserRepo struct{}
 
 func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "user", "GetByID")
+	logger.DebugLogRequestReceived("service", "user", "GetByID")
 
 	// Get user from database
 	user, err := db.Users.GetByID(c.Locals("requestorId").(*uuid.UUID), userID)
@@ -70,7 +70,7 @@ func (ur *UserRepo) GetSettings(userID string) error {
 }
 
 func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password string) error {
-	logger.DebugLogRequestRecieved("service", "user", "Create")
+	logger.DebugLogRequestReceived("service", "user", "Create")
 
 	// Check if username is taken
 	if db.Users.UsernameExists(&username) {

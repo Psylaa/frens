@@ -92,7 +92,7 @@ func (r *Router) configureRoutes() {
 	r.Repos.Login.ConfigureRoutes(v1.Group("/login"))
 	r.addAuth()
 	r.Repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
-	r.Repos.Feed.ConfigureRoutes(v1.Group("/feed"))
+	r.Repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
 	r.Repos.Files.ConfigureRoutes(v1.Group("/files"))
 	r.Repos.Follows.ConfigureRoutes(v1.Group("/follows"))
 	r.Repos.Likes.ConfigureRoutes(v1.Group("/likes"))

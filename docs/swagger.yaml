@@ -116,7 +116,7 @@ paths:
       summary: Delete a bookmark by ID
       tags:
       - Bookmarks
-  /feed/algo:
+  /feeds/algorithmic:
     get:
       consumes:
       - application/json
@@ -135,7 +135,7 @@ paths:
       summary: Get algorithm-based feed
       tags:
       - Feed
-  /feed/chrono:
+  /feeds/chronological:
     get:
       consumes:
       - application/json
@@ -161,7 +161,7 @@ paths:
       summary: Get chronological feed
       tags:
       - Feed
-  /feed/explore:
+  /feeds/explore:
     get:
       consumes:
       - application/json
@@ -403,8 +403,21 @@ paths:
     post:
       consumes:
       - application/json
+      - text/xml
+      - application/x-www-form-urlencoded
+      - multipart/form-data
       description: Authenticate a user and return a JWT token
       parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
       - description: Username
         in: body
         name: username
@@ -431,6 +444,23 @@ paths:
         "500":
           description: Internal Server Error
       summary: Login
+      tags:
+      - Login
+  /login/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verify a JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Verify Token
       tags:
       - Login
   /posts:
@@ -642,21 +672,4 @@ paths:
       summary: Get a user by ID
       tags:
       - Users
-  /verify:
-    get:
-      consumes:
-      - application/json
-      description: Verify a JWT token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-      security:
-      - ApiKeyAuth: []
-      summary: Verify Token
-      tags:
-      - Login
 swagger: "2.0"

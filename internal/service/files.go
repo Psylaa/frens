@@ -19,7 +19,7 @@ func (fr *FilesRepo) GetByID(c *fiber.Ctx) error {
 }
 
 func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
-	logger.DebugLogRequestRecieved("service", "files", "Create")
+	logger.DebugLogRequestReceived("service", "files", "Create")
 
 	requestorId := c.Locals("requestorId").(*uuid.UUID)
 
@@ -80,7 +80,7 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 }
 
 func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "files", "Retrieve")
+	logger.DebugLogRequestReceived("service", "files", "Retrieve")
 
 	// Get file data
 	logger.Log.Debug().
@@ -116,7 +116,7 @@ func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 }
 
 func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileId *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "files", "Delete")
+	logger.DebugLogRequestReceived("service", "files", "Delete")
 
 	// Get file data
 	logger.Log.Debug().

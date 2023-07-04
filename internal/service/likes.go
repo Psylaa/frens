@@ -11,7 +11,7 @@ import (
 type LikeRepo struct{}
 
 func (lr *LikeRepo) Create(c *fiber.Ctx, postId *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "like", "Create")
+	logger.DebugLogRequestReceived("service", "like", "Create")
 
 	// Get the user id
 	userId := c.Locals("requestorId").(*uuid.UUID)
@@ -60,7 +60,7 @@ func (lr *LikeRepo) Create(c *fiber.Ctx, postId *uuid.UUID) error {
 }
 
 func (lr *LikeRepo) Delete(c *fiber.Ctx, postId *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "like", "Delete")
+	logger.DebugLogRequestReceived("service", "like", "Delete")
 
 	// Get the user id
 	userId := c.Locals("requestorId").(*uuid.UUID)

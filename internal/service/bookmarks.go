@@ -11,7 +11,7 @@ import (
 type BookmarkRepo struct{}
 
 func (br *BookmarkRepo) GetByID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "GetByBookmarkID")
+	logger.DebugLogRequestReceived("service", "bookmark", "GetByBookmarkID")
 
 	// Get bookmark from database
 	bookmark, err := db.Bookmarks.GetByID(bookmarkID)
@@ -25,7 +25,7 @@ func (br *BookmarkRepo) GetByID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
 }
 
 func (br *BookmarkRepo) GetSelf(c *fiber.Ctx, userID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "GetByUserID")
+	logger.DebugLogRequestReceived("service", "bookmark", "GetByUserID")
 
 	// Get bookmarks from database
 	bookmarks, err := db.Bookmarks.GetByUserID(userID)
@@ -39,7 +39,7 @@ func (br *BookmarkRepo) GetSelf(c *fiber.Ctx, userID *uuid.UUID) error {
 }
 
 func (br *BookmarkRepo) GetByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "GetByPostID")
+	logger.DebugLogRequestReceived("service", "bookmark", "GetByPostID")
 
 	// Get bookmarks from database
 	bookmarks, err := db.Bookmarks.GetByPostID(postID)
@@ -53,7 +53,7 @@ func (br *BookmarkRepo) GetByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
 }
 
 func (br *BookmarkRepo) GetCountByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "GetCountByPostID")
+	logger.DebugLogRequestReceived("service", "bookmark", "GetCountByPostID")
 
 	// Get bookmark count from database
 	count, err := db.Bookmarks.GetCountByPostID(postID)
@@ -67,7 +67,7 @@ func (br *BookmarkRepo) GetCountByPostID(c *fiber.Ctx, postID *uuid.UUID) error 
 }
 
 func (br *BookmarkRepo) GetCountByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "GetCountByUserID")
+	logger.DebugLogRequestReceived("service", "bookmark", "GetCountByUserID")
 
 	// Get bookmark count from database
 	count, err := db.Bookmarks.GetCountByUserID(userID)
@@ -82,7 +82,7 @@ func (br *BookmarkRepo) GetCountByUserID(c *fiber.Ctx, userID *uuid.UUID) error 
 }
 
 func (br *BookmarkRepo) Create(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "Create")
+	logger.DebugLogRequestReceived("service", "bookmark", "Create")
 
 	// Create bookmark in database
 	bookmark, err := db.Bookmarks.Create(userID, postID)
@@ -96,7 +96,7 @@ func (br *BookmarkRepo) Create(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUI
 }
 
 func (br *BookmarkRepo) DeleteByID(c *fiber.Ctx, userID *uuid.UUID, bookmarkID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "DeleteByID")
+	logger.DebugLogRequestReceived("service", "bookmark", "DeleteByID")
 
 	// Delete bookmark from database
 	bookmark, err := db.Bookmarks.DeleteByID(userID, bookmarkID)
@@ -110,7 +110,7 @@ func (br *BookmarkRepo) DeleteByID(c *fiber.Ctx, userID *uuid.UUID, bookmarkID *
 }
 
 func (br *BookmarkRepo) DeleteByUserAndPostID(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
-	logger.DebugLogRequestRecieved("service", "bookmark", "DeleteByUserAndPostID")
+	logger.DebugLogRequestReceived("service", "bookmark", "DeleteByUserAndPostID")
 
 	// Delete bookmark from database
 	bookmark, err := db.Bookmarks.DeleteByUserAndPostID(userID, postID)

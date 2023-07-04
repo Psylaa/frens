@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/microcosm-cc/bluemonday"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -31,8 +33,10 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Summary Login
 // @Description Authenticate a user and return a JWT token
 // @Tags Login
-// @Accept  json
+// @Accept  json,xml,x-www-form-urlencoded,multipart/form-data
 // @Produce  json
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
 // @Param username body string true "Username"
 // @Param password body string true "Password"
 // @Success 200
@@ -42,15 +46,23 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 500
 // @Router /login [post]
 func (lr *LoginRepo) login(c *fiber.Ctx) error {
-	logger.DebugLogRequestRecieved("router", "login", "login")
+	logger.DebugLogRequestReceived("router", "login", "login")
+
+	// Parse body
 	var body struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Username string `form:"username" json:"username" xml:"username"`
+		Password string `form:"password" json:"password" xml:"password"`
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
+	// Sanitize input to prevent XSS attacks
+	p := bluemonday.UGCPolicy()
+	body.Username = p.Sanitize(body.Username)
+	body.Password = p.Sanitize(body.Password)
+
+	// Validate body
 	if body.Username == "" || body.Password == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
@@ -66,7 +78,10 @@ func (lr *LoginRepo) login(c *fiber.Ctx) error {
 // @Success 200
 // @Failure 401
 // @Security ApiKeyAuth
-// @Router /verify [get]
+// @Router /login/verify [get]
 func (lr *LoginRepo) verifyToken(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "login", "verifyToken")
+
+	// If we've gotten this far, the token has already passed through the middleware and is valid
 	return c.SendStatus(fiber.StatusOK)
 }
