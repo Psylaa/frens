@@ -35,10 +35,10 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Login
 // @Accept  json,xml,x-www-form-urlencoded,multipart/form-data
 // @Produce  json
-// @Param username formData string true "Username"
-// @Param password formData string true "Password"
 // @Param username body string true "Username"
+// @Param username formData string true "Username"
 // @Param password body string true "Password"
+// @Param password formData string true "Password"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -50,8 +50,8 @@ func (lr *LoginRepo) login(c *fiber.Ctx) error {
 
 	// Parse body
 	var body struct {
-		Username string `form:"username" json:"username" xml:"username"`
-		Password string `form:"password" json:"password" xml:"password"`
+		Username string `form:"username" json:"username"`
+		Password string `form:"password" json:"password"`
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))

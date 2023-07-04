@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -11,6 +12,7 @@ import (
 type LoginRepo struct{}
 
 func (l *LoginRepo) Login(c *fiber.Ctx, body *string, password *string) error {
+	logger.DebugLogRequestReceived("service", "login", "Login")
 
 	// Verify user credentials
 	user, err := db.Users.VerifyUser(body, password)

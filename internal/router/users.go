@@ -1,11 +1,15 @@
 package router
 
 import (
+	"regexp"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type UsersRepo struct {
@@ -21,10 +25,10 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 }
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("", ur.get)
-	rtr.Post("", ur.create)
+	rtr.Get("/:userId", ur.get)
+	rtr.Post("/", ur.create)
 	rtr.Patch("/:userId", ur.update)
-	rtr.Delete("/:userId", ur.delete)
+	rtr.Delete("/", ur.delete)
 }
 
 // @Summary Get a user by ID
@@ -32,24 +36,42 @@ func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param id path string true "User ID"
+// @Param userId path string true "User ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/{id} [get]
+// @Router /users/{userId} [get]
 func (ur *UsersRepo) get(c *fiber.Ctx) error {
-	/*
-		users, err := db.Users.GetUsers()
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	logger.DebugLogRequestReceived("router", "users", "get")
 
-		return c.Status(fiber.StatusOK).JSON(response.GenerateUsersResponse(users))
-	*/
-	return nil
+	// Parse userID from path
+	userID := c.Params("userId")
+	if userID == "" {
+		logger.Log.Info().Msg("No user ID provided")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
+	// Sanitize the input
+	p := bluemonday.UGCPolicy()
+	userID = p.Sanitize(userID)
+
+	// Validate the user ID format
+	if matched, _ := regexp.MatchString(`\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b`, userID); !matched {
+		logger.Log.Error().Msg("Invalid user ID format")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
+	// Convert userID to UUID
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing user ID to UUID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
+	return ur.Srv.Users.Get(c, &userUUID)
 }
 
 // @Summary Create a user
@@ -57,7 +79,12 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param id path string true "User ID"
+// @Param username body string true "Username"
+// @Param username formData string true "Username"
+// @Param email body string true "Email"
+// @Param email formData string true "Email"
+// @Param password body string true "Password"
+// @Param password formData string true "Password"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -66,10 +93,13 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /users/ [post]
 func (ur *UsersRepo) create(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "users", "create")
+
+	// Parse the request body
 	var body struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Username string `form:"username" json:"username"`
+		Email    string `form:"email" json:"email"`
+		Password string `form:"password" json:"password"`
 	}
 
 	if err := c.BodyParser(&body); err != nil {
@@ -77,15 +107,38 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
+	// Sanitize the input
+	p := bluemonday.UGCPolicy()
+	body.Username = p.Sanitize(body.Username)
+	body.Email = p.Sanitize(body.Email)
+	// Don't sanitize password - it might unintentionally change it.
+
+	// Validate email format
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, body.Email); !matched {
+		logger.Log.Error().Msg("Invalid email format")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidEmail))
+	}
+
+	// Validate username and password - they should not be empty
+	if body.Username == "" || body.Password == "" {
+		logger.Log.Error().Msg("Username or password is empty")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
 	return ur.Srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
 // @Summary Update a user
-// @Description Update a user.
+// @Description Update a users information including bio, avatar, and cover. Note that avatar and cover must first be uploaded to the server and UUIDs must be provided.
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param id path string true "User ID"
+// @Param bio body string false "Bio"
+// @Param bio formData string false "Bio"
+// @Param avatarId body string false "Avatar ID"
+// @Param avatarId formData string false "Avatar ID"
+// @Param coverId body string false "Cover ID"
+// @Param coverId formData string false "Cover ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -94,71 +147,70 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /users/ [patch]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
-	/*
-		var body struct {
-			Bio              *string `json:"bio"`
-			AvatarID *string `json:"avatarId"`
-			CoverID     *string `json:"coverId"`
-		}
+	logger.DebugLogRequestReceived("router", "users", "update")
 
-		if err := c.BodyParser(&body); err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing request body")
+	// Parse the request body
+	var body struct {
+		Bio      *string `form:"bio" json:"bio"`
+		AvatarID *string `form:"avatarId" json:"avatarId"`
+		CoverID  *string `form:"coverId" json:"coverId"`
+	}
+
+	if err := c.BodyParser(&body); err != nil {
+		logger.Log.Error().Err(err).Msg("Error parsing request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
+	// Sanitize the input
+	p := bluemonday.UGCPolicy()
+	if body.Bio != nil {
+		*body.Bio = p.Sanitize(*body.Bio)
+		if len(*body.Bio) > 256 {
+			logger.Log.Error().Msg("Bio is too long")
 			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
+	}
 
-		userId, err := getUserID(c)
+	if body.AvatarID != nil {
+		*body.AvatarID = p.Sanitize(*body.AvatarID)
+	}
+
+	if body.CoverID != nil {
+		*body.CoverID = p.Sanitize(*body.CoverID)
+	}
+
+	// Convert avatarID and coverID to UUID
+	var err error
+
+	// Avatar ID
+	var avatarUUID, coverUUID *uuid.UUID
+	if body.AvatarID != nil {
+		avatarUUID = new(uuid.UUID)
+		*avatarUUID, err = uuid.Parse(*body.AvatarID)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
+			logger.Log.Error().Err(err).Msg("Error parsing avatar ID to UUID")
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
+	}
 
-		if body.Bio != nil {
-			if err := db.Users.UpdateBio(userId, body.Bio); err != nil {
-				logger.Log.Error().Err(err).Msg("Error updating bio")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-			}
-		}
-
-		if body.AvatarID != nil {
-			ppUUID, err := uuid.Parse(*body.AvatarID)
-			if err != nil {
-				logger.Log.Error().Err(err).Msg("Error parsing AvatarID")
-				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
-			}
-			if err := db.Users.UpdateAvatar(userId, &ppUUID); err != nil {
-				logger.Log.Error().Err(err).Msg("Error updating profile picture")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-			}
-		}
-
-		if body.CoverID != nil {
-			ciUUID, err := uuid.Parse(*body.CoverID)
-			if err != nil {
-				logger.Log.Error().Err(err).Msg("Error parsing CoverID")
-				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
-			}
-			if err := db.Users.UpdateCover(userId, &ciUUID); err != nil {
-				logger.Log.Error().Err(err).Msg("Error updating cover image")
-				return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-			}
-		}
-
-		// Retrieve updated user
-		user, err := db.Users.GetUser(userId)
+	// Cover ID
+	if body.CoverID != nil {
+		coverUUID = new(uuid.UUID)
+		*coverUUID, err = uuid.Parse(*body.CoverID)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+			logger.Log.Error().Err(err).Msg("Error parsing cover ID to UUID")
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 		}
+	}
 
-		return c.Status(fiber.StatusOK).JSON(response.GenerateUserResponse(user))
-	*/
-	return nil
+	return ur.Srv.Users.Update(c, body.Bio, avatarUUID, coverUUID)
 }
 
-// @Summary Delete a user
-// @Description Delete a user.
+// @Summary Delete self
+// @Description Delete the user associated with the provided access token.
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param id path string true "User ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -167,5 +219,6 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /users [delete]
 func (ur *UsersRepo) delete(c *fiber.Ctx) error {
-	return nil
+	logger.DebugLogRequestReceived("router", "users", "delete")
+	return ur.Srv.Users.Delete(c)
 }

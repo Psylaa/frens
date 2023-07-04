@@ -650,20 +650,6 @@ const docTemplate = `{
                 "summary": "Login",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Username",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "description": "Username",
                         "name": "username",
                         "in": "body",
@@ -673,6 +659,13 @@ const docTemplate = `{
                         }
                     },
                     {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
                         "description": "Password",
                         "name": "password",
                         "in": "body",
@@ -680,6 +673,13 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -878,7 +878,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete a user.",
+                "description": "Delete the user associated with the provided access token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -888,16 +888,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Delete a user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Delete self",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -937,10 +928,51 @@ const docTemplate = `{
                 "summary": "Create a user",
                 "parameters": [
                     {
+                        "description": "Username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "Email",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "Password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
                         "required": true
                     }
                 ],
@@ -968,7 +1000,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Update a user.",
+                "description": "Update a users information including bio, avatar, and cover. Note that avatar and cover must first be uploaded to the server and UUIDs must be provided.",
                 "consumes": [
                     "application/json"
                 ],
@@ -981,11 +1013,46 @@ const docTemplate = `{
                 "summary": "Update a user",
                 "parameters": [
                     {
+                        "description": "Bio",
+                        "name": "bio",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Bio",
+                        "name": "bio",
+                        "in": "formData"
+                    },
+                    {
+                        "description": "Avatar ID",
+                        "name": "avatarId",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Avatar ID",
+                        "name": "avatarId",
+                        "in": "formData"
+                    },
+                    {
+                        "description": "Cover ID",
+                        "name": "coverId",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cover ID",
+                        "name": "coverId",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1007,7 +1074,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/users/{userId}": {
             "get": {
                 "security": [
                     {
@@ -1029,7 +1096,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User ID",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }

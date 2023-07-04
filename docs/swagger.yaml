@@ -409,27 +409,27 @@ paths:
       description: Authenticate a user and return a JWT token
       parameters:
       - description: Username
-        in: formData
+        in: body
         name: username
         required: true
-        type: string
-      - description: Password
-        in: formData
-        name: password
-        required: true
-        type: string
+        schema:
+          type: string
       - description: Username
-        in: body
+        in: formData
         name: username
         required: true
-        schema:
-          type: string
+        type: string
       - description: Password
         in: body
         name: password
         required: true
         schema:
           type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -561,13 +561,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a user.
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
+      description: Delete the user associated with the provided access token.
       produces:
       - application/json
       responses:
@@ -583,19 +577,43 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Delete a user
+      summary: Delete self
       tags:
       - Users
   /users/:
     patch:
       consumes:
       - application/json
-      description: Update a user.
+      description: Update a users information including bio, avatar, and cover. Note
+        that avatar and cover must first be uploaded to the server and UUIDs must
+        be provided.
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
+      - description: Bio
+        in: body
+        name: bio
+        schema:
+          type: string
+      - description: Bio
+        in: formData
+        name: bio
+        type: string
+      - description: Avatar ID
+        in: body
+        name: avatarId
+        schema:
+          type: string
+      - description: Avatar ID
+        in: formData
+        name: avatarId
+        type: string
+      - description: Cover ID
+        in: body
+        name: coverId
+        schema:
+          type: string
+      - description: Cover ID
+        in: formData
+        name: coverId
         type: string
       produces:
       - application/json
@@ -620,9 +638,37 @@ paths:
       - application/json
       description: Create a new user.
       parameters:
-      - description: User ID
-        in: path
-        name: id
+      - description: Username
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      - description: Password
+        in: formData
+        name: password
         required: true
         type: string
       produces:
@@ -643,7 +689,7 @@ paths:
       summary: Create a user
       tags:
       - Users
-  /users/{id}:
+  /users/{userId}:
     get:
       consumes:
       - application/json
@@ -651,7 +697,7 @@ paths:
       parameters:
       - description: User ID
         in: path
-        name: id
+        name: userId
         required: true
         type: string
       produces:

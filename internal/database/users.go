@@ -30,6 +30,8 @@ type UserRepo struct {
 }
 
 func (ur *UserRepo) GetByID(requestorID *uuid.UUID, toLookupID *uuid.UUID) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "getUserByID")
+
 	var user User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Where("id = ?", toLookupID).First(&user).Error; err != nil {
 		return nil, err
@@ -44,6 +46,8 @@ func (ur *UserRepo) GetByID(requestorID *uuid.UUID, toLookupID *uuid.UUID) (*Use
 }
 
 func (ur *UserRepo) GetUsers() ([]*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "getUsers")
+
 	var users []*User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Find(&users).Error; err != nil {
 		return nil, err
@@ -52,6 +56,8 @@ func (ur *UserRepo) GetUsers() ([]*User, error) {
 }
 
 func (ur *UserRepo) GetUserByUsername(username *string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "getUserByUsername")
+
 	var user User
 	if err := ur.db.Preload("Avatar").Preload("Cover").Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
@@ -60,6 +66,8 @@ func (ur *UserRepo) GetUserByUsername(username *string) (*User, error) {
 }
 
 func (ur *UserRepo) CreateUser(username string, email string, password string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "createUser")
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -81,6 +89,8 @@ func (ur *UserRepo) CreateUser(username string, email string, password string) (
 }
 
 func (ur *UserRepo) VerifyUser(username *string, password *string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "verifyUser")
+
 	user, err := ur.GetUserByUsername(username)
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -96,6 +106,8 @@ func (ur *UserRepo) VerifyUser(username *string, password *string) (*User, error
 }
 
 func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
+	logger.DebugLogRequestReceived("database", "users", "updateBio")
+
 	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own bio, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -113,6 +125,8 @@ func (ur *UserRepo) UpdateBio(userId *uuid.UUID, bio *string) error {
 }
 
 func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("database", "users", "updateAvatar")
+
 	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own profile picture, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -148,6 +162,8 @@ func (ur *UserRepo) UpdateAvatar(userId *uuid.UUID, profilePictureID *uuid.UUID)
 }
 
 func (ur *UserRepo) UpdateCover(userId *uuid.UUID, coverID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("database", "users", "updateCover")
+
 	user, err := ur.GetByID(userId, userId) // only the requesting user can update their own cover image, so we pass the user's ID as the requestor ID
 	if err != nil {
 		logger.Log.Debug().Str("package", "database").Msgf("Error getting user: %s", err.Error())
@@ -184,19 +200,44 @@ func (ur *UserRepo) UpdateCover(userId *uuid.UUID, coverID *uuid.UUID) error {
 }
 
 func (ur *UserRepo) UsernameExists(username *string) bool {
+	logger.DebugLogRequestReceived("database", "users", "usernameExists")
+
 	var count int64
 	ur.db.Model(&User{}).Where("username = ?", username).Count(&count)
 	return count > 0
 }
 
 func (ur *UserRepo) Exists(id *uuid.UUID) bool {
+	logger.DebugLogRequestReceived("database", "users", "exists")
+
 	var count int64
 	ur.db.Model(&User{}).Where("id = ?", id).Count(&count)
 	return count > 0
 }
 
 func (ur *UserRepo) EmailExists(email *string) bool {
+	logger.DebugLogRequestReceived("database", "users", "emailExists")
+
 	var count int64
 	ur.db.Model(&User{}).Where("email = ?", email).Count(&count)
 	return count > 0
+}
+
+func (ur *UserRepo) Delete(id *uuid.UUID) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "deleteUser")
+
+	// Define the user struct
+	var user User
+
+	// Retrieve the user before deleting
+	if err := ur.db.First(&user, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+
+	// Delete the user
+	if err := ur.db.Delete(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
