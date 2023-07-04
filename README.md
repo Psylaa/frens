@@ -18,6 +18,10 @@ A server oriented towards end-users requires an intuitive and appealing frontend
 
 We've observed existing implementations to be either performance-limited or too arcane for widespread contributions. Our choice of the Go programming language aims to resolve these issues. Go offers satisfactory performance and, more importantly, a codebase that is comprehensible and accessible for contributions. Furthermore, we've opted for a SQL database over a graph database. Despite the suitability of graph databases for social networks, their complexity and maintenance requirements outweigh their benefits. A SQL database, on the other hand, is easier to maintain and is more familiar to a wider audience.
 
+## Embracing Modern Technologies
+
+In our pursuit of delivering an exemplary user experience, we've chosen to incorporate a variety of contemporary technologies. These include algorithmic feeds, subscription services, and the potential addition of responsibly curated advertisements. We believe that when deployed thoughtfully, these technologies can substantially enhance user engagement and interaction. While we are still evaluating the suite of features we will provide, we do not shy away from integrating technologies that mutually benefit users and server operators. At Frens, our mission is to harmoniously blend technology with user expectations, creating a platform that embodies the future of social networking.
+
 ## Adherence to Professional Standards
 
 Regrettably, certain project communities fail to meet the professional standards we believe to be essential. At Frens, we aim to be a beacon of professionalism, inclusivity, and excellence. We strive to foster a project that others can admire and learn from. To ensure this, we've drafted a Code of Conduct that respects the identities and affiliations of *all* individuals. We are committed to implementing workflows and standards that inspire confidence in the reliability and security of our platform.
