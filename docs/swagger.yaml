@@ -1,5 +1,5 @@
 basePath: /v1
-host: frens.moe
+host: localhost:3001
 info:
   contact:
     name: Frens Repo
@@ -18,13 +18,20 @@ paths:
       - application/json
       description: Get bookmarks
       parameters:
-      - description: User ID
+      - description: The ID of the user to get bookmarks for. Given bookmarks are
+          private, this must be the same as the requestor (defaults to the requestor).
+          Admins can get any user's bookmarks
         in: query
         name: userId
         type: string
-      - description: Count
+      - description: The number of bookmarks to return.
         in: query
         name: count
+        type: string
+      - description: The number of bookmarks to offset the returned bookmarks by e.g.
+          offset=10&count=10 would return bookmarks 10-20
+        in: query
+        name: offset
         type: string
       produces:
       - application/json
@@ -44,17 +51,17 @@ paths:
       summary: Get bookmarks
       tags:
       - Bookmarks
+  /bookmarks/{:postId}:
     post:
       consumes:
       - application/json
       description: Create a bookmark for a specific post based on the provided ID
       parameters:
       - description: Post ID
-        in: body
+        in: path
         name: postId
         required: true
-        schema:
-          type: string
+        type: string
       produces:
       - application/json
       responses:
@@ -77,11 +84,18 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a specific bookmark based on the provided ID
+      description: Delete a specific bookmark. Either a bookmark ID or a post ID must
+        be provided. If both are provided, the bookmark ID will be used. Only the
+        owner of the bookmark can delete it. Admins can delete any bookmark.
       parameters:
-      - description: Bookmark ID
-        in: path
+      - description: The ID of the bookmark to delete
+        in: query
         name: bookmarkId
+        required: true
+        type: string
+      - description: The ID of the post to delete the bookmark for
+        in: query
+        name: postId
         required: true
         type: string
       produces:
@@ -167,6 +181,30 @@ paths:
       tags:
       - Feed
   /files:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve files
+      parameters:
+      - description: File ID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a file
+      tags:
+      - Files
     post:
       consumes:
       - multipart/form-data
@@ -189,31 +227,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new file
-      tags:
-      - Files
-  /files/{:fileId}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a specific file using its ID
-      parameters:
-      - description: File ID
-        in: path
-        name: fileId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Get a file by ID
       tags:
       - Files
   /files/{fileId}:
@@ -241,11 +254,12 @@ paths:
       summary: Delete a file by ID
       tags:
       - Files
-  /follows/:
+  /follows:
     get:
       consumes:
       - application/json
-      description: Retrieve the followers of a user based on the provided user ID
+      description: Retrieve a follow relationship between a source user and a target
+        user
       parameters:
       - description: User ID
         in: path
@@ -263,7 +277,7 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Retrieve user's followers
+      summary: Get a follow
       tags:
       - Follows
   /follows/{userId}:
@@ -320,47 +334,10 @@ paths:
       tags:
       - Follows
   /likes:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all likes made by the user based on the provided token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Retrieve all likes for a user
-      tags:
-      - Likes
-    post:
-      consumes:
-      - application/json
-      description: Create a new like for a user based on the provided token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Create a like
-      tags:
-      - Likes
-  /likes/{likeId}:
     delete:
       consumes:
       - application/json
-      description: Delete a specific like based on the provided ID
+      description: Delete a specific like
       parameters:
       - description: Like ID
         in: path
@@ -382,7 +359,44 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Delete a like by ID
+      summary: Delete a like
+      tags:
+      - Likes
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a like object consisting of a user and a target post
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get likes
+      tags:
+      - Likes
+  /likes/{:postId}:
+    post:
+      consumes:
+      - application/json
+      description: Create a new like for a user based on the provided token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Create a like
       tags:
       - Likes
   /login:
@@ -420,6 +434,30 @@ paths:
       tags:
       - Login
   /posts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get a post
+      tags:
+      - Posts
     post:
       consumes:
       - application/json
@@ -461,30 +499,6 @@ paths:
         "500":
           description: Internal Server Error
       summary: Delete a post
-      tags:
-      - Posts
-    get:
-      consumes:
-      - application/json
-      description: Fetch a specific post by its ID.
-      parameters:
-      - description: Post ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      summary: Get a post by ID
       tags:
       - Posts
     put:
@@ -640,8 +654,6 @@ paths:
           description: OK
         "401":
           description: Unauthorized
-        "500":
-          description: Internal Server Error
       security:
       - ApiKeyAuth: []
       summary: Verify Token

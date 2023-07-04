@@ -25,8 +25,8 @@ func NewBookmarksRepo(db *database.Database, srv *service.Service) *BookmarksRep
 
 func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.getSelf)
-	rtr.Post("/", br.create)
-	rtr.Delete("/:id", br.delete)
+	rtr.Post("/:postId", br.create)
+	rtr.Delete("/", br.delete)
 }
 
 // @Summary Get bookmarks
@@ -34,8 +34,9 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param userId query string false "User ID"
-// @Param count query string false "Count"
+// @Param userId query string false "The ID of the user to get bookmarks for. Given bookmarks are private, this must be the same as the requestor (defaults to the requestor). Admins can get any user's bookmarks"
+// @Param count query string false "The number of bookmarks to return."
+// @Param offset query string false "The number of bookmarks to offset the returned bookmarks by e.g. offset=10&count=10 would return bookmarks 10-20"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -52,14 +53,14 @@ func (br *BookmarksRepo) getSelf(c *fiber.Ctx) error {
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param postId body string true "Post ID"
+// @Param postId path string true "Post ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks [post]
+// @Router /bookmarks/{:postId} [post]
 func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 	postId := c.Params("postId")
 	postID, err := uuid.Parse(postId)
@@ -72,11 +73,12 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 }
 
 // @Summary Delete a bookmark by ID
-// @Description Delete a specific bookmark based on the provided ID
+// @Description Delete a specific bookmark. Either a bookmark ID or a post ID must be provided. If both are provided, the bookmark ID will be used. Only the owner of the bookmark can delete it. Admins can delete any bookmark.
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param bookmarkId path string true "Bookmark ID"
+// @Param bookmarkId query string true "The ID of the bookmark to delete"
+// @Param postId query string true "The ID of the post to delete the bookmark for"
 // @Success 200
 // @Failure 400
 // @Failure 401

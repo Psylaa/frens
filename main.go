@@ -23,7 +23,7 @@ import (
 // @license.name MIT License
 // @license.url http://www.github.com/bwoff11/frens/docs/LICENSE.md
 
-// @host frens.moe
+// @host localhost:3001
 // @BasePath /v1
 func main() {
 	// Read the config

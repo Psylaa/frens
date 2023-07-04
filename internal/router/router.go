@@ -2,6 +2,7 @@ package router
 
 // Separate imports into three groups: standard library, third-party, and internal
 import (
+	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
@@ -88,8 +89,10 @@ func (r *Router) configureMiddleware() {
 
 func (r *Router) configureRoutes() {
 	v1 := r.App.Group("/v1")
-	r.Repos.Login.ConfigureRoutes(v1.Group("/login"))
 
+	log.Println("desu")
+	r.Repos.Login.ConfigureRoutes(v1.Group("/login"))
+	log.Println("desu2")
 	r.addAuth()
 	r.Repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.Repos.Feed.ConfigureRoutes(v1.Group("/feed"))

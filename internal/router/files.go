@@ -29,9 +29,8 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:fileId", fr.deleteByID)
 }
 
-// getByID handles the request to get a file by ID.
-// @Summary Get a file by ID
-// @Description Retrieve a specific file using its ID
+// @Summary Get a file
+// @Description Retrieve files
 // @Tags Files
 // @Accept  json
 // @Produce  json
@@ -40,7 +39,7 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /files/{:fileId} [get]
+// @Router /files [get]
 func (fr *FilesRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestRecieved("router", "files", "retrieveFile")
 

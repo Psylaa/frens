@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +24,7 @@ func NewLoginRepo(db *database.Database, srv *service.Service) *LoginRepo {
 
 // ConfigureRoutes configures the routes associated with login functionality.
 func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Post("/login", lr.login)
+	rtr.Post("/", lr.login)
 	rtr.Get("/verify", lr.verifyToken)
 }
 
@@ -41,6 +42,7 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 500
 // @Router /login [post]
 func (lr *LoginRepo) login(c *fiber.Ctx) error {
+	logger.DebugLogRequestRecieved("router", "login", "login")
 	var body struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -63,7 +65,6 @@ func (lr *LoginRepo) login(c *fiber.Ctx) error {
 // @Produce  json
 // @Success 200
 // @Failure 401
-// @Failure 500
 // @Security ApiKeyAuth
 // @Router /verify [get]
 func (lr *LoginRepo) verifyToken(c *fiber.Ctx) error {

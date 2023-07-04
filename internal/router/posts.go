@@ -29,8 +29,8 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:id", pr.delete)
 }
 
-// @Summary Get a post by ID
-// @Description Fetch a specific post by its ID.
+// @Summary Get a post
+// @Description Retrieve a post
 // @Tags Posts
 // @Accept json
 // @Produce json
@@ -39,7 +39,7 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 400
 // @Failure 404
 // @Failure 500
-// @Router /posts/{id} [get]
+// @Router /posts [get]
 func (pr *PostsRepo) get(c *fiber.Ctx) error {
 	return nil
 	/*

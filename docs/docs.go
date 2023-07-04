@@ -45,14 +45,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
+                        "description": "The ID of the user to get bookmarks for. Given bookmarks are private, this must be the same as the requestor (defaults to the requestor). Admins can get any user's bookmarks",
                         "name": "userId",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Count",
+                        "description": "The number of bookmarks to return.",
                         "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of bookmarks to offset the returned bookmarks by e.g. offset=10\u0026count=10 would return bookmarks 10-20",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
@@ -73,7 +79,9 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            },
+            }
+        },
+        "/bookmarks/{:postId}": {
             "post": {
                 "security": [
                     {
@@ -93,13 +101,11 @@ const docTemplate = `{
                 "summary": "Create a bookmark for a post",
                 "parameters": [
                     {
+                        "type": "string",
                         "description": "Post ID",
                         "name": "postId",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -128,7 +134,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete a specific bookmark based on the provided ID",
+                "description": "Delete a specific bookmark. Either a bookmark ID or a post ID must be provided. If both are provided, the bookmark ID will be used. Only the owner of the bookmark can delete it. Admins can delete any bookmark.",
                 "consumes": [
                     "application/json"
                 ],
@@ -142,9 +148,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bookmark ID",
+                        "description": "The ID of the bookmark to delete",
                         "name": "bookmarkId",
-                        "in": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The ID of the post to delete the bookmark for",
+                        "name": "postId",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -272,6 +285,44 @@ const docTemplate = `{
             }
         },
         "/files": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve files",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Get a file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File ID",
+                        "name": "fileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -295,46 +346,6 @@ const docTemplate = `{
                         "description": "File to upload",
                         "name": "file",
                         "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/files/{:fileId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve a specific file using its ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Files"
-                ],
-                "summary": "Get a file by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "File ID",
-                        "name": "fileId",
-                        "in": "path",
                         "required": true
                     }
                 ],
@@ -391,14 +402,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/follows/": {
+        "/follows": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieve the followers of a user based on the provided user ID",
+                "description": "Retrieve a follow relationship between a source user and a target user",
                 "consumes": [
                     "application/json"
                 ],
@@ -408,7 +419,7 @@ const docTemplate = `{
                 "tags": [
                     "Follows"
                 ],
-                "summary": "Retrieve user's followers",
+                "summary": "Get a follow",
                 "parameters": [
                     {
                         "type": "string",
@@ -522,7 +533,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieve all likes made by the user based on the provided token",
+                "description": "Retrieve a like object consisting of a user and a target post",
                 "consumes": [
                     "application/json"
                 ],
@@ -532,7 +543,7 @@ const docTemplate = `{
                 "tags": [
                     "Likes"
                 ],
-                "summary": "Retrieve all likes for a user",
+                "summary": "Get likes",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -545,6 +556,52 @@ const docTemplate = `{
                     }
                 }
             },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific like",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Delete a like",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Like ID",
+                        "name": "likeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/likes/{:postId}": {
             "post": {
                 "security": [
                     {
@@ -568,52 +625,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/likes/{likeId}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete a specific like based on the provided ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Likes"
-                ],
-                "summary": "Delete a like by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Like ID",
-                        "name": "likeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -674,6 +685,42 @@ const docTemplate = `{
             }
         },
         "/posts": {
+            "get": {
+                "description": "Retrieve a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new post.",
                 "consumes": [
@@ -700,42 +747,6 @@ const docTemplate = `{
             }
         },
         "/posts/{id}": {
-            "get": {
-                "description": "Fetch a specific post by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Get a post by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Post ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
             "put": {
                 "description": "Update an existing post.",
                 "consumes": [
@@ -1021,9 +1032,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -1034,7 +1042,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "frens.moe",
+	Host:             "localhost:3001",
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Frens API",

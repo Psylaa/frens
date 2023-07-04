@@ -25,8 +25,8 @@ func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:id", lr.deleteByID)
 }
 
-// @Summary Retrieve all likes for a user
-// @Description Retrieve all likes made by the user based on the provided token
+// @Summary Get likes
+// @Description Retrieve a like object consisting of a user and a target post
 // @Tags Likes
 // @Accept  json
 // @Produce  json
@@ -48,13 +48,13 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 // @Failure 401
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /likes [post]
+// @Router /likes/{:postId} [post]
 func (lr *LikesRepo) create(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Delete a like by ID
-// @Description Delete a specific like based on the provided ID
+// @Summary Delete a like
+// @Description Delete a specific like
 // @Tags Likes
 // @Accept  json
 // @Produce  json
@@ -65,7 +65,7 @@ func (lr *LikesRepo) create(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /likes/{likeId} [delete]
+// @Router /likes [delete]
 func (lr *LikesRepo) deleteByID(c *fiber.Ctx) error {
 	return nil
 }

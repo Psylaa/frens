@@ -24,8 +24,8 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Delete("/:id", fr.delete)
 }
 
-// @Summary Retrieve user's followers
-// @Description Retrieve the followers of a user based on the provided user ID
+// @Summary Get a follow
+// @Description Retrieve a follow relationship between a source user and a target user
 // @Tags Follows
 // @Accept  json
 // @Produce  json
@@ -34,7 +34,7 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /follows/ [get]
+// @Router /follows [get]
 func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 	/*
 		id := c.Params("id")
