@@ -20,7 +20,7 @@ We've observed existing implementations to be either performance-limited or too 
 
 ## Embracing Modern Technologies
 
-In our pursuit of delivering an exemplary user experience, we've chosen to incorporate a variety of contemporary technologies. These include features such as algorithmic feeds and subscription services. We believe that when deployed thoughtfully, these technologies can substantially enhance user engagement and interaction. While we are still evaluating the suite of features we will provide, we do not shy away from integrating technologies that mutually benefit users and server operators. At Frens, our mission is to harmoniously blend technology with user expectations, creating a platform that embodies the future of social networking.
+In our pursuit of delivering an exemplary user experience, we've chosen to incorporate a variety of contemporary technologies. These include features such as algorithmic feeds and subscription services. We believe that when deployed thoughtfully, these technologies can substantially enhance user engagement and interaction. While we are still evaluating the suite of features we will provide, we do not shy away from integrating technologies that mutually benefit users and server operators.
 
 ## Adherence to Professional Standards
 
