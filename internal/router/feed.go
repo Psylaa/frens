@@ -25,8 +25,8 @@ func NewFeedRepo(db *database.Database, srv *service.Service) *FeedRepo {
 
 func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/chronological", fr.getChrono)
-	rtr.Get("/algorithmic", fr.getAlgo)
-	rtr.Get("/explore", fr.getExplore)
+	rtr.Get("/algorithmic", fr.getChrono) // temp until algo is finished
+	rtr.Get("/explore", fr.getChrono)     // temp
 }
 
 // @Summary Get chronological feed

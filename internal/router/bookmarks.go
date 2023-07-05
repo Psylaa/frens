@@ -1,6 +1,8 @@
 package router
 
 import (
+	"strconv"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -31,11 +33,10 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 }
 
 // @Summary Get bookmarks
-// @Description Get bookmarks
+// @Description Get the bookmarks for the requesting user
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param userId query string false "The ID of the user to get bookmarks for. Given bookmarks are private, this must be the same as the requestor (defaults to the requestor). Admins can get any user's bookmarks"
 // @Param count query string false "The number of bookmarks to return."
 // @Param offset query string false "The number of bookmarks to offset the returned bookmarks by e.g. offset=10&count=10 would return bookmarks 10-20"
 // @Success 200
@@ -47,7 +48,39 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Router /bookmarks [get]
 func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "get")
-	return br.Srv.Bookmarks.GetSelf(c, c.Locals("requestorId").(*uuid.UUID))
+
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorId").(*uuid.UUID)
+
+	// Get the query parameters
+	queries := c.Queries()
+	queryCount := queries["count"]
+	queryOffset := queries["offset"]
+
+	// If a count was provided, parse it
+	var count *int
+	if len(queryCount) > 0 {
+		countInt, err := strconv.Atoi(queryCount)
+		if err != nil {
+			logger.DebugLogRequestUpdate("router", "bookmarks", "get", "Error parsing count: "+queryCount)
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCount))
+		}
+		count = &countInt
+	}
+
+	// If an offset was provided, parse it
+	var offset *int
+	if len(queryOffset) > 0 {
+		offsetInt, err := strconv.Atoi(queryOffset)
+		if err != nil {
+			log.Error().Err(err).Msg("Error parsing offset: " + queryOffset)
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidOffset))
+		}
+		offset = &offsetInt
+	}
+
+	// Send request to service layer
+	return br.Srv.Bookmarks.GetByUserID(c, requestorID, count, offset)
 }
 
 // @Summary Create a bookmark for a post

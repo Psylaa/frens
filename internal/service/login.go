@@ -23,8 +23,11 @@ func (l *LoginRepo) Login(c *fiber.Ctx, body *string, password *string) error {
 	// Create claims
 	expiryDate := time.Now().Add(time.Hour * 24 * 7)
 	claims := jwt.RegisteredClaims{
+		Issuer:    "frens",
 		Subject:   user.ID.String(),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		ExpiresAt: jwt.NewNumericDate(expiryDate),
+		Audience:  jwt.ClaimStrings{"frens"},
 	}
 
 	// Create token

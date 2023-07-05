@@ -10,6 +10,51 @@ import (
 
 type LikeRepo struct{}
 
+func (lr *LikeRepo) GetByID(c *fiber.Ctx, postId *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "like", "GetByID")
+
+	// Get the like
+	like, err := db.Likes.GetByID(postId)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "like", "GetByID", "Error getting like", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+	logger.DebugLogRequestUpdate("service", "like", "GetByID", "Like retrieved")
+
+	// Return the like
+	return c.Status(fiber.StatusOK).JSON(response.CreateLikesResponse(nil, nil, []*database.Like{like}))
+}
+
+func (lr *LikeRepo) GetByPostID(c *fiber.Ctx, postId *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "like", "GetByPostID")
+
+	// Get the likes
+	likes, err := db.Likes.GetByPostID(postId)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "like", "GetByPostID", "Error getting likes", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+	logger.DebugLogRequestUpdate("service", "like", "GetByPostID", "Likes retrieved")
+
+	// Return the likes
+	return c.Status(fiber.StatusOK).JSON(response.CreateLikesResponse(nil, nil, likes))
+}
+
+func (lr *LikeRepo) GetByPostIDAndUserID(c *fiber.Ctx, postId *uuid.UUID, userId *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "like", "GetByPostIDAndUserID")
+
+	// Get the likes
+	like, err := db.Likes.GetByPostIDAndUserID(postId, userId)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "like", "GetByPostIDAndUserID", "Error getting likes", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+	logger.DebugLogRequestUpdate("service", "like", "GetByPostIDAndUserID", "Likes retrieved")
+
+	// Return the likes
+	return c.Status(fiber.StatusOK).JSON(response.CreateLikesResponse(nil, nil, []*database.Like{like}))
+}
+
 func (lr *LikeRepo) Create(c *fiber.Ctx, postId *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "like", "Create")
 

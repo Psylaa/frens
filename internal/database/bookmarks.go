@@ -7,9 +7,9 @@ import (
 
 type Bookmark struct {
 	BaseModel
-	UserID uuid.UUID `json:"userId"`
-	PostID uuid.UUID `json:"postId"`
-	Owner  User      `gorm:"foreignKey:UserID" json:"owner"`
+	UserID uuid.UUID
+	PostID uuid.UUID
+	Owner  User `gorm:"foreignKey:UserID"`
 }
 
 type BookmarkRepo struct {
@@ -42,13 +42,24 @@ func (br *BookmarkRepo) GetByPostID(postID *uuid.UUID) ([]*Bookmark, error) {
 	return bookmarks, nil
 }
 
-func (br *BookmarkRepo) GetByUserID(userID *uuid.UUID) ([]*Bookmark, error) {
+func (br *BookmarkRepo) GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error) {
 	var bookmarks []*Bookmark
-	if err := br.db.
+	query := br.db.
 		Preload("Owner").
-		Where("user_id = ?", userID).
-		Find(&bookmarks).
-		Error; err != nil {
+		Where("user_id = ?", userID)
+
+	// If count is provided, add it to the query
+	if count != nil {
+		query = query.Limit(*count)
+	}
+
+	// If offset is provided, add it to the query
+	if offset != nil {
+		query = query.Offset(*offset)
+	}
+
+	// Execute the query
+	if err := query.Find(&bookmarks).Error; err != nil {
 		return nil, err
 	}
 

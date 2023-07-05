@@ -15,7 +15,16 @@ type LikeRepo struct {
 	db *gorm.DB
 }
 
-func (lr *LikeRepo) GetByPostID(postID uuid.UUID) ([]*Like, error) {
+func (lr *LikeRepo) GetByID(likeId *uuid.UUID) (*Like, error) {
+	var like *Like
+	if err := lr.db.Where("id = ?", likeId).First(&like).Error; err != nil {
+		return nil, err
+	}
+
+	return like, nil
+}
+
+func (lr *LikeRepo) GetByPostID(postID *uuid.UUID) ([]*Like, error) {
 	var likes []*Like
 	if err := lr.db.Where("post_id = ?", postID).Find(&likes).Error; err != nil {
 		return nil, err
@@ -24,12 +33,16 @@ func (lr *LikeRepo) GetByPostID(postID uuid.UUID) ([]*Like, error) {
 	return likes, nil
 }
 
-func (lr *LikeRepo) GetCountByPostID(postID uuid.UUID) (*int, error) {
-	var count int
-	if err := lr.db.Model(&Like{}).Where("post_id = ?", postID).Count(&count).Error; err != nil {
+func (lr *LikeRepo) GetByPostIDAndUserID(postID *uuid.UUID, userID *uuid.UUID) (*Like, error) {
+	var like *Like
+	if err := lr.db.
+		Where("post_id = ? AND user_id = ?", postID, userID).
+		First(&like).
+		Error; err != nil {
 		return nil, err
 	}
-	return &count, nil
+
+	return like, nil
 }
 
 func (lr *LikeRepo) Create(userID *uuid.UUID, postID *uuid.UUID) (*Like, error) {

@@ -24,11 +24,11 @@ func (br *BookmarkRepo) GetByID(c *fiber.Ctx, bookmarkID *uuid.UUID) error {
 	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
 }
 
-func (br *BookmarkRepo) GetSelf(c *fiber.Ctx, userID *uuid.UUID) error {
+func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, count *int, offset *int) error {
 	logger.DebugLogRequestReceived("service", "bookmark", "GetByUserID")
 
 	// Get bookmarks from database
-	bookmarks, err := db.Bookmarks.GetByUserID(userID)
+	bookmarks, err := db.Bookmarks.GetByUserID(userID, count, offset)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "bookmark", "GetByUserID", "bookmark not found", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
@@ -50,35 +50,6 @@ func (br *BookmarkRepo) GetByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
 	logger.DebugLogRequestUpdate("service", "bookmark", "GetByPostID", "bookmark found")
 
 	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse(bookmarks))
-}
-
-func (br *BookmarkRepo) GetCountByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
-	logger.DebugLogRequestReceived("service", "bookmark", "GetCountByPostID")
-
-	// Get bookmark count from database
-	count, err := db.Bookmarks.GetCountByPostID(postID)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "bookmark", "GetCountByPostID", "bookmark not found", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "bookmark", "GetCountByPostID", "bookmark found")
-
-	return c.Status(fiber.StatusOK).JSON(response.CreateCountResponse(count))
-}
-
-func (br *BookmarkRepo) GetCountByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
-	logger.DebugLogRequestReceived("service", "bookmark", "GetCountByUserID")
-
-	// Get bookmark count from database
-	count, err := db.Bookmarks.GetCountByUserID(userID)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "bookmark", "GetCountByUserID", "bookmark not found", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "bookmark", "GetCountByUserID", "bookmark found")
-
-	resp := response.CreateCountResponse(count)
-	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
 func (br *BookmarkRepo) Create(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {

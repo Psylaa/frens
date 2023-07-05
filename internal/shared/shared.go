@@ -1,7 +1,5 @@
 package shared
 
-import "github.com/google/uuid"
-
 type Privacy string
 
 const (
@@ -18,27 +16,9 @@ const (
 	DataTypeToken  DataType = "token"
 )
 
-type APIResponseErr string
+type Role string
 
 const (
-	ErrInternal      APIResponseErr = "internal server error"
-	ErrNotFound      APIResponseErr = "not found"
-	ErrInvalidID     APIResponseErr = "invalid id"
-	ErrInvalidJSON   APIResponseErr = "invalid json"
-	ErrInvalidToken  APIResponseErr = "invalid token"
-	ErrUnauthorized  APIResponseErr = "unauthorized"
-	ErrMissingToken  APIResponseErr = "missing or malformed token"
-	ErrAlreadyExists APIResponseErr = "already exists"
+	RoleAdmin Role = "admin"
+	RoleUser  Role = "user"
 )
-
-func UUIDsFromStrings(ids []string) ([]uuid.UUID, error) {
-	var uuids []uuid.UUID
-	for _, id := range ids {
-		uuid, err := uuid.Parse(id)
-		if err != nil {
-			return nil, err
-		}
-		uuids = append(uuids, uuid)
-	}
-	return uuids, nil
-}

@@ -21,6 +21,7 @@ type User struct {
 	Cover       File `gorm:"foreignKey:CoverID"`
 	CoverID     uuid.UUID
 	Privacy     shared.Privacy
+	Role        shared.Role
 	IsFollowing bool `gorm:"-"` // Not stored in database
 }
 
