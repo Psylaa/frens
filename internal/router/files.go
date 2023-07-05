@@ -48,23 +48,11 @@ func (fr *FilesRepo) get(c *fiber.Ctx) error {
 	if filename == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotProvided))
 	}
-	logger.Log.Debug().
-		Str("package", "router").
-		Str("router", "files").
-		Str("method", "retrieveFile").
-		Str("file_id", filename).
-		Msg("Got file ID from request")
 
 	// If extension is provided, remove it
 	var fileId string
 	if filepath.Ext(filename) != "" {
 		fileId = filename[:len(filename)-len(filepath.Ext(filename))]
-		logger.Log.Debug().
-			Str("package", "router").
-			Str("router", "files").
-			Str("method", "retrieveFile").
-			Str("file_id", fileId).
-			Msg("Removed file extension")
 	} else {
 		fileId = filename
 	}
@@ -72,20 +60,8 @@ func (fr *FilesRepo) get(c *fiber.Ctx) error {
 	// Convert the file ID to a UUID
 	fileIdUUID, err := uuid.Parse(fileId)
 	if err != nil {
-		logger.Log.Debug().
-			Str("package", "router").
-			Str("router", "files").
-			Str("method", "retrieveFile").
-			Str("file_id", fileId).
-			Msg("Failed to convert file ID to UUID")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotUUID))
 	}
-	logger.Log.Debug().
-		Str("package", "router").
-		Str("router", "files").
-		Str("method", "retrieveFile").
-		Str("file_id", fileIdUUID.String()).
-		Msg("Converted file ID to UUID")
 
 	// Send the request to the service package
 	return fr.Srv.Files.RetrieveByID(c, &fileIdUUID)

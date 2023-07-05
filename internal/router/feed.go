@@ -42,6 +42,7 @@ func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /feeds/chronological [get]
 func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "feed", "getChrono")
 
 	// Get the cursor from the query string
 	cursorString := c.Query("cursor")
@@ -71,6 +72,7 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /feeds/algorithmic [get]
 func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "feed", "getAlgo")
 	return nil
 }
 
@@ -85,5 +87,6 @@ func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /feeds/explore [get]
 func (fr *FeedRepo) getExplore(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "feed", "getExplore")
 	return nil
 }

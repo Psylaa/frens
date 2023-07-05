@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,6 +37,7 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /follows [get]
 func (fr *FollowsRepo) get(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "follows", "getFollows")
 	/*
 		id := c.Params("id")
 		userID, err := uuid.Parse(id)
@@ -66,6 +68,7 @@ func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /follows/{userId} [post]
 func (fr *FollowsRepo) create(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "follows", "createFollow")
 	/*
 		sourceID, err := getUserID(c)
 		if err != nil {
@@ -111,6 +114,7 @@ func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /follows/{userId} [delete]
 func (fr *FollowsRepo) delete(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "follows", "deleteFollow")
 	/*
 		SourceID, err := getUserID(c)
 		if err != nil {

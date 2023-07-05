@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/service"
 )
 
@@ -36,6 +37,7 @@ func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /likes [get]
 func (lr *LikesRepo) get(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "likes", "getLikes")
 	return nil
 }
 
@@ -50,6 +52,7 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /likes/{:postId} [post]
 func (lr *LikesRepo) create(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "likes", "createLike")
 	return nil
 }
 
@@ -67,5 +70,6 @@ func (lr *LikesRepo) create(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /likes [delete]
 func (lr *LikesRepo) deleteByID(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "likes", "deleteLike")
 	return nil
 }

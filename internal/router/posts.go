@@ -23,10 +23,10 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/:", pr.get)
+	rtr.Get("/:postId", pr.get)
 	rtr.Post("", pr.create)
-	rtr.Put("/:id", pr.update)
-	rtr.Delete("/:id", pr.delete)
+	rtr.Put("/:postId", pr.update)
+	rtr.Delete("/:postId", pr.delete)
 }
 
 // @Summary Get a post
@@ -34,40 +34,24 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Posts
 // @Accept json
 // @Produce json
-// @Param id path string true "Post ID"
+// @Param postId path string true "Post ID"
 // @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500
-// @Router /posts [get]
+// @Router /posts/{:postId} [get]
 func (pr *PostsRepo) get(c *fiber.Ctx) error {
-	return nil
-	/*
-		postID, err := uuid.Parse(c.Params("id"))
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-		}
-		logger.Log.Debug().
-			Str("package", "router").
-			Str("func", "getPost").
-			Msgf("successfully parsed provided post id into uuid: %v", postID)
+	logger.DebugLogRequestReceived("router", "posts", "get")
 
-		post, err := db.Posts.GetPost(postID)
-		switch err {
-		case nil:
-			break
-		case gorm.ErrRecordNotFound:
-			return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
-		default:
-			logger.Log.Error().Err(err).
-				Str("package", "router").
-				Str("func", "getPost").
-				Msg("unknown error fetching post from database")
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Parse the post ID from the URL parameter as a UUID
+	postID, err := uuid.Parse(c.Params("postId"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
 
-		return c.JSON(response.GeneratePostResponse(post))
-	*/
+	// Send the request to the service layer
+	return pr.Srv.Posts.Get(c, &postID)
 }
 
 // @Summary Create a post
@@ -80,13 +64,14 @@ func (pr *PostsRepo) get(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts [post]
 func (pr *PostsRepo) create(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "create")
+
+	// Parse the request body.
 	var body struct {
 		Text     string         `json:"text"`
 		Privacy  shared.Privacy `json:"privacy"`
 		MediaIDs []string       `json:"mediaIds"`
 	}
-
-	// Parse the request body.
 	if err := c.BodyParser(&body); err != nil {
 		logger.Log.Error().Err(err).Msg("error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
@@ -103,6 +88,7 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 		mediaIDs = append(mediaIDs, &mediaID)
 	}
 
+	// Send the request to the service layer.
 	return pr.Srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
 }
 
@@ -119,6 +105,7 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{id} [put]
 func (pr *PostsRepo) update(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "update")
 	return nil
 }
 
@@ -135,6 +122,7 @@ func (pr *PostsRepo) update(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{id} [delete]
 func (pr *PostsRepo) delete(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "delete")
 	/*
 		// Parse the post ID from the URL parameter.
 		postID, err := uuid.Parse(c.Params("id"))

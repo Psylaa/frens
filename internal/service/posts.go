@@ -11,8 +11,10 @@ import (
 
 type PostRepo struct{}
 
-func (pr *PostRepo) GetByID() {
+func (pr *PostRepo) Get(c *fiber.Ctx, userId *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "post", "Get")
 
+	return nil
 }
 
 func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userId *uuid.UUID) error {

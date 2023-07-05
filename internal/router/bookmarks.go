@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
@@ -24,7 +25,7 @@ func NewBookmarksRepo(db *database.Database, srv *service.Service) *BookmarksRep
 }
 
 func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/", br.getSelf)
+	rtr.Get("/", br.get)
 	rtr.Post("/:postId", br.create)
 	rtr.Delete("/", br.delete)
 }
@@ -44,7 +45,8 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /bookmarks [get]
-func (br *BookmarksRepo) getSelf(c *fiber.Ctx) error {
+func (br *BookmarksRepo) get(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "bookmarks", "get")
 	return br.Srv.Bookmarks.GetSelf(c, c.Locals("requestorId").(*uuid.UUID))
 }
 
@@ -62,6 +64,9 @@ func (br *BookmarksRepo) getSelf(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /bookmarks/{:postId} [post]
 func (br *BookmarksRepo) create(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "bookmarks", "create")
+
+	// Parse the post ID
 	postId := c.Params("postId")
 	postID, err := uuid.Parse(postId)
 	if err != nil {
@@ -69,6 +74,7 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 	}
 
+	// Send request to service
 	return br.Srv.Bookmarks.Create(c, c.Locals("requestorID").(*uuid.UUID), &postID)
 }
 
@@ -87,6 +93,7 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /bookmarks/{bookmarkId} [delete]
 func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "bookmarks", "delete")
 
 	// Get post ID from request
 	id := c.Params("id")
@@ -95,6 +102,6 @@ func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
 	}
 
-	// Send request to service
+	// Send request to service layer
 	return br.Srv.Bookmarks.DeleteByUserAndPostID(c, c.Locals("requestorId").(*uuid.UUID), &postID)
 }
