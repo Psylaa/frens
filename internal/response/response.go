@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
@@ -54,6 +55,9 @@ type Attributes struct {
 	IsLiked      *bool          `json:"isLiked,omitempty"`      // Pointer so its not ommited if false
 	IsBookmarked *bool          `json:"isBookmarked,omitempty"` // Pointer so its not ommited if false
 	IsFollowing  *bool          `json:"isFollowing,omitempty"`  // Pointer so its not ommited if false
+	AvatarID     *uuid.UUID     `json:"avatarID,omitempty"`
+	CoverID      *uuid.UUID     `json:"coverID,omitempty"`
+	Bio          *string        `json:"bio,omitempty"`
 }
 
 type Relationships struct {
@@ -72,9 +76,11 @@ type Meta struct {
 }
 
 var baseURL string
+var defaultBio string
 
-func Init(baseUrl string) {
-	baseURL = baseUrl
+func Init(config *config.Config) {
+	baseURL = config.Server.BaseURL
+	defaultBio = config.Users.DefaultBio
 }
 
 func CreateErrorResponse(err RespErr) *Response {
@@ -99,17 +105,31 @@ func CreateUsersResponse(users []*database.User) *Response {
 		followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
 		followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
 
+		// Generate bio depending on if its nil or not
+		var bio *string
+		if user.Bio == "" {
+			bio = &defaultBio
+		} else {
+			bio = &user.Bio
+		}
+
+		var avatarID *uuid.UUID
 		var avatarLink string
 		if user.AvatarID == uuid.Nil {
+			avatarID = nil
 			avatarLink = fmt.Sprintf("%s/files/default-avatar.png", baseURL)
 		} else {
+			avatarID = &user.AvatarID
 			avatarLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.AvatarID, user.Avatar.Extension)
 		}
 
+		var coverID *uuid.UUID
 		var coverLink string
 		if user.CoverID == uuid.Nil {
+			coverID = nil
 			coverLink = fmt.Sprintf("%s/files/default-cover.png", baseURL)
 		} else {
+			coverID = &user.CoverID
 			coverLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverID, user.Cover.Extension)
 		}
 
@@ -120,6 +140,9 @@ func CreateUsersResponse(users []*database.User) *Response {
 				CreatedAt: user.CreatedAt,
 				UpdatedAt: &user.UpdatedAt,
 				Username:  user.Username,
+				Bio:       bio,
+				AvatarID:  avatarID,
+				CoverID:   coverID,
 			},
 			Links: Links{
 				Self:      selfLink,

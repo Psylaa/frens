@@ -20,6 +20,7 @@ type Config struct {
 	Server   Server         `yaml:"server" validate:"required"`
 	Database Database       `yaml:"database" validate:"required"`
 	Storage  StorageDetails `yaml:"storage" validate:"required"`
+	Users    Users          `yaml:"users" validate:"required"`
 }
 
 type StorageDetails struct {
@@ -54,6 +55,10 @@ type Database struct {
 	LogMode      bool   `yaml:"log_mode"`
 	MaxIdleConns int    `yaml:"max_idle_conns"`
 	MaxOpenConns int    `yaml:"max_open_conns"`
+}
+
+type Users struct {
+	DefaultBio string `yaml:"default_bio" validate:"required"`
 }
 
 func (c *Config) Validate() error {

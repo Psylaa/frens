@@ -25,10 +25,5 @@ storage:
     region: us-east-1
     access_key: sampleaccesskey
     secret_key: samplesecretkey
-content: # To be implemented
-  user_name_min_length: 1
-  user_name_max_length: 32
-  post_text_min_length: 1
-  post_text_max_length: 256
-  post_text_required_with_media: false
-  post_max_media_count: 4
+users:
+  default_bio: "This user has not yet written a bio."

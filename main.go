@@ -36,7 +36,7 @@ func main() {
 	logger.Init(cfg.Server.LogLevel)
 
 	// Initialize response package
-	response.Init(cfg.Server.BaseURL)
+	response.Init(cfg)
 
 	// Connect to the database
 	db, err := database.New(cfg)

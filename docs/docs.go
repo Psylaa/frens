@@ -31,7 +31,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get bookmarks",
+                "description": "Get the bookmarks for the requesting user",
                 "consumes": [
                     "application/json"
                 ],
@@ -43,12 +43,6 @@ const docTemplate = `{
                 ],
                 "summary": "Get bookmarks",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The ID of the user to get bookmarks for. Given bookmarks are private, this must be the same as the requestor (defaults to the requestor). Admins can get any user's bookmarks",
-                        "name": "userId",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "The number of bookmarks to return.",
@@ -533,7 +527,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieve a like object consisting of a user and a target post",
+                "description": "Retrieve likes. If a like ID is provided, it is always used. Otherwise, a postID will return all likes for that post. If a userID is also provided, it will return either the like for that user/post or an empty array. If only a userID is provided, it will return all likes by that user for any post.",
                 "consumes": [
                     "application/json"
                 ],
@@ -544,6 +538,26 @@ const docTemplate = `{
                     "Likes"
                 ],
                 "summary": "Get likes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Like ID",
+                        "name": "likeId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -601,7 +615,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/likes/{:postId}": {
+        "/likes/": {
             "post": {
                 "security": [
                     {
@@ -619,6 +633,17 @@ const docTemplate = `{
                     "Likes"
                 ],
                 "summary": "Create a like",
+                "parameters": [
+                    {
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -730,42 +755,6 @@ const docTemplate = `{
             }
         },
         "/posts": {
-            "get": {
-                "description": "Retrieve a post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Get a post",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Post ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
             "post": {
                 "description": "Create a new post.",
                 "consumes": [
@@ -784,6 +773,44 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/posts/{:postId}": {
+            "get": {
+                "description": "Retrieve a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -993,6 +1020,52 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
+            }
+        },
+        "/users/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetch a specific user by their ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
             },
             "patch": {
                 "security": [
@@ -1053,52 +1126,6 @@ const docTemplate = `{
                         "description": "Cover ID",
                         "name": "coverId",
                         "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/users/{userId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Fetch a specific user by their ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get a user by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {

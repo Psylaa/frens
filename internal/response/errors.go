@@ -20,8 +20,13 @@ const (
 	ErrInvalidOffset      RespErr = "invalid offset"
 	ErrInvalidPassword    RespErr = "invalid password"
 	ErrInvalidToken       RespErr = "invalid token"
+	ErrInvalidUserID      RespErr = "invalid user id"
 	ErrInvalidUsername    RespErr = "invalid username"
 	ErrInvalidUUID        RespErr = "invalid uuid"
+	ErrInvalidAvatarUUID  RespErr = "provided avatar id is not a valid uuid"
+	ErrInvalidCoverUUID   RespErr = "provided cover id is not a valid uuid"
+	ErrAvatarNotFound     RespErr = "unable to find avatar file with provided id"
+	ErrCoverNotFound      RespErr = "unable to find cover file with provided id"
 
 	ErrMissingMedia     RespErr = "unable to find media with provided ids"
 	ErrMissingToken     RespErr = "missing or malformed token"

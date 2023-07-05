@@ -70,3 +70,11 @@ func (fr *FileRepo) DeleteByFile(file *File) error {
 func (fr *FileRepo) DeleteByID(fileID *uuid.UUID) error {
 	return fr.db.Where("id = ?", fileID).Delete(&File{}).Error
 }
+
+func (fr *FileRepo) ExistsByID(fileID *uuid.UUID) (bool, error) {
+	var count int
+	if err := fr.db.Model(&File{}).Where("id = ?", fileID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

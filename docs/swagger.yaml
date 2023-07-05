@@ -16,14 +16,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get bookmarks
+      description: Get the bookmarks for the requesting user
       parameters:
-      - description: The ID of the user to get bookmarks for. Given bookmarks are
-          private, this must be the same as the requestor (defaults to the requestor).
-          Admins can get any user's bookmarks
-        in: query
-        name: userId
-        type: string
       - description: The number of bookmarks to return.
         in: query
         name: count
@@ -365,7 +359,23 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a like object consisting of a user and a target post
+      description: Retrieve likes. If a like ID is provided, it is always used. Otherwise,
+        a postID will return all likes for that post. If a userID is also provided,
+        it will return either the like for that user/post or an empty array. If only
+        a userID is provided, it will return all likes by that user for any post.
+      parameters:
+      - description: Like ID
+        in: query
+        name: likeId
+        type: string
+      - description: Post ID
+        in: query
+        name: postId
+        type: string
+      - description: User ID
+        in: query
+        name: userId
+        type: string
       produces:
       - application/json
       responses:
@@ -380,11 +390,18 @@ paths:
       summary: Get likes
       tags:
       - Likes
-  /likes/{:postId}:
+  /likes/:
     post:
       consumes:
       - application/json
       description: Create a new like for a user based on the provided token
+      parameters:
+      - description: Post ID
+        in: body
+        name: postId
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -464,30 +481,6 @@ paths:
       tags:
       - Login
   /posts:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a post
-      parameters:
-      - description: Post ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      summary: Get a post
-      tags:
-      - Posts
     post:
       consumes:
       - application/json
@@ -502,6 +495,31 @@ paths:
         "500":
           description: Internal Server Error
       summary: Create a post
+      tags:
+      - Posts
+  /posts/{:postId}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get a post
       tags:
       - Posts
   /posts/{id}:
@@ -581,58 +599,6 @@ paths:
       tags:
       - Users
   /users/:
-    patch:
-      consumes:
-      - application/json
-      description: Update a users information including bio, avatar, and cover. Note
-        that avatar and cover must first be uploaded to the server and UUIDs must
-        be provided.
-      parameters:
-      - description: Bio
-        in: body
-        name: bio
-        schema:
-          type: string
-      - description: Bio
-        in: formData
-        name: bio
-        type: string
-      - description: Avatar ID
-        in: body
-        name: avatarId
-        schema:
-          type: string
-      - description: Avatar ID
-        in: formData
-        name: avatarId
-        type: string
-      - description: Cover ID
-        in: body
-        name: coverId
-        schema:
-          type: string
-      - description: Cover ID
-        in: formData
-        name: coverId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Update a user
-      tags:
-      - Users
     post:
       consumes:
       - application/json
@@ -716,6 +682,58 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get a user by ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Update a users information including bio, avatar, and cover. Note
+        that avatar and cover must first be uploaded to the server and UUIDs must
+        be provided.
+      parameters:
+      - description: Bio
+        in: body
+        name: bio
+        schema:
+          type: string
+      - description: Bio
+        in: formData
+        name: bio
+        type: string
+      - description: Avatar ID
+        in: body
+        name: avatarId
+        schema:
+          type: string
+      - description: Avatar ID
+        in: formData
+        name: avatarId
+        type: string
+      - description: Cover ID
+        in: body
+        name: coverId
+        schema:
+          type: string
+      - description: Cover ID
+        in: formData
+        name: coverId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user
       tags:
       - Users
 swagger: "2.0"

@@ -26,6 +26,7 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/:userId", ur.get)
+	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
 	rtr.Post("/", ur.create)
 	rtr.Patch("/:userId", ur.update)
 	rtr.Delete("/", ur.delete)
@@ -53,6 +54,7 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 		logger.Log.Info().Msg("No user ID provided")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
+	logger.DebugLogRequestUpdate("router", "users", "get", "parsed userID from path: "+userID)
 
 	// Sanitize the input
 	p := bluemonday.UGCPolicy()
@@ -63,6 +65,7 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 		logger.Log.Error().Msg("Invalid user ID format")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
+	logger.DebugLogRequestUpdate("router", "users", "get", "validated user ID format with regex")
 
 	// Convert userID to UUID
 	userUUID, err := uuid.Parse(userID)
@@ -70,7 +73,9 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 		logger.Log.Error().Err(err).Msg("Error parsing user ID to UUID")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
+	logger.DebugLogRequestUpdate("router", "users", "get", "converted userID to UUID")
 
+	// Send the request to the service layer
 	return ur.Srv.Users.Get(c, &userUUID)
 }
 
@@ -104,7 +109,7 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&body); err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUserID))
 	}
 
 	// Sanitize the input
@@ -145,7 +150,7 @@ func (ur *UsersRepo) create(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/ [patch]
+// @Router /users/{userId} [patch]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "update")
 
@@ -160,6 +165,7 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
+	logger.DebugLogRequestUpdate("router", "users", "update", "parsed request body")
 
 	// Sanitize the input
 	p := bluemonday.UGCPolicy()
@@ -178,6 +184,7 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	if body.CoverID != nil {
 		*body.CoverID = p.Sanitize(*body.CoverID)
 	}
+	logger.DebugLogRequestUpdate("router", "users", "update", "sanitized request body")
 
 	// Convert avatarID and coverID to UUID
 	var err error
@@ -189,9 +196,10 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 		*avatarUUID, err = uuid.Parse(*body.AvatarID)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing avatar ID to UUID")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidAvatarUUID))
 		}
 	}
+	logger.DebugLogRequestUpdate("router", "users", "update", "parsed avatar ID to UUID")
 
 	// Cover ID
 	if body.CoverID != nil {
@@ -199,9 +207,10 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 		*coverUUID, err = uuid.Parse(*body.CoverID)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error parsing cover ID to UUID")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCoverUUID))
 		}
 	}
+	logger.DebugLogRequestUpdate("router", "users", "update", "parsed cover ID to UUID")
 
 	return ur.Srv.Users.Update(c, body.Bio, avatarUUID, coverUUID)
 }
