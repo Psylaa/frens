@@ -38,6 +38,8 @@ type Repos struct {
 	Users     *UsersRepo
 }
 
+var tokenBlacklist []string
+
 // Initialize a new router
 func New(cfg *config.Config, db *database.Database, srv *service.Service) *Router {
 	app := fiber.New(fiber.Config{})
@@ -111,6 +113,7 @@ func (r *Router) Run() {
 }
 
 func (r *Router) addAuth() {
+
 	r.App.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(r.Config.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {

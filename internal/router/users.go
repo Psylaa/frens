@@ -229,5 +229,6 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 // @Router /users [delete]
 func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "delete")
+
 	return ur.Srv.Users.Delete(c)
 }
