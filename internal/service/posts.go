@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/shared"
@@ -47,41 +46,44 @@ func (pr *PostRepo) Create(
 	text string,
 	privacy shared.Privacy,
 	mediaIDs []*uuid.UUID) error {
-	logger.DebugLogRequestReceived("service", "post", "Create")
+	/*
+		logger.DebugLogRequestReceived("service", "post", "Create")
 
-	requestorId := c.Locals("requestorId").(*uuid.UUID)
+		requestorId := c.Locals("requestorId").(*uuid.UUID)
 
-	// Set default privacy to public if not provided.
-	if privacy == "" {
-		logger.DebugLogRequestUpdate("service", "post", "Create", "privacy not provided, setting to public")
-		privacy = shared.PrivacyPublic
-	}
-	logger.DebugLogRequestUpdate("service", "post", "Create", "privacy set")
+		// Set default privacy to public if not provided.
+		if privacy == "" {
+			logger.DebugLogRequestUpdate("service", "post", "Create", "privacy not provided, setting to public")
+			privacy = shared.PrivacyPublic
+		}
+		logger.DebugLogRequestUpdate("service", "post", "Create", "privacy set")
 
-	// Convert the media IDs files
-	mediaFiles, err := db.Files.GetManyByID(mediaIDs)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "post", "Create", "error getting media files", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "post", "Create", "media files retrieved")
+		// Convert the media IDs files
+		mediaFiles, err := db.Files.GetManyByID(mediaIDs)
+		if err != nil {
+			logger.ErrorLogRequestError("service", "post", "Create", "error getting media files", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+		}
+		logger.DebugLogRequestUpdate("service", "post", "Create", "media files retrieved")
 
-	// Create post in database
-	post, err := db.Posts.Create(*c.Locals("requestorId").(*uuid.UUID), text, privacy, mediaFiles)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "post", "Create", "error creating post", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "post", "Create", "post created")
+		// Create post in database
+		post, err := db.Posts.Create(*c.Locals("requestorId").(*uuid.UUID), text, privacy, mediaFiles)
+		if err != nil {
+			logger.ErrorLogRequestError("service", "post", "Create", "error creating post", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+		}
+		logger.DebugLogRequestUpdate("service", "post", "Create", "post created")
 
-	// Retrieve the post so we can return the author's information.
-	post, err = db.Posts.GetByID(requestorId, &post.ID)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "post", "Create", "error retrieving post", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "post", "Create", "post retrieved")
+		// Retrieve the post so we can return the author's information.
+		post, err = db.Posts.GetByID(requestorId, &post.ID)
+		if err != nil {
+			logger.ErrorLogRequestError("service", "post", "Create", "error retrieving post", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+		}
+		logger.DebugLogRequestUpdate("service", "post", "Create", "post retrieved")
 
-	// Return the post
-	return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse([]*database.Post{post}))
+		// Return the post
+		return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse([]*database.Post{post}))
+	*/
+	return nil
 }

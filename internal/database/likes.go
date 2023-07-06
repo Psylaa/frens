@@ -75,9 +75,9 @@ func (lr *LikeRepo) Delete(userID *uuid.UUID, postID *uuid.UUID) error {
 	return nil
 }
 
-func (lr *LikeRepo) Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error) {
+func (lr *LikeRepo) ExistsByPostAndUserID(postID *uuid.UUID, userID *uuid.UUID) (bool, error) {
 	var count int
-	if err := lr.db.Model(&Like{}).Where("user_id = ? AND post_id = ?", userID, postID).Count(&count).Error; err != nil {
+	if err := lr.db.Model(&Like{}).Where("post_id = ? AND user_id = ?", userID, postID).Count(&count).Error; err != nil {
 		return false, err
 	}
 

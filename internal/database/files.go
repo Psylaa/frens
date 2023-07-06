@@ -22,6 +22,22 @@ type FileRepo struct {
 	db *gorm.DB
 }
 
+func (fr *FileRepo) Create(file *File) error {
+	logger.DebugLogRequestReceived("database", "files", "Create")
+	if err := fr.db.Create(file).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (fr *FileRepo) DeleteByID(fileID *uuid.UUID) error {
+	log.Println("DeleteFile")
+	if err := fr.db.Delete(&File{}, "id = ?", fileID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (fr *FileRepo) GetByID(fileID *uuid.UUID) (*File, error) {
 	log.Println("GetFile")
 	var file File
@@ -35,46 +51,18 @@ func (fr *FileRepo) GetByID(fileID *uuid.UUID) (*File, error) {
 	return &file, nil
 }
 
-func (fr *FileRepo) GetManyByID(fileIDs []*uuid.UUID) ([]*File, error) {
+func (fr *FileRepo) GetByPostID(postID *uuid.UUID) ([]*File, error) {
 	var files []*File
-	if err := fr.db.Where("id IN (?)", fileIDs).Find(&files).Error; err != nil {
+	if err := fr.db.Where("post_id = ?", postID).Find(&files).Error; err != nil {
 		return nil, err
 	}
 	return files, nil
 }
 
-func (fr *FileRepo) GetByUserID(userID *uuid.UUID) ([]File, error) {
-	var files []File
+func (fr *FileRepo) GetByUserID(userID *uuid.UUID) ([]*File, error) {
+	var files []*File
 	if err := fr.db.Where("owner = ?", userID).Find(&files).Error; err != nil {
 		return nil, err
 	}
 	return files, nil
-}
-
-func (fr *FileRepo) Create(file *File) (*File, error) {
-	logger.DebugLogRequestReceived("database", "files", "Create")
-	if err := fr.db.Create(file).Error; err != nil {
-		return nil, err
-	}
-	return file, nil
-}
-
-func (fr *FileRepo) Update(file *File) error {
-	return fr.db.Save(file).Error
-}
-
-func (fr *FileRepo) DeleteByFile(file *File) error {
-	return fr.db.Delete(file).Error
-}
-
-func (fr *FileRepo) DeleteByID(fileID *uuid.UUID) error {
-	return fr.db.Where("id = ?", fileID).Delete(&File{}).Error
-}
-
-func (fr *FileRepo) ExistsByID(fileID *uuid.UUID) (bool, error) {
-	var count int
-	if err := fr.db.Model(&File{}).Where("id = ?", fileID).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
 }

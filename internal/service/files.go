@@ -27,13 +27,6 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	ext := filepath.Ext(file.Filename)
 
 	// Create file object
-	logger.Log.Debug().
-		Str("package", "service").
-		Str("service", "files").
-		Str("method", "Create").
-		Str("file_extension", ext).
-		Str("user_id", requestorId.String()).
-		Msg("Creating file object")
 
 	fileObj := &database.File{
 		ID:        uuid.New(),
@@ -42,16 +35,13 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	}
 
 	// Create file record in database
-	logger.Log.Debug().
-		Str("package", "service").
-		Str("service", "files").
-		Str("method", "Create").
-		Str("file_id", fileObj.ID.String()).
-		Str("file_extension", fileObj.Extension).
-		Str("user_id", fileObj.UserID.String()).
-		Msg("Creating file record in database")
+	err := db.Files.Create(fileObj)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-	fileData, err := db.Files.Create(fileObj)
+	// Retrieve file data from database with owner
+	fileData, err := db.Files.GetByID(&fileObj.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
@@ -119,12 +109,6 @@ func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "files", "Delete")
 
 	// Get file data
-	logger.Log.Debug().
-		Str("package", "service").
-		Str("service", "files").
-		Str("method", "DeleteByID").
-		Str("file_id", fileId.String()).
-		Msg("Getting file data")
 	fileData, err := db.Files.GetByID(fileId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
@@ -134,26 +118,8 @@ func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 	}
 
 	// Delete file from storage
-	logger.Log.Debug().
-		Str("package", "service").
-		Str("service", "files").
-		Str("method", "DeleteByID").
-		Str("file_id", fileId.String()).
-		Str("file_extension", fileData.Extension).
-		Str("user_id", fileData.UserID.String()).
-		Str("directory", cfg.Storage.Local.Path).
-		Msg("Deleting file from storage")
 
 	if err := os.Remove(filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+fileData.Extension)); err != nil {
-		logger.Log.Error().
-			Str("package", "service").
-			Str("service", "files").
-			Str("method", "DeleteByID").
-			Str("file_id", fileId.String()).
-			Str("file_extension", fileData.Extension).
-			Str("user_id", fileData.UserID.String()).
-			Str("directory", cfg.Storage.Local.Path).
-			Msg("Failed to delete file from storage")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 

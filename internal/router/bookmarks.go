@@ -136,5 +136,5 @@ func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 	}
 
 	// Send request to service layer
-	return br.Srv.Bookmarks.DeleteByUserAndPostID(c, c.Locals("requestorId").(*uuid.UUID), &postID)
+	return br.Srv.Bookmarks.Delete(c, c.Locals("requestorId").(*uuid.UUID), &postID)
 }

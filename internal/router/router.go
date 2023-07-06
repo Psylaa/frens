@@ -125,11 +125,11 @@ func (r *Router) addAuth() {
 	}))
 
 	// Requestor ID
-	r.App.Use(r.getUserIDFromTokenMiddleware)
+	r.App.Use(r.extractRequestorID)
 }
 
 // Middleware function to extract the user ID from the token, validate it, and add it to the context:
-func (r *Router) getUserIDFromTokenMiddleware(c *fiber.Ctx) error {
+func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 	// Parse claims from token
 	if c.Locals("user") == nil {
 		logger.Log.Warn().Msg("no user in context of provided token")

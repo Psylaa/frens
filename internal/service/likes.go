@@ -62,7 +62,7 @@ func (lr *LikeRepo) Create(c *fiber.Ctx, postId *uuid.UUID) error {
 	userId := c.Locals("requestorId").(*uuid.UUID)
 
 	// Check if the user has already liked the post
-	liked, err := db.Likes.Exists(userId, postId)
+	liked, err := db.Likes.ExistsByPostAndUserID(postId, userId)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "like", "Create", "Error checking if like exists", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
@@ -111,7 +111,7 @@ func (lr *LikeRepo) Delete(c *fiber.Ctx, postId *uuid.UUID) error {
 	userId := c.Locals("requestorId").(*uuid.UUID)
 
 	// Check if the user has already liked the post
-	liked, err := db.Likes.Exists(userId, postId)
+	liked, err := db.Likes.ExistsByPostAndUserID(postId, userId)
 	if err != nil {
 		logger.ErrorLogRequestError("service", "like", "Delete", "Error checking if like exists", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

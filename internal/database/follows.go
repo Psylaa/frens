@@ -18,7 +18,7 @@ type FollowRepo struct {
 	db *gorm.DB
 }
 
-func (fr *FollowRepo) CreateFollow(sourceID uuid.UUID, targetID uuid.UUID) (*Follow, error) {
+func (fr *FollowRepo) Create(sourceID uuid.UUID, targetID uuid.UUID) (*Follow, error) {
 	newFollow := &Follow{
 		BaseModel: BaseModel{ID: uuid.New()},
 		SourceID:  sourceID,
@@ -34,7 +34,7 @@ func (fr *FollowRepo) CreateFollow(sourceID uuid.UUID, targetID uuid.UUID) (*Fol
 	return newFollow, nil
 }
 
-func (fr *FollowRepo) DeleteFollow(sourceID, targetID uuid.UUID) error {
+func (fr *FollowRepo) Delete(sourceID, targetID uuid.UUID) error {
 	var follow Follow
 	if err := fr.db.Where("source_id = ? AND target_id = ?", sourceID, targetID).First(&follow).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
