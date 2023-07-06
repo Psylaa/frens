@@ -6,99 +6,107 @@ import (
 
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type BaseModel struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	SourceID  uuid.UUID `gorm:"type:uuid;"`
+	TargetID  uuid.UUID `gorm:"type:uuid;"`
 }
 
 type Database struct {
 	*gorm.DB
-	Bookmarks *BookmarkRepo
-	Files     *FileRepo
-	Follows   *FollowRepo
-	Likes     *LikeRepo
-	Posts     *PostRepo
-	Users     *UserRepo
+	Bookmarks interface{ Base[Bookmark] }
+	Files     interface{ Base[File] }
+	Follows   interface{ Base[Follow] }
+	Likes     interface{ Base[Like] }
+	Posts     interface{ Base[Post] }
+	Users     Users
 }
 
-/*
-	The interfaces are here just to make it easier to organize the code.
-	They are not necessary, but they do make it easier to see what methods
-	are available for each model and make sure we have proper naming
-	standards, consistency, scope, and coverage.
-
-	Naming convention:
-	- Except when accepting a pointer to a struct, name should be "By" + type
-*/
-
-type BookmarkRepoInterface interface {
-	Create(bookmark *Bookmark) error
-	DeleteByID(bookmarkID *uuid.UUID) error
-	ExistsByPostAndUserID(postID *uuid.UUID, userID *uuid.UUID) (bool, error)
-	GetByID(bookmarkID *uuid.UUID) (*Bookmark, error)
-	GetByPostID(postID *uuid.UUID, count *int, offest *int) ([]*Bookmark, error)
-	GetByPostAndUserID(userID *uuid.UUID, postID *uuid.UUID) (*Bookmark, error)
-	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error)
+type Bookmark struct {
+	BaseModel
+	UserID uuid.UUID
+	PostID uuid.UUID
+	Owner  User `gorm:"foreignKey:UserID"`
 }
 
-var _ BookmarkRepoInterface = &BookmarkRepo{} // Ensure interface is implemented
-
-type FileRepoInterface interface {
-	Create(file *File) error
-	DeleteByID(fileID *uuid.UUID) error
-	GetByID(fileID *uuid.UUID) (*File, error)
-	GetByPostID(postID *uuid.UUID) ([]*File, error)
-	GetByUserID(userID *uuid.UUID) ([]*File, error)
+type File struct {
+	BaseModel
+	Extension string
 }
 
-var _ FileRepoInterface = &FileRepo{} // Ensure interface is implemented
-
-type FollowRepoInterface interface {
-	Create(follow *Follow) error
-	DeleteBySourceAndTargetID(sourceId uuid.UUID, targetId uuid.UUID) error
-	ExistsBySourceAndTargetID(sourceId uuid.UUID, targetId uuid.UUID) (bool, error)
-	GetByID(followId *uuid.UUID) (*Follow, error)
-	GetBySourceID(sourceId uuid.UUID, count *int, offset *int) ([]*Follow, error)
-	GetByTargetID(targetId uuid.UUID, count *int, offset *int) ([]*Follow, error)
+type Post struct {
+	BaseModel
+	Author   User `gorm:"foreignKey:AuthorID"`
+	AuthorID uuid.UUID
+	Privacy  shared.Privacy
+	Text     string
+	Media    []*File `gorm:"foreignKey:PostID;AssociationForeignKey:ID" json:"media"`
 }
 
-type LikeRepoInterface interface {
-	GetByIDs(likeIds []*uuid.UUID) ([]*Like, error)
-	GetByPostID(postID *uuid.UUID) ([]*Like, error)
-	GetByUserID(userID *uuid.UUID) ([]*Like, error)
-
-	GetCount_ByPostID(postID *uuid.UUID) (int, error)
-	GetCount_ByUserID(userID *uuid.UUID) (int, error)
-
-	Create(like *Like) (*Like, error)
-	Delete(userId *uuid.UUID, postId *uuid.UUID) error
-	Exists(userId *uuid.UUID, postId *uuid.UUID) (bool, error)
+type User struct {
+	BaseModel
+	Username    string `gorm:"unique"`
+	Email       string
+	Bio         string
+	Password    string
+	Avatar      File `gorm:"foreignKey:AvatarID"`
+	AvatarID    uuid.UUID
+	Cover       File `gorm:"foreignKey:CoverID"`
+	CoverID     uuid.UUID
+	Privacy     shared.Privacy
+	Role        shared.Role
+	IsFollowing bool `gorm:"-"`
 }
 
-type PostRepoInterface interface {
-	GetByIDs(postIDs []*uuid.UUID) ([]*Post, error)
-	GetByUserID(userID *uuid.UUID) ([]*Post, error)
-
-	GetCount_ByUserID(userID *uuid.UUID) (int, error)
-
-	Create(post *Post) (*Post, error)
-	Delete(postID *uuid.UUID) error
+type Follow struct {
+	BaseModel
 }
 
-type UserRepoInterface interface {
-	GetByIDs(userID []*uuid.UUID) ([]*User, error)
-	GetByUsername(username string) (*User, error)
+type Like struct {
+	BaseModel
+}
+
+type Entity interface{}
+
+// Base represents a generic CRUD interface for a database entity
+type Base[T Entity] interface {
+	// Create inserts a new entity into the database
+	Create(entity *T) error
+
+	// Update modifies an existing entity in the database
+	Update(entity *T) error
+
+	// GetByID fetches entities by their ID
+	GetByID(id *uuid.UUID) ([]*T, error)
+
+	// DeleteByID deletes an entity by its ID
+	DeleteByID(id *uuid.UUID) error
+
+	// GetBySourceID fetches entities by their SourceID
+	GetBySourceID(sourceID *uuid.UUID, limit *int, offset *int) ([]*T, error)
+
+	// GetByTargetID fetches entities by their TargetID
+	GetByTargetID(targetID *uuid.UUID, limit *int, offset *int) ([]*T, error)
+
+	// DeleteBySourceAndTargetID deletes an entity by its SourceID and TargetID
+	DeleteBySourceAndTargetID(entity *T, sourceID *uuid.UUID, targetID *uuid.UUID) error
+
+	// ExistsBySourceAndTargetID checks if an entity with the given SourceID and TargetID exists
+	ExistsBySourceAndTargetID(entity *T, sourceID *uuid.UUID, targetID *uuid.UUID) (bool, error)
+}
+
+type Users interface {
+	Base[User]
 	GetByEmail(email string) (*User, error)
-
-	Create(user *User) (*User, error)
-	Update(user *User) (*User, error)
-	Delete(userID *uuid.UUID) error
+	GetByUsername(username string) (*User, error)
 }
 
 // New initializes a new database connection
@@ -127,11 +135,11 @@ func New(cfg *config.Config) (*Database, error) {
 
 	return &Database{
 		DB:        db,
-		Bookmarks: &BookmarkRepo{db: db},
-		Files:     &FileRepo{db: db},
-		Follows:   &FollowRepo{db: db},
-		Likes:     &LikeRepo{db: db},
-		Posts:     &PostRepo{db: db, Likes: &LikeRepo{db: db}, Bookmarks: &BookmarkRepo{db: db}},
-		Users:     &UserRepo{db: db, Follows: &FollowRepo{db: db}},
+		Bookmarks: NewBaseRepo[Bookmark](db),
+		Files:     NewBaseRepo[File](db),
+		Follows:   NewBaseRepo[Follow](db),
+		Likes:     NewBaseRepo[Like](db),
+		Posts:     NewBaseRepo[Post](db),
+		//Users:     NewUserRepo(db), // This needs to be defined separately as it has additional methods
 	}, nil
 }
