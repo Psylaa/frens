@@ -74,6 +74,10 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 	logger.DebugLogRequestUpdate("router", "users", "get", "converted userID to UUID")
+	if userUUID == uuid.Nil {
+		logger.Log.Error().Msg("Invalid user ID")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
 
 	// Send the request to the service layer
 	return ur.Srv.Users.Get(c, &userUUID)

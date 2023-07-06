@@ -162,10 +162,10 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 	}
 
 	// Verify user exists
-	if exists := r.DB.Users.Exists(uuidPtr); exists == false {
-		logger.Log.Warn().Msg("user does not exist")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	}
+	//if exists := r.DB.Users.Exists(uuidPtr); exists == false {
+	//	logger.Log.Warn().Msg("user does not exist")
+	//	return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+	//}
 
 	c.Locals("requestorId", uuidPtr)
 

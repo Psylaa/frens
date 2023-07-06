@@ -29,7 +29,7 @@ func DebugLogRequestUpdate(pack string, repo string, method string, message stri
 		Str("package", pack).
 		Str("repo", repo).
 		Str("method", method).
-		Msgf("request received: %s", message)
+		Msgf("request updated: %s", message)
 }
 
 func ErrorLogRequestError(pack string, repo string, method string, message string, err error) {

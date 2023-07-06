@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -17,24 +16,27 @@ func (pr *PostRepo) Get(c *fiber.Ctx, userId *uuid.UUID) error {
 }
 
 func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userId *uuid.UUID) error {
+	/*
 
-	// Verify that the user exists
-	if !db.Users.Exists(userId) {
-		logger.ErrorLogRequestError("service", "post", "GetByUserID", "user not found", nil)
-		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
-	}
-	logger.DebugLogRequestUpdate("service", "post", "GetByUserID", "user found")
+		// Verify that the user exists
+		if !db.Users.Exists(userId) {
+			logger.ErrorLogRequestError("service", "post", "GetByUserID", "user not found", nil)
+			return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
+		}
+		logger.DebugLogRequestUpdate("service", "post", "GetByUserID", "user found")
 
-	// Get posts from database
-	posts, err := db.Posts.GetByUserID(userId)
-	if err != nil {
-		logger.ErrorLogRequestError("service", "post", "GetByUserID", "posts not found", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-	logger.DebugLogRequestUpdate("service", "post", "GetByUserID", "posts found")
+		// Get posts from database
+		posts, err := db.Posts.GetByUserID(userId)
+		if err != nil {
+			logger.ErrorLogRequestError("service", "post", "GetByUserID", "posts not found", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+		}
+		logger.DebugLogRequestUpdate("service", "post", "GetByUserID", "posts found")
 
-	// Return the posts
-	return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse(posts))
+		// Return the posts
+		return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse(posts))
+	*/
+	return nil
 }
 
 func (pr *PostRepo) GetReplies() {

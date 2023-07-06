@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
@@ -98,193 +97,148 @@ func CreateCountResponse(count int) *Response {
 }
 
 func CreateUsersResponse(users []*database.User) *Response {
-	var data []Data
-	for _, user := range users {
-		selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID)
-		postsLink := fmt.Sprintf("%s/users/%s/posts", baseURL, user.ID)
-		followersLink := fmt.Sprintf("%s/users/%s/followers", baseURL, user.ID)
-		followingLink := fmt.Sprintf("%s/users/%s/following", baseURL, user.ID)
-
-		// Generate bio depending on if its nil or not
-		var bio *string
-		if user.Bio == "" {
-			bio = &defaultBio
-		} else {
-			bio = &user.Bio
-		}
-
-		var avatarID *uuid.UUID
-		var avatarLink string
-		if user.AvatarID == uuid.Nil {
-			avatarID = nil
-			avatarLink = fmt.Sprintf("%s/files/default-avatar.png", baseURL)
-		} else {
-			avatarID = &user.AvatarID
-			avatarLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.AvatarID, user.Avatar.Extension)
-		}
-
-		var coverID *uuid.UUID
-		var coverLink string
-		if user.CoverID == uuid.Nil {
-			coverID = nil
-			coverLink = fmt.Sprintf("%s/files/default-cover.png", baseURL)
-		} else {
-			coverID = &user.CoverID
-			coverLink = fmt.Sprintf("%s/files/%s%s", baseURL, user.CoverID, user.Cover.Extension)
-		}
-
-		data = append(data, Data{
-			Type: UserType,
-			ID:   user.ID,
-			Attributes: Attributes{
-				CreatedAt: user.CreatedAt,
-				UpdatedAt: &user.UpdatedAt,
-				Username:  user.Username,
-				Bio:       bio,
-				AvatarID:  avatarID,
-				CoverID:   coverID,
-			},
-			Links: Links{
-				Self:      selfLink,
-				Posts:     postsLink,
-				Following: followingLink,
-				Followers: followersLink,
-				Avatar:    avatarLink,
-				Cover:     coverLink,
-			},
-		},
-		)
-	}
-
-	return &Response{
-		Data: data,
-	}
+	return nil
 }
 
 func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
-	var data []Data
-	for _, b := range bookmark {
-		selfLink := fmt.Sprintf("%s/bookmarks/%s", baseURL, b.ID)
-		ownerLink := fmt.Sprintf("%s/users/%s", baseURL, b.Owner.ID)
+	/*
+		var data []Data
+		for _, b := range bookmark {
+			selfLink := fmt.Sprintf("%s/bookmarks/%s", baseURL, b.ID)
+			ownerLink := fmt.Sprintf("%s/users/%s", baseURL, b.Owner.ID)
 
-		data = append(data, Data{
-			Type:          BookmarkType,
-			ID:            b.ID,
-			Attributes:    Attributes{},
-			Relationships: &Relationships{},
-			Links: Links{
-				Self:  selfLink,
-				Owner: ownerLink,
-			},
-		})
-	}
+			data = append(data, Data{
+				Type:          BookmarkType,
+				ID:            b.ID,
+				Attributes:    Attributes{},
+				Relationships: &Relationships{},
+				Links: Links{
+					Self:  selfLink,
+					Owner: ownerLink,
+				},
+			})
+		}
 
-	return &Response{
-		Data: data,
-	}
+		return &Response{
+			Data: data,
+		}
+	*/
+	return nil
 }
 
 func CreatePostsResponse(posts []*database.Post) *Response {
-	var data []Data
-	for _, post := range posts {
-		selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
-		//authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
+	/*
+		var data []Data
+		for _, post := range posts {
+			selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
+			//authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
 
-		data = append(data, Data{
-			Type: UserType,
-			ID:   post.ID,
-			Attributes: Attributes{
-				CreatedAt:    post.CreatedAt,
-				UpdatedAt:    &post.UpdatedAt,
-				Privacy:      post.Privacy,
-				Text:         post.Text,
-				IsLiked:      &post.IsLiked,
-				IsBookmarked: &post.IsBookmarked,
-			},
-			Relationships: &Relationships{
-				Author: CreateUsersResponse([]*database.User{&post.Author}),
-				Media:  CreateFilesResponse(post.Media),
-			},
-			Links: Links{
-				Self: selfLink,
-			},
-		})
-	}
+			data = append(data, Data{
+				Type: UserType,
+				ID:   post.ID,
+				Attributes: Attributes{
+					CreatedAt:    post.CreatedAt,
+					UpdatedAt:    &post.UpdatedAt,
+					Privacy:      post.Privacy,
+					Text:         post.Text,
+					IsLiked:      &post.IsLiked,
+					IsBookmarked: &post.IsBookmarked,
+				},
+				Relationships: &Relationships{
+					Author: CreateUsersResponse([]*database.User{&post.Author}),
+					Media:  CreateFilesResponse(post.Media),
+				},
+				Links: Links{
+					Self: selfLink,
+				},
+			})
+		}
 
-	return &Response{
-		Data: data,
-	}
+		return &Response{
+			Data: data,
+		}
+	*/
+	return nil
 }
 
 func CreateFilesResponse(files []*database.File) *Response {
-	var data []Data
-	for _, file := range files {
-		selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
+	/*
+		var data []Data
+		for _, file := range files {
+			selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
 
-		data = append(data, Data{
-			Type: "file",
-			ID:   file.ID,
-			Attributes: Attributes{
-				CreatedAt: file.CreatedAt,
-				UpdatedAt: &file.UpdatedAt,
-				Extenion:  &file.Extension,
-			},
-			Links: Links{
-				Self: selfLink,
-			},
-		})
-	}
+			data = append(data, Data{
+				Type: "file",
+				ID:   file.ID,
+				Attributes: Attributes{
+					CreatedAt: file.CreatedAt,
+					UpdatedAt: &file.UpdatedAt,
+					Extenion:  &file.Extension,
+				},
+				Links: Links{
+					Self: selfLink,
+				},
+			})
+		}
 
-	return &Response{
-		Data: data,
-	}
+		return &Response{
+			Data: data,
+		}
+	*/
+	return nil
 }
 
 func CreateLoginResponse(user *database.User, token string, expirationDate time.Time) *Response {
-	return &Response{
-		Data: []Data{
-			{
-				Type: "login",
-				ID:   user.ID,
-				Attributes: Attributes{
-					CreatedAt: time.Now(),
-					ExpiresAt: &expirationDate,
-					Token:     token,
-					Username:  user.Username,
-				},
-				Links: Links{
-					Self: fmt.Sprintf("%s/login", baseURL),
+	/*
+		return &Response{
+			Data: []Data{
+				{
+					Type: "login",
+					ID:   user.ID,
+					Attributes: Attributes{
+						CreatedAt: time.Now(),
+						ExpiresAt: &expirationDate,
+						Token:     token,
+						Username:  user.Username,
+					},
+					Links: Links{
+						Self: fmt.Sprintf("%s/login", baseURL),
+					},
 				},
 			},
-		},
-	}
+		}
+	*/
+	return nil
 }
 
 func CreateLikesResponse(user *database.User, post *database.Post, likes []*database.Like) *Response {
-	var data []Data
-	for _, like := range likes {
-		selfLink := fmt.Sprintf("%s/likes/%s", baseURL, like.ID)
-		ownerLink := fmt.Sprintf("%s/users/%s", baseURL, like.UserID)
+	/*
+		var data []Data
+		for _, like := range likes {
+			selfLink := fmt.Sprintf("%s/likes/%s", baseURL, like.ID)
+			ownerLink := fmt.Sprintf("%s/users/%s", baseURL, like.UserID)
 
-		data = append(data, Data{
-			Type: LikeType,
-			ID:   like.ID,
-			Attributes: Attributes{
-				CreatedAt: like.CreatedAt,
-				UpdatedAt: &like.UpdatedAt,
-			},
-			Relationships: &Relationships{
-				Owner: CreateUsersResponse([]*database.User{user}),
-				Post:  CreatePostsResponse([]*database.Post{post}),
-			},
-			Links: Links{
-				Self:  selfLink,
-				Owner: ownerLink,
-			},
-		})
-	}
+			data = append(data, Data{
+				Type: LikeType,
+				ID:   like.ID,
+				Attributes: Attributes{
+					CreatedAt: like.CreatedAt,
+					UpdatedAt: &like.UpdatedAt,
+				},
+				Relationships: &Relationships{
+					Owner: CreateUsersResponse([]*database.User{user}),
+					Post:  CreatePostsResponse([]*database.Post{post}),
+				},
+				Links: Links{
+					Self:  selfLink,
+					Owner: ownerLink,
+				},
+			})
+		}
 
-	return &Response{
-		Data: data,
-	}
+		return &Response{
+			Data: data,
+		}
+	*/
+	return nil
 }
