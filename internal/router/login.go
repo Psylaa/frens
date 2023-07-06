@@ -67,7 +67,7 @@ func (lr *LoginRepo) login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
-	return lr.Srv.Login.Login(c, &body.Username, &body.Password)
+	return lr.Srv.Login.Login(c, body.Username, body.Password)
 }
 
 // @Summary Verify Token

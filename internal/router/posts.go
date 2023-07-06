@@ -59,6 +59,9 @@ func (pr *PostsRepo) get(c *fiber.Ctx) error {
 // @Tags Posts
 // @Accept json
 // @Produce json
+// @Param text body string true "The text of the post"
+// @Param privacy body string true "The privacy setting of the post"
+// @Param mediaIds body []string false "The UUIDs of the media files attached to the post"
 // @Success 200
 // @Failure 400
 // @Failure 500

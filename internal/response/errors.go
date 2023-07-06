@@ -25,8 +25,10 @@ const (
 	ErrInvalidUUID        RespErr = "invalid uuid"
 	ErrInvalidAvatarUUID  RespErr = "provided avatar id is not a valid uuid"
 	ErrInvalidCoverUUID   RespErr = "provided cover id is not a valid uuid"
-	ErrAvatarNotFound     RespErr = "unable to find avatar file with provided id"
-	ErrCoverNotFound      RespErr = "unable to find cover file with provided id"
+	ErrInvalidPhone       RespErr = "invalid phone number"
+
+	ErrAvatarNotFound RespErr = "unable to find avatar file with provided id"
+	ErrCoverNotFound  RespErr = "unable to find cover file with provided id"
 
 	ErrMissingMedia     RespErr = "unable to find media with provided ids"
 	ErrMissingToken     RespErr = "missing or malformed token"
@@ -34,6 +36,7 @@ const (
 
 	ErrTakenEmail    RespErr = "email is already in use"
 	ErrTakenUsername RespErr = "username is already in use"
+	ErrTakenPhone    RespErr = "phone is already in use"
 
 	ErrFileIDNotUUID     RespErr = "file id is not a valid uuid"
 	ErrFileIDNotProvided RespErr = "file id not provided"

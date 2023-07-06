@@ -27,7 +27,6 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/:userId", ur.get)
 	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
-	rtr.Post("/", ur.create)
 	rtr.Patch("/:userId", ur.update)
 	rtr.Delete("/", ur.delete)
 }
@@ -81,60 +80,6 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 
 	// Send the request to the service layer
 	return ur.Srv.Users.Get(c, &userUUID)
-}
-
-// @Summary Create a user
-// @Description Create a new user.
-// @Tags Users
-// @Accept  json
-// @Produce  json
-// @Param username body string true "Username"
-// @Param username formData string true "Username"
-// @Param email body string true "Email"
-// @Param email formData string true "Email"
-// @Param password body string true "Password"
-// @Param password formData string true "Password"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /users/ [post]
-func (ur *UsersRepo) create(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "users", "create")
-
-	// Parse the request body
-	var body struct {
-		Username string `form:"username" json:"username"`
-		Email    string `form:"email" json:"email"`
-		Password string `form:"password" json:"password"`
-	}
-
-	if err := c.BodyParser(&body); err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUserID))
-	}
-
-	// Sanitize the input
-	p := bluemonday.UGCPolicy()
-	body.Username = p.Sanitize(body.Username)
-	body.Email = p.Sanitize(body.Email)
-	// Don't sanitize password - it might unintentionally change it.
-
-	// Validate email format
-	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, body.Email); !matched {
-		logger.Log.Error().Msg("Invalid email format")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidEmail))
-	}
-
-	// Validate username and password - they should not be empty
-	if body.Username == "" || body.Password == "" {
-		logger.Log.Error().Msg("Username or password is empty")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	return ur.Srv.Users.Create(c, body.Username, body.Email, body.Password)
 }
 
 // @Summary Update a user

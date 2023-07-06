@@ -24,7 +24,7 @@ type Base[T Entity] interface {
 	// Update modifies an existing entity in the database
 	Update(entity *T) error
 
-	// GetByID fetches entities by their ID
+	// GetByID fetches an entity by its ID
 	GetByID(id *uuid.UUID) (*T, error)
 
 	// DeleteByID deletes an entity by its ID

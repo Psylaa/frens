@@ -767,6 +767,37 @@ const docTemplate = `{
                     "Posts"
                 ],
                 "summary": "Create a post",
+                "parameters": [
+                    {
+                        "description": "The text of the post",
+                        "name": "text",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "The privacy setting of the post",
+                        "name": "privacy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "The UUIDs of the media files attached to the post",
+                        "name": "mediaIds",
+                        "in": "body",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -898,6 +929,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/signup": {
+            "post": {
+                "description": "Create a new user account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Signup"
+                ],
+                "summary": "Signup",
+                "parameters": [
+                    {
+                        "description": "The user account to create",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/router.CreateUserRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "phone",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "username",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/users": {
             "delete": {
                 "security": [
@@ -916,93 +1001,6 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Delete self",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/users/": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create a new user.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Create a user",
-                "parameters": [
-                    {
-                        "description": "Username",
-                        "name": "username",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Username",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "description": "Email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Email",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "description": "Password",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -1144,6 +1142,25 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error"
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "router.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -25,4 +26,17 @@ type PostRepo struct {
 
 func NewPostRepo(db *gorm.DB) Posts {
 	return &PostRepo{NewBaseRepo[Post](db)}
+}
+
+// GetByID returns the post with the given ID
+func (pr *PostRepo) GetByID(id *uuid.UUID) (*Post, error) {
+	logger.DebugLogRequestReceived("database", "PostRepo", "GetByID")
+
+	var post Post
+	result := pr.db.Preload("Author").Preload("Media").First(&post, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &post, nil
 }

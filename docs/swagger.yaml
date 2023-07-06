@@ -1,4 +1,16 @@
 basePath: /v1
+definitions:
+  router.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:3001
 info:
   contact:
@@ -485,6 +497,26 @@ paths:
       consumes:
       - application/json
       description: Create a new post.
+      parameters:
+      - description: The text of the post
+        in: body
+        name: text
+        required: true
+        schema:
+          type: string
+      - description: The privacy setting of the post
+        in: body
+        name: privacy
+        required: true
+        schema:
+          type: string
+      - description: The UUIDs of the media files attached to the post
+        in: body
+        name: mediaIds
+        schema:
+          items:
+            type: string
+          type: array
       produces:
       - application/json
       responses:
@@ -575,6 +607,40 @@ paths:
       summary: Update a post
       tags:
       - Posts
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account.
+      parameters:
+      - description: The user account to create
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/router.CreateUserRequest'
+      - in: formData
+        name: email
+        type: string
+      - in: formData
+        name: password
+        type: string
+      - in: formData
+        name: phone
+        type: string
+      - in: formData
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Signup
+      tags:
+      - Signup
   /users:
     delete:
       consumes:
@@ -596,63 +662,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete self
-      tags:
-      - Users
-  /users/:
-    post:
-      consumes:
-      - application/json
-      description: Create a new user.
-      parameters:
-      - description: Username
-        in: body
-        name: username
-        required: true
-        schema:
-          type: string
-      - description: Username
-        in: formData
-        name: username
-        required: true
-        type: string
-      - description: Email
-        in: body
-        name: email
-        required: true
-        schema:
-          type: string
-      - description: Email
-        in: formData
-        name: email
-        required: true
-        type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
-      - description: Password
-        in: formData
-        name: password
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Create a user
       tags:
       - Users
   /users/{userId}:

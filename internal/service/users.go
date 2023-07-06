@@ -25,7 +25,7 @@ func (ur *UserRepo) Get(c *fiber.Ctx, userID *uuid.UUID) error {
 	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{user}))
 }
 
-func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password string) error {
+func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, phoneNumber string, password string) error {
 	logger.DebugLogRequestReceived("service", "user", "Create")
 
 	// Check if username is taken
@@ -37,10 +37,14 @@ func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password
 		logger.ErrorLogRequestError("service", "user", "Create", "email already taken", nil)
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenEmail))
 	}
+	if db.Users.PhoneNumberExists(phoneNumber) {
+		logger.ErrorLogRequestError("service", "user", "Create", "phone already taken", nil)
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenPhone))
+	}
 	logger.DebugLogRequestUpdate("service", "user", "Create", "username and email are available")
 
 	// Create user object
-	newUser := database.NewUser(username, email, password)
+	newUser := database.NewUser(username, email, phoneNumber, password)
 
 	// Create user in database
 	err := db.Users.Create(&newUser)

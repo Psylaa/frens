@@ -1,6 +1,5 @@
 package router
 
-// Separate imports into three groups: standard library, third-party, and internal
 import (
 	"time"
 
@@ -19,12 +18,17 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	maxRequestsPerSecond = 1000
+	requestExpiration    = 30 * time.Second
+)
+
 type Router struct {
-	App    *fiber.App
-	Config *config.Config
-	DB     *database.Database
-	Srv    *service.Service
-	Repos  Repos
+	app    *fiber.App
+	config *config.Config
+	db     *database.Database
+	srv    *service.Service
+	repos  Repos
 }
 
 type Repos struct {
@@ -36,19 +40,20 @@ type Repos struct {
 	Login     *LoginRepo
 	Posts     *PostsRepo
 	Users     *UsersRepo
+	Signup    *SignupRepo
 }
 
 var tokenBlacklist []string
 
-// Initialize a new router
+// New creates a new router instance
 func New(cfg *config.Config, db *database.Database, srv *service.Service) *Router {
 	app := fiber.New(fiber.Config{})
 	r := &Router{
-		App:    app,
-		Config: cfg,
-		DB:     db,
-		Srv:    srv,
-		Repos: Repos{
+		app:    app,
+		config: cfg,
+		db:     db,
+		srv:    srv,
+		repos: Repos{
 			Bookmarks: NewBookmarksRepo(db, srv),
 			Feed:      NewFeedRepo(db, srv),
 			Files:     NewFilesRepo(db, srv),
@@ -57,10 +62,11 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 			Login:     NewLoginRepo(db, srv),
 			Posts:     NewPostsRepo(db, srv),
 			Users:     NewUsersRepo(db, srv),
+			Signup:    NewSignupRepo(db, srv),
 		},
 	}
 
-	r.App.Get("/swagger/*", swagger.HandlerDefault) // Move at some point. Just needed to get it working.
+	r.app.Get("/swagger/*", swagger.HandlerDefault)
 
 	r.configureMiddleware()
 	r.configureRoutes()
@@ -68,54 +74,50 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 	return r
 }
 
-func (r *Router) configureMiddleware() {
-
-	// ZeroLog
-	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
-		Logger: &logger.Log,
-	}))
-
-	// CORS
-	r.App.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-	}))
-
-	// Limiters
-	r.App.Use(limiter.New(limiter.Config{
-		Max:        1000,
-		Expiration: 30 * time.Second,
-	}))
-}
-
-func (r *Router) configureRoutes() {
-	v1 := r.App.Group("/v1")
-
-	r.Repos.Login.ConfigureRoutes(v1.Group("/login"))
-	r.addAuth()
-	r.Repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
-	r.Repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
-	r.Repos.Files.ConfigureRoutes(v1.Group("/files"))
-	r.Repos.Follows.ConfigureRoutes(v1.Group("/follows"))
-	r.Repos.Likes.ConfigureRoutes(v1.Group("/likes"))
-	r.Repos.Posts.ConfigureRoutes(v1.Group("/posts"))
-	r.Repos.Users.ConfigureRoutes(v1.Group("/users"))
-
-	logger.Log.Info().Msg("Configured routes")
-}
-
 // Run starts the server
 func (r *Router) Run() {
-	port := ":" + r.Config.Server.Port
-	if err := r.App.Listen(port); err != nil {
+	port := ":" + r.config.Server.Port
+	if err := r.app.Listen(port); err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
 
-func (r *Router) addAuth() {
+func (r *Router) configureMiddleware() {
+	r.app.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: &logger.Log,
+	}))
 
-	r.App.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(r.Config.Server.JWTSecret)},
+	r.app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+	}))
+
+	r.app.Use(limiter.New(limiter.Config{
+		Max:        maxRequestsPerSecond,
+		Expiration: requestExpiration,
+	}))
+}
+
+func (r *Router) configureRoutes() {
+	v1 := r.app.Group("/v1")
+
+	r.repos.Login.ConfigureRoutes(v1.Group("/login"))
+	r.repos.Signup.ConfigureRoutes(v1.Group("/signup"))
+	r.addAuth()
+	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
+	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
+	r.repos.Files.ConfigureRoutes(v1.Group("/files"))
+	r.repos.Follows.ConfigureRoutes(v1.Group("/follows"))
+	r.repos.Likes.ConfigureRoutes(v1.Group("/likes"))
+	r.repos.Posts.ConfigureRoutes(v1.Group("/posts"))
+	r.repos.Users.ConfigureRoutes(v1.Group("/users"))
+
+	logger.Log.Info().Msg("Configured routes")
+}
+
+func (r *Router) addAuth() {
+	r.app.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: []byte(r.config.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
 				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
@@ -124,13 +126,10 @@ func (r *Router) addAuth() {
 		},
 	}))
 
-	// Requestor ID
-	r.App.Use(r.extractRequestorID)
+	r.app.Use(r.extractRequestorID)
 }
 
-// Middleware function to extract the user ID from the token, validate it, and add it to the context:
 func (r *Router) extractRequestorID(c *fiber.Ctx) error {
-	// Parse claims from token
 	if c.Locals("user") == nil {
 		logger.Log.Warn().Msg("no user in context of provided token")
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
@@ -145,27 +144,18 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 	}
 
-	// Parse user id as uuid
 	userUUID, err := uuid.Parse(sub)
 	if err != nil {
 		logger.Log.Warn().Msg("invalid sub claim in token")
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 	}
 
-	// Convert to pointer
 	uuidPtr := &userUUID
 
-	// Validate uuid is not nil (a bit redundant but whatever)
 	if userUUID == uuid.Nil {
 		logger.Log.Warn().Msg("invalid sub claim in token")
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 	}
-
-	// Verify user exists
-	//if exists := r.DB.Users.Exists(uuidPtr); exists == false {
-	//	logger.Log.Warn().Msg("user does not exist")
-	//	return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	//}
 
 	c.Locals("requestorId", uuidPtr)
 

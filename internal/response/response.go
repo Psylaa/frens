@@ -96,10 +96,6 @@ func CreateCountResponse(count int) *Response {
 	}
 }
 
-func CreateUsersResponse(users []*database.User) *Response {
-	return nil
-}
-
 func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
 	/*
 		var data []Data
@@ -183,29 +179,6 @@ func CreateFilesResponse(files []*database.File) *Response {
 
 		return &Response{
 			Data: data,
-		}
-	*/
-	return nil
-}
-
-func CreateLoginResponse(user *database.User, token string, expirationDate time.Time) *Response {
-	/*
-		return &Response{
-			Data: []Data{
-				{
-					Type: "login",
-					ID:   user.ID,
-					Attributes: Attributes{
-						CreatedAt: time.Now(),
-						ExpiresAt: &expirationDate,
-						Token:     token,
-						Username:  user.Username,
-					},
-					Links: Links{
-						Self: fmt.Sprintf("%s/login", baseURL),
-					},
-				},
-			},
 		}
 	*/
 	return nil
