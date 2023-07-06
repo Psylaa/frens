@@ -1,13 +1,13 @@
 package database
 
 import (
-	"bytes"
-	"crypto/rand"
 	"errors"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Users interface {
@@ -27,7 +27,6 @@ type User struct {
 	Email       string  `gorm:"unique"`
 	PhoneNumber *string `gorm:"unique,default:null"` // Need default null for unique constraint to work
 	Password    string
-	Salt        []byte
 
 	Bio *string `gorm:"size:1024"`
 
@@ -44,11 +43,9 @@ type User struct {
 }
 
 func (u *User) VerifyPassword(password string) bool {
-	hashedPassword, err := shared.HashPassword(password, u.Salt)
-	if err != nil {
-		return false
-	}
-	return bytes.Equal([]byte(*hashedPassword), []byte(u.Password))
+	// Use bcrypt's CompareHashAndPassword to compare the provided password with the hashed one
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	return err == nil
 }
 
 type UserRepo struct {
@@ -60,10 +57,7 @@ func NewUserRepo(db *gorm.DB) Users {
 }
 
 func NewUser(username string, email string, phoneNumber string, password string) User {
-
-	// Generate a random salt
-	salt := make([]byte, 16)
-	rand.Read(salt)
+	logger.DebugLogRequestReceived("database", "users", "NewUser")
 
 	// Check if the phoneNumber parameter is empty
 	// This is necessary for weirdness with gorm and the unique constraint
@@ -72,8 +66,8 @@ func NewUser(username string, email string, phoneNumber string, password string)
 		phonePtr = &phoneNumber
 	}
 
-	// Hash the password with the salt
-	hasedPass, _ := shared.HashPassword(password, salt)
+	// Hash the password
+	hashedPass, _ := shared.HashPassword(password)
 
 	return User{
 		BaseModel: BaseModel{
@@ -82,38 +76,42 @@ func NewUser(username string, email string, phoneNumber string, password string)
 		Username:    username,
 		Email:       email,
 		PhoneNumber: phonePtr,
-		Password:    *hasedPass,
-		Salt:        salt,
+		Password:    *hashedPass,
 		Privacy:     shared.PrivacyPublic,
 		Role:        shared.RoleUser,
 	}
 }
 
 func (ur *UserRepo) GetByEmail(email string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "GetByEmail")
 	var user User
 	result := ur.db.Where("email = ?", email).First(&user)
 	return &user, result.Error
 }
 
 func (ur *UserRepo) GetByUsername(username string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "GetByUsername")
 	var user User
 	result := ur.db.Where("username = ?", username).First(&user)
 	return &user, result.Error
 }
 
 func (ur *UserRepo) UsernameExists(username string) bool {
+	logger.DebugLogRequestReceived("database", "users", "UsernameExists")
 	var user User
 	result := ur.db.Where("username = ?", username).First(&user)
 	return !result.RecordNotFound()
 }
 
 func (ur *UserRepo) EmailExists(email string) bool {
+	logger.DebugLogRequestReceived("database", "users", "EmailExists")
 	var user User
 	result := ur.db.Where("email = ?", email).First(&user)
 	return !result.RecordNotFound()
 }
 
 func (ur *UserRepo) PhoneNumberExists(phoneNumber string) bool {
+	logger.DebugLogRequestReceived("database", "users", "PhoneNumberExists")
 	var user User
 	result := ur.db.Where("phone_number = ?", phoneNumber).First(&user)
 	return !result.RecordNotFound()
@@ -121,6 +119,7 @@ func (ur *UserRepo) PhoneNumberExists(phoneNumber string) bool {
 
 // IsVerifiedByID checks if a user with the given ID has verified their email or phone number.
 func (ur *UserRepo) IsVerifiedByID(id *uuid.UUID) (bool, error) {
+	logger.DebugLogRequestReceived("database", "users", "IsVerifiedByID")
 	user, err := ur.GetByID(id)
 	if err != nil {
 		return false, err
@@ -130,6 +129,7 @@ func (ur *UserRepo) IsVerifiedByID(id *uuid.UUID) (bool, error) {
 }
 
 func (ur *UserRepo) CheckCredentials(username, password string) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "CheckCredentials")
 	user, err := ur.GetByUsername(username)
 	if err != nil {
 		return nil, err

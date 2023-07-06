@@ -25,9 +25,9 @@ const (
 	RoleUser  Role = "user"
 )
 
-func HashPassword(password string, salt []byte) (*string, error) {
-	// Generate the bcrypt hash with salt
-	hashedPassword, err := bcrypt.GenerateFromPassword(append([]byte(password), salt...), bcrypt.DefaultCost)
+func HashPassword(password string) (*string, error) {
+	// Generate the bcrypt hash
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}

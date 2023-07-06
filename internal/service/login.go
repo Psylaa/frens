@@ -12,7 +12,6 @@ import (
 type LoginRepo struct{}
 
 func (l *LoginRepo) Login(c *fiber.Ctx, body string, password string) error {
-
 	logger.DebugLogRequestReceived("service", "login", "Login")
 
 	// Verify user credentials
