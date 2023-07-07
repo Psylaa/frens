@@ -30,6 +30,8 @@ func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/:userID", ur.get)
 	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
 	rtr.Patch("/:userID", ur.update)
+	rtr.Post("/:userID/blocks", ur.block)
+	rtr.Delete("/:userID/blocks", ur.unblock)
 }
 
 // @Summary Get information about the authenticated user
@@ -208,4 +210,38 @@ func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "delete")
 
 	return ur.Srv.Users.Delete(c)
+}
+
+// @Summary Block a user
+// @Description Block a user by their ID.
+// @Tags Blocks
+// @Accept  json
+// @Produce  json
+// @Param userID path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /{userID}/blocks [post]
+func (ur *UsersRepo) block(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Unblock a user
+// @Description Unblock a user by their ID.
+// @Tags Blocks
+// @Accept  json
+// @Produce  json
+// @Param userID path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /{userID}/blocks [delete]
+func (ur *UsersRepo) unblock(c *fiber.Ctx) error {
+	return nil
 }

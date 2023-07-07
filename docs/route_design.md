@@ -19,7 +19,9 @@ Block - A source user ID and target user ID.
 | ----------------------------------- | ----------- | ------------------------ | ------- |
 | Block a user                        | POST        | /users/{usersID}/blocks  | Pending |
 | Get users I've blocked              | GET         | /blocks                  | Pending |
+| Get a block by ID                   | GET         | /blocks/{blockID}        | Pending |
 | Get users I've blocked (pagination) | GET         | /blocks?count=n&offset=m | Pending |
+| Remove all blocks                   | DELETE      | /blocks                  | Pending |
 | Unblock a user                      | DELETE      | /users/{userID}/blocks   | Pending |
 
 # Bookmarks
