@@ -13,6 +13,8 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 
 # Blocks
 
+Block - A source user ID and target user ID. 
+
 | Use Case                            | HTTP Method | Path                     | Status  |
 | ----------------------------------- | ----------- | ------------------------ | ------- |
 | Block a user                        | POST        | /users/{usersID}/blocks  | Pending |
@@ -21,6 +23,8 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 | Unblock a user                      | DELETE      | /users/{userID}/blocks   | Pending |
 
 # Bookmarks
+
+Bookmark - A user ID and post ID.
 
 | Use Case                                     | HTTP Method | Path                            | Status  |
 | -------------------------------------------- | ----------- | ------------------------------- | ------- |
@@ -36,6 +40,8 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 | Delete a bookmark by post ID                 | DELETE      | /posts/{postID}/bookmarks       | Pending |
 # Follows
 
+Follow - A source user ID and target user ID.
+
 | Use Case                                                    | HTTP Method | Path                                       | Status  |
 | ----------------------------------------------------------- | ----------- | ------------------------------------------ | ------- |
 | Follow a user                                               | POST        | /users/{userID}/follows                    | Pending |
@@ -47,6 +53,8 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 
 # Files
 
+File - A reference to a file on disk with extension and owner (user ID). 
+
 | Use Case                                       | HTTP Method | Path                    | Status  |
 | ---------------------------------------------- | ----------- | ----------------------- | ------- |
 | Upload a new file                              | POST        | /files                  | Pending |
@@ -57,29 +65,34 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 
 # Likes
 
+Like - A userID and postID.
+
 | Use Case                                          | HTTP Method | Path                                 | Status  |
 | ------------------------------------------------- | ----------- | ------------------------------------ | ------- |
+| Like a post                                       | POST        | /posts/{postID}/likes                | Pending |
+| View all likes I have given                       | GET         | /likes                               | Pending |
 | View all posts I have liked                       | GET         | /likes                               | Pending |
 | View a specific like by like ID                   | GET         | /likes/{likeID}                      | Pending |
 | Check if a specific like exists by like ID        | GET         | /likes/{likeID}                      | Pending |
-| Like a post                                       | POST        | /posts/{postID}/likes                | Pending |
 | View a specific like by post ID                   | GET         | /posts/{postID}/likes                | Pending |
 | Check if a post has been liked                    | GET         | /posts/{postID}/likes                | Pending |
 | View all likes for a specific post                | GET         | /posts/{postID}/likes                | Pending |
 | View the number of likes a post has               | GET         | /posts/{postID}/likes/count          | Pending |
 | View the latest posts I have liked                | GET         | /likes?sort=latest                   | Pending |
 | View my likes in batches (pagination)             | GET         | /likes?count=n&offset=m              | Pending |
-| Unlike a post by like ID                          | DELETE      | /likes/{likeID}                      | Pending |
-| Unlike a post by post ID                          | DELETE      | /posts/{postID}/likes                | Pending |
 | Check if a specific like exists by post ID        | GET         | /posts/{postID}/likes                | Pending |
 | View all likes from a specific user               | GET         | /users/{userID}/likes                | Pending |
 | View the number of likes a specific user has made | GET         | /users/{userID}/likes/count          | Pending |
 | Check if a user has liked a specific post         | GET         | /users/{userID}/posts/{postID}/likes | Pending |
 | View all users who have liked a specific post     | GET         | /posts/{postID}/likes/users          | Pending |
+| Unlike a post by like ID                          | DELETE      | /likes/{likeID}                      | Pending |
+| Unlike a post by post ID                          | DELETE      | /posts/{postID}/likes                | Pending |
 
 # Messages
-| Use Case                                          | HTTP Method | Path                                 | Status  |
-| ------------------------------------------------- | ----------- | ------------------------------------ | ------- |
+| Use Case | HTTP Method | Path | Status |
+| -------- | ----------- | ---- | ------ |
+
+To be implemented at a later date.
 
 # Notifications
 | Use Case                          | HTTP Method | Path                            | Status  |
@@ -92,39 +105,37 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 
 # Posts
 
-| Use Case                                                     | HTTP Method | Path                                      | Status  |
-| ------------------------------------------------------------ | ----------- | ----------------------------------------- | ------- |
-| Create a new post                                            | POST        | /posts                                    | Pending |
-| View a specific post by post ID                              | GET         | /posts/{postID}                           | Pending |
-| Update a post by post ID                                     | PUT         | /posts/{postID}                           | Pending |
-| Delete a post by post ID                                     | DELETE      | /posts/{postID}                           | Pending |
-| View all my posts                                            | GET         | /users/{userID}/posts                     | Pending |
-| View all my posts in batches (pagination)                    | GET         | /users/{userID}/posts?count=n&offset=m    | Pending |
-| View all posts by a specific user                            | GET         | /users/{userID}/posts                     | Pending |
-| View all posts by a specific user in batches (pagination)    | GET         | /users/{userID}/posts?count=n&offset=m    | Pending |
-| Attach a file to a post                                      | POST        | /posts/{postID}/files/{fileID}            | Pending |
-| View all files attached to a post                            | GET         | /posts/{postID}/files                     | Pending |
-| Remove a file from a post                                    | DELETE      | /posts/{postID}/files/{fileID}            | Pending |
-| View the number of likes a post has                          | GET         | /posts/{postID}/likes/count               | Pending |
-| Comment on a post                                            | POST        | /posts/{postID}/comments                  | Pending |
-| View all comments on a post                                  | GET         | /posts/{postID}/comments                  | Pending |
-| View all comments on a post in batches (pagination)          | GET         | /posts/{postID}/comments?count=n&offset=m | Pending |
-| Share a post                                                 | POST        | /posts/{postID}/shares                    | Pending |
-| View the number of shares a post has                         | GET         | /posts/{postID}/shares/count              | Pending |
-| View all posts I shared                                      | GET         | /users/{userID}/shares                    | Pending |
-| View all posts I shared in batches (pagination)              | GET         | /users/{userID}/shares?count=n&offset=m   | Pending |
-| Set the privacy of a post                                    | PUT         | /posts/{postID}/privacy                   | Pending |
-| View all posts by privacy setting (public, private, friends) | GET         | /users/{userID}/posts?privacy={setting}   | Pending |
-| View the author of a post                                    | GET         | /posts/{postID}/author                    | Pending |
+| Use Case                                                     | HTTP Method | Path                                    | Status  |
+| ------------------------------------------------------------ | ----------- | --------------------------------------- | ------- |
+| Create a new post                                            | POST        | /posts                                  | Pending |
+| View a specific post by post ID                              | GET         | /posts/{postID}                         | Pending |
+| Update a post by post ID                                     | PUT         | /posts/{postID}                         | Pending |
+| Delete a post by post ID                                     | DELETE      | /posts/{postID}                         | Pending |
+| View all my posts                                            | GET         | /users/{userID}/posts                   | Pending |
+| View all posts by a specific user                            | GET         | /users/{userID}/posts                   | Pending |
+| Attach a file to a post                                      | POST        | /posts/{postID}/files/{fileID}          | Pending |
+| View all files attached to a post                            | GET         | /posts/{postID}/files                   | Pending |
+| Remove a file from a post                                    | DELETE      | /posts/{postID}/files/{fileID}          | Pending |
+| View the number of likes a post has                          | GET         | /posts/{postID}/likes/count             | Pending |
+| View all my posts in batches (pagination)                    | GET         | /users/{userID}/posts?count=n&offset=m  | Pending |
+| View all posts by a specific user in batches (pagination)    | GET         | /users/{userID}/posts?count=n&offset=m  | Pending |
+| Share a post                                                 | POST        | /posts/{postID}/shares                  | Pending |
+| View the number of shares a post has                         | GET         | /posts/{postID}/shares/count            | Pending |
+| View all posts I shared                                      | GET         | /users/{userID}/shares                  | Pending |
+| View all posts I shared in batches (pagination)              | GET         | /users/{userID}/shares?count=n&offset=m | Pending |
+| Set the privacy of a post                                    | PUT         | /posts/{postID}/privacy                 | Pending |
+| View all posts by privacy setting (public, private, friends) | GET         | /users/{userID}/posts?privacy={setting} | Pending |
+| View the author of a post                                    | GET         | /posts/{postID}/author                  | Pending |
+| Get all replies to a post                                    | GET         | /posts/{postID}/replies                 | Pending |
 
 # Reports
-| Use Case                     | HTTP Method | Path                    | Status   |
-| ---------------------------- | ----------- | ----------------------- | -------- |
-| File a report for a user     | POST        | /users/{userID}/reports | Pending  |
-| File a report for a post     | POST        | /posts/{postID}/reports | Pending  |
-| View my reports              | GET         | /reports                | /reports | Pending |
-| View my reports (pagination) | GET         | /reports                | Pending  |
-| Delete a report              | DELETE      | /reports/{reportID}     | Pending  |
+| Use Case                     | HTTP Method | Path                    | Status  |
+| ---------------------------- | ----------- | ----------------------- | ------- |
+| File a report for a user     | POST        | /users/{userID}/reports | Pending |
+| File a report for a post     | POST        | /posts/{postID}/reports | Pending |
+| View my reports              | GET         | /reports                | Pending |
+| View my reports (pagination) | GET         | /reports                | Pending |
+| Delete a report              | DELETE      | /reports/{reportID}     | Pending |
 
 # Users
 
@@ -170,11 +181,9 @@ Sort each item in order of method (Post > Get > Patch > Put > Delete), route len
 | Remove my cover photo                     | DELETE      | /users/{userID}/cover_photo                    | Pending |
 | Update my bio                             | PUT         | /users/{userID}/bio                            | Pending |
 | Remove my bio                             | DELETE      | /users/{userID}/bio                            | Pending |
-| Update my website                         | PUT         | /users/{userID}/website                        | Pending |
-| Remove my website                         | DELETE      | /users/{userID}/website                        | Pending |
-| View user's profile picture               | GET         | /users/{userID}/profile_picture                | Pending |
-| View user's cover photo                   | GET         | /users/{userID}/cover_photo                    | Pending |
-| View user's bio                           | GET         | /users/{userID}/bio                            | Pending |
+| View user's profile picture               | GET         | /users/{userID}                                | Pending |
+| View user's cover photo                   | GET         | /users/{userID}                                | Pending |
+| View user's bio                           | GET         | /users/{userID}                                | Pending |
 | Update my password                        | PUT         | /users/{userID}/password                       | Pending |
 | Set a file as profile picture             | POST        | /users/{ownerID}/profilePicture/{fileID}       | Pending |
 | View a user's profile picture             | GET         | /users/{userID}/profilePicture                 | Pending |

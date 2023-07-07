@@ -89,6 +89,38 @@ info:
   title: Frens API
   version: "1.0"
 paths:
+  /blocks/:
+    get:
+      consumes:
+      - application/json
+      description: Get blocks for the authenticated user.
+      parameters:
+      - description: The number of blocks to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of blocks to offset the returned blocks by.
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get blocks
+      tags:
+      - Blocks
   /bookmarks/:
     get:
       consumes:

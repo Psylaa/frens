@@ -11,6 +11,7 @@ import (
 
 type Database struct {
 	*gorm.DB
+	Blocks    Blocks
 	Bookmarks Bookmarks
 	Files     Files
 	Follows   Follows
@@ -44,6 +45,7 @@ func New(cfg *config.Config) (*Database, error) {
 	logger.Log.Info().Msg("Created unique index for Like")
 
 	return &Database{
+		Blocks:    NewBlockRepo(db),
 		Bookmarks: NewBookmarkRepo(db),
 		Files:     NewFileRepo(db),
 		Follows:   NewFollowRepo(db),

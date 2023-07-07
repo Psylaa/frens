@@ -10,6 +10,7 @@ type Bookmarks interface {
 	Base[Bookmark]
 	IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool
 	GetByPostID(postID *uuid.UUID) (*Bookmark, error)
+	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error)
 }
 
 type Bookmark struct {
@@ -59,4 +60,16 @@ func (br *BookmarkRepo) GetByPostID(postID *uuid.UUID) (*Bookmark, error) {
 	}
 
 	return &bookmark, nil
+}
+
+func (br *BookmarkRepo) GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error) {
+	logger.DebugLogRequestReceived("database", "BookmarkRepo", "GetPaginated")
+
+	var bookmarks []*Bookmark
+	result := br.db.Where("user_id = ?", userID).Limit(count).Offset(offset).Find(&bookmarks)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookmarks, nil
 }

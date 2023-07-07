@@ -24,6 +24,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/blocks/": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get blocks for the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get blocks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The number of blocks to return.",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of blocks to offset the returned blocks by.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/bookmarks/": {
             "get": {
                 "security": [

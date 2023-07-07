@@ -33,8 +33,11 @@ func (br *BookmarkRepo) GetByID(c *fiber.Ctx, id *uuid.UUID) error {
 func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, count, offset *int) error {
 	logger.DebugLogRequestReceived("service", "bookmark", "GetByUserID")
 
+	// Get the userID from the token.
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
 	// Get all bookmarks owned by the user
-	bookmarks, err := db.Bookmarks.GetPaginated(count, offset)
+	bookmarks, err := db.Bookmarks.GetByUserID(requestorID, count, offset)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error getting bookmarks")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
