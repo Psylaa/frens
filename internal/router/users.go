@@ -25,10 +25,38 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 }
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/self", ur.getSelf)
 	rtr.Get("/:userId", ur.get)
 	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
 	rtr.Patch("/:userId", ur.update)
 	rtr.Delete("/", ur.delete)
+}
+
+// @Summary Get information about the authenticated user
+// @Description Fetch information about the user making the request
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/self [get]
+func (ur *UsersRepo) getSelf(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "users", "getSelf")
+
+	// Get the userID from the token. This could vary depending on your authentication method.
+	// For example, if you are using JWT for authentication, you could retrieve the userID from the payload.
+	requestorID := c.Locals("requestorId").(*uuid.UUID)
+
+	// If the user ID is not provided or invalid, return an error
+	if requestorID == nil {
+		logger.Log.Info().Msg("No valid user ID provided in the token")
+		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+	}
+	logger.DebugLogRequestUpdate("router", "users", "getSelf", "parsed userID from token: "+requestorID.String())
+
+	// Send the request to the service layer
+	return ur.Srv.Users.Get(c, requestorID)
 }
 
 // @Summary Get a user by ID

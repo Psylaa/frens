@@ -120,8 +120,10 @@ func (r *Router) addAuth() {
 		SigningKey: jwtware.SigningKey{Key: []byte(r.config.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
+				logger.Log.Warn().Msg("token is missing or malformed")
 				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 			}
+			logger.Log.Warn().Msg("unknown token error: " + err.Error())
 			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 		},
 	}))
@@ -159,5 +161,6 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 
 	c.Locals("requestorId", uuidPtr)
 
+	logger.DebugLogRequestUpdate("router", "extractRequestorID", "extractRequestorID", "parsed userID from token: "+uuidPtr.String())
 	return c.Next()
 }

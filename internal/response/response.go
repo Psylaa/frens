@@ -122,41 +122,6 @@ func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
 	return nil
 }
 
-func CreatePostsResponse(posts []*database.Post) *Response {
-	/*
-		var data []Data
-		for _, post := range posts {
-			selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID)
-			//authorLink := fmt.Sprintf("%s/users/%s", baseURL, post.Author.ID)
-
-			data = append(data, Data{
-				Type: UserType,
-				ID:   post.ID,
-				Attributes: Attributes{
-					CreatedAt:    post.CreatedAt,
-					UpdatedAt:    &post.UpdatedAt,
-					Privacy:      post.Privacy,
-					Text:         post.Text,
-					IsLiked:      &post.IsLiked,
-					IsBookmarked: &post.IsBookmarked,
-				},
-				Relationships: &Relationships{
-					Author: CreateUsersResponse([]*database.User{&post.Author}),
-					Media:  CreateFilesResponse(post.Media),
-				},
-				Links: Links{
-					Self: selfLink,
-				},
-			})
-		}
-
-		return &Response{
-			Data: data,
-		}
-	*/
-	return nil
-}
-
 func CreateFilesResponse(files []*database.File) *Response {
 	/*
 		var data []Data

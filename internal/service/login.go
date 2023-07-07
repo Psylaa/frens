@@ -17,6 +17,7 @@ func (l *LoginRepo) Login(c *fiber.Ctx, body string, password string) error {
 	// Verify user credentials
 	user, err := db.Users.CheckCredentials(body, password)
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error verifying user credentials")
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidCredentials))
 	}
 
@@ -33,6 +34,7 @@ func (l *LoginRepo) Login(c *fiber.Ctx, body string, password string) error {
 	// Create token
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(cfg.Server.JWTSecret))
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error creating token")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 

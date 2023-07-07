@@ -25,6 +25,14 @@ const (
 	RoleUser  Role = "user"
 )
 
+func (p *Privacy) IsValid() bool {
+	switch *p {
+	case PrivacyPublic, PrivacyPrivate:
+		return true
+	}
+	return false
+}
+
 func HashPassword(password string) (*string, error) {
 	// Generate the bcrypt hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

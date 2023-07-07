@@ -54,6 +54,12 @@ func (pr *PostsRepo) get(c *fiber.Ctx) error {
 	return pr.Srv.Posts.Get(c, &postID)
 }
 
+type CreatePostRequest struct {
+	Text     string         `json:"text"`
+	Privacy  shared.Privacy `json:"privacy"`
+	MediaIDs []string       `json:"mediaIds"`
+}
+
 // @Summary Create a post
 // @Description Create a new post.
 // @Tags Posts
@@ -69,30 +75,32 @@ func (pr *PostsRepo) get(c *fiber.Ctx) error {
 func (pr *PostsRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "create")
 
-	// Parse the request body.
-	var body struct {
-		Text     string         `json:"text"`
-		Privacy  shared.Privacy `json:"privacy"`
-		MediaIDs []string       `json:"mediaIds"`
-	}
-	if err := c.BodyParser(&body); err != nil {
+	// Parse the request body
+	var req CreatePostRequest
+	if err := c.BodyParser(&req); err != nil {
 		logger.Log.Error().Err(err).Msg("error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
-	// Convert the media IDs to UUIDs.
-	var mediaIDs []*uuid.UUID
-	for _, id := range body.MediaIDs {
-		mediaID, err := uuid.Parse(id)
-		if err != nil {
-			logger.Log.Error().Err(err).Interface("id", id).Msg("error parsing media id")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidMediaUUID))
-		}
-		mediaIDs = append(mediaIDs, &mediaID)
+	// Fill in default values
+	if req.Privacy == "" {
+		req.Privacy = shared.PrivacyPublic
 	}
 
-	// Send the request to the service layer.
-	return pr.Srv.Posts.Create(c, body.Text, body.Privacy, mediaIDs)
+	//// Validate the request body
+	// Ensure one of text or media is provided
+	if req.Text == "" && len(req.MediaIDs) == 0 {
+		logger.Log.Error().Msg("no text or media provided in request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+	// Ensure the privacy setting is valid
+	if !req.Privacy.IsValid() {
+		logger.Log.Error().Msg("invalid privacy setting provided in request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
+	}
+
+	// Send the request to the service layer
+	return pr.Srv.Posts.Create(c, req.Text, req.Privacy, req.MediaIDs)
 }
 
 // @Summary Update a post
