@@ -5,7 +5,6 @@ import (
 
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
-	"github.com/google/uuid"
 )
 
 type LoginResponse struct {
@@ -14,12 +13,11 @@ type LoginResponse struct {
 
 type LoginData struct {
 	Type       shared.DataType `json:"type"`
-	ID         uuid.UUID       `json:"id"`
 	Attributes *LoginAttr      `json:"attributes"`
 }
 
 type LoginAttr struct {
-	Token     string    `json:"token"`
+	Token     string    `json:"value"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }
