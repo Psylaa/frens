@@ -3,8 +3,9 @@
 Welcome to Frens, a revolutionary decentralized social networking platform. Designed with a keen focus on performance, scalability, and an unwavering respect for user privacy, Frens delivers an elevated social media experience. Built with the power of Go, our platform stands as a lightweight, yet formidable solution, giving users unparalleled control over their data.
 
 - To get started, please check out our [wiki](https://github.com/bwoff11/frens/wiki).
+- To see how close we are to 1.0, review our [route design and use case coverage](https://github.com/bwoff11/frens/wiki/Route-Design-and-Use-Case-Coverage).
 - To understand how everything works, read our [design philosophy](https://github.com/bwoff11/frens/wiki/Design-Philosophy)
-- To see what we're working on, check out our [roadmap](https://github.com/users/bwoff11/projects/2/views/1).
+- To see what we're working on big picture, check out our [roadmap](https://github.com/users/bwoff11/projects/2/views/1).
 - Or, if you're feeling adventurous, you can dive right into the [specification](https://github.com/bwoff11/frens/blob/main/docs/swagger.yaml).
 
 # The Purpose
