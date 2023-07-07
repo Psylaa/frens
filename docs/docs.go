@@ -24,14 +24,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/bookmarks": {
+        "/bookmarks/": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get the bookmarks for the requesting user",
+                "description": "Get bookmarks for the authenticated user. If an ID is provided, it will return an array with that specific bookmark if found. Alternatively, you can provide count and offset parameters to paginate through all of your bookmarks.",
                 "consumes": [
                     "application/json"
                 ],
@@ -45,66 +45,29 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "The ID of a specific bookmark to retrieve",
+                        "name": "bookmarkID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "The number of bookmarks to return.",
                         "name": "count",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "The number of bookmarks to offset the returned bookmarks by e.g. offset=10\u0026count=10 would return bookmarks 10-20",
+                        "description": "The number of bookmarks to offset the returned bookmarks by. For example, offset=10\u0026count=10 would return bookmarks 10-20",
                         "name": "offset",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/bookmarks/{:postID}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create a bookmark for a specific post based on the provided ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Bookmarks"
-                ],
-                "summary": "Create a bookmark for a post",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Post ID",
-                        "name": "postID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BookmarkResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
@@ -157,7 +120,59 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BookmarkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/bookmarks/{postID}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a bookmark for a specific post based on the provided ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmarks"
+                ],
+                "summary": "Create a bookmark for a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BookmarkResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
@@ -569,6 +584,48 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
+            }
+        },
+        "/likes/{postID}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new like for a user based on the provided token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Create a like",
+                "parameters": [
+                    {
+                        "description": "Post ID",
+                        "name": "postID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -608,48 +665,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/likes/": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create a new like for a user based on the provided token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Likes"
-                ],
-                "summary": "Create a like",
-                "parameters": [
-                    {
-                        "description": "Post ID",
-                        "name": "postID",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -814,7 +829,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{:postID}": {
+        "/posts/{postID}": {
             "get": {
                 "description": "Retrieve a post",
                 "consumes": [
@@ -850,9 +865,7 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            }
-        },
-        "/posts/{id}": {
+            },
             "put": {
                 "description": "Update an existing post.",
                 "consumes": [
@@ -986,7 +999,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
+        "/users/self": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetch information about the user making the request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get information about the authenticated user",
+                "responses": {
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1016,34 +1055,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/users/self": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Fetch information about the user making the request",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get information about the authenticated user",
-                "responses": {
-                    "401": {
-                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -1178,6 +1189,50 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.BookmarkAttr": {
+            "type": "object",
+            "properties": {
+                "post_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.BookmarkData": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/response.BookmarkAttr"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/response.BookmarkLinks"
+                },
+                "type": {
+                    "$ref": "#/definitions/shared.DataType"
+                }
+            }
+        },
+        "response.BookmarkLinks": {
+            "type": "object",
+            "properties": {
+                "self": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.BookmarkResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.BookmarkData"
+                    }
+                }
+            }
+        },
         "response.LoginAttr": {
             "type": "object",
             "properties": {
@@ -1237,13 +1292,15 @@ const docTemplate = `{
                 "user",
                 "post",
                 "follow",
-                "token"
+                "token",
+                "bookmark"
             ],
             "x-enum-varnames": [
                 "DataTypeUser",
                 "DataTypePost",
                 "DataTypeFollow",
-                "DataTypeToken"
+                "DataTypeToken",
+                "DataTypeBookmark"
             ]
         }
     }

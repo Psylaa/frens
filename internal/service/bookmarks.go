@@ -1,81 +1,109 @@
 package service
 
 import (
+	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 type BookmarkRepo struct{}
 
-func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, count *int, offset *int) error {
-	/*
-		logger.DebugLogRequestReceived("service", "bookmark", "GetByUserID")
+func (br *BookmarkRepo) GetByID(c *fiber.Ctx, id *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "bookmark", "GetByID")
 
-		// Get bookmarks from database
-		bookmarks, err := db.Bookmarks.GetByUserID(userID, count, offset)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "bookmark", "GetByUserID", "bookmark not found", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "bookmark", "GetByUserID", "bookmark found")
+	// Make sure the user owns the bookmark
+	isOwner := db.Bookmarks.IsOwner(id, c.Locals("requestorID").(*uuid.UUID))
+	if !isOwner {
+		return c.Status(fiber.StatusForbidden).JSON(response.CreateErrorResponse(response.ErrForbidden))
+	}
 
-		return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse(bookmarks))
-	*/
-	return nil
+	// Retrieve the bookmark from the database
+	bookmark, err := db.Bookmarks.GetByID(id)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error getting bookmark")
+		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse([]*database.Bookmark{bookmark}))
 }
 
-func (br *BookmarkRepo) Create(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
-	/*
-		logger.DebugLogRequestReceived("service", "bookmark", "Create")
+func (br *BookmarkRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, count, offset *int) error {
+	logger.DebugLogRequestReceived("service", "bookmark", "GetByUserID")
 
-		// Construct a new bookmark
-		newBookmark := &database.Bookmark{
-			UserID: *userID,
-			PostID: *postID,
+	// Get all bookmarks owned by the user
+	bookmarks, err := db.Bookmarks.GetPaginated(count, offset)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error getting bookmarks")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Filter bookmarks that belong to the user
+	var userBookmarks []*database.Bookmark
+	for _, bookmark := range bookmarks {
+		if bookmark.UserID == *userID {
+			userBookmarks = append(userBookmarks, bookmark)
 		}
+	}
 
-		// Insert bookmark into database
-		err := db.Bookmarks.Create(newBookmark)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "bookmark", "Create", "bookmark not created", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-
-		// Get bookmark from database with owner
-		bookmark, err := db.Bookmarks.GetByPostAndUserID(userID, postID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "bookmark", "Create", "bookmark not found", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "bookmark", "Create", "bookmark created")
-
-		// Return bookmark
-		return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
-	*/
-	return nil
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse(userBookmarks))
 }
 
-func (br *BookmarkRepo) Delete(c *fiber.Ctx, userID *uuid.UUID, postID *uuid.UUID) error {
-	/*
-		logger.DebugLogRequestReceived("service", "bookmark", "DeleteByUserAndPostID")
+func (br *BookmarkRepo) Create(c *fiber.Ctx, postID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "bookmark", "Create")
 
-		// Get bookmark from database
-		bookmark, err := db.Bookmarks.GetByPostAndUserID(userID, postID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "bookmark", "DeleteByUserAndPostID", "bookmark not found", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Get the userID from the token.
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
-		// Delete bookmark from database
-		err = db.Bookmarks.DeleteByID(&bookmark.ID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "bookmark", "DeleteByUserAndPostID", "bookmark not deleted", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "bookmark", "DeleteByUserAndPostID", "bookmark deleted")
+	// Construct the bookmark object
+	bookmark := &database.Bookmark{
+		BaseModel: database.BaseModel{
+			ID: uuid.New(),
+		},
+		UserID: *requestorID,
+		PostID: *postID,
+	}
 
-		// Return bookmark
-		return c.Status(fiber.StatusOK).JSON(response.CreateBookmarkResponse([]*database.Bookmark{bookmark}))
-	*/
-	return nil
+	// Insert the bookmark into the database
+	err := db.Bookmarks.Create(bookmark)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error creating bookmark")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse([]*database.Bookmark{bookmark}))
+}
+
+func (br *BookmarkRepo) DeleteByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "bookmark", "DeleteByPostID")
+
+	// Get the userID from the token.
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
+	// Get the bookmark
+	bookmark, err := db.Bookmarks.GetByPostID(postID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error getting bookmark")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Make sure the user owns the bookmark
+	isOwner := db.Bookmarks.IsOwner(&bookmark.ID, requestorID)
+	if !isOwner {
+		return c.Status(fiber.StatusForbidden).JSON(response.CreateErrorResponse(response.ErrForbidden))
+	}
+
+	// Delete the bookmark
+	err = db.Bookmarks.DeleteByID(&bookmark.ID)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error deleting bookmark")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse([]*database.Bookmark{bookmark}))
 }

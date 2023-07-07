@@ -108,7 +108,7 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 // @Failure 401
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /likes/ [post]
+// @Router /likes/{postID} [post]
 func (lr *LikesRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "likes", "createLike")
 
@@ -142,7 +142,7 @@ func (lr *LikesRepo) create(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /likes [delete]
+// @Router /likes/{postID} [delete]
 func (lr *LikesRepo) deleteByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "likes", "deleteLike")
 	return nil

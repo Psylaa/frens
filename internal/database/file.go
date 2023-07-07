@@ -12,6 +12,7 @@ type Files interface {
 
 type File struct {
 	BaseModel
+	OwnerID   uuid.UUID
 	Extension string
 }
 

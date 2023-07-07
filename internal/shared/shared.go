@@ -12,10 +12,11 @@ const (
 type DataType string
 
 const (
-	DataTypeUser   DataType = "user"
-	DataTypePost   DataType = "post"
-	DataTypeFollow DataType = "follow"
-	DataTypeToken  DataType = "token"
+	DataTypeUser     DataType = "user"
+	DataTypePost     DataType = "post"
+	DataTypeFollow   DataType = "follow"
+	DataTypeToken    DataType = "token"
+	DataTypeBookmark DataType = "bookmark"
 )
 
 type Role string

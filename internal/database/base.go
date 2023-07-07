@@ -29,6 +29,9 @@ type Base[T Entity] interface {
 
 	// DeleteByID deletes an entity by its ID
 	DeleteByID(id *uuid.UUID) error
+
+	// GetPaginated returns a paginated list of entities
+	GetPaginated(count, offset *int) ([]*T, error)
 }
 
 type BaseRepo[T Entity] struct {
@@ -68,4 +71,24 @@ func (repo *BaseRepo[T]) DeleteByID(id *uuid.UUID) error {
 	var entity T
 	result := repo.db.Where("id = ?", id).Delete(&entity)
 	return result.Error
+}
+
+// Returns a paginated list of entities. Count defines the number of entities, and offset the starting position.
+func (repo *BaseRepo[T]) GetPaginated(count, offset *int) ([]*T, error) {
+	logger.DebugLogRequestReceived("database", "BaseRepo", "GetPaginated")
+	var entities []*T
+
+	db := repo.db
+
+	if count != nil {
+		db = db.Limit(*count)
+	}
+
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+
+	result := db.Find(&entities)
+
+	return entities, result.Error
 }

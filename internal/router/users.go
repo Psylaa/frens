@@ -26,10 +26,10 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/self", ur.getSelf)
+	rtr.Delete("/self", ur.delete)
 	rtr.Get("/:userID", ur.get)
 	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
 	rtr.Patch("/:userID", ur.update)
-	rtr.Delete("/", ur.delete)
 }
 
 // @Summary Get information about the authenticated user
@@ -203,7 +203,7 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users [delete]
+// @Router /users/self [delete]
 func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "delete")
 

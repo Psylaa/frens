@@ -33,19 +33,20 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 }
 
 // @Summary Get bookmarks
-// @Description Get the bookmarks for the requesting user
+// @Description Get bookmarks for the authenticated user. If an ID is provided, it will return an array with that specific bookmark if found. Alternatively, you can provide count and offset parameters to paginate through all of your bookmarks.
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
+// @Param bookmarkID query string false "The ID of a specific bookmark to retrieve"
 // @Param count query string false "The number of bookmarks to return."
-// @Param offset query string false "The number of bookmarks to offset the returned bookmarks by e.g. offset=10&count=10 would return bookmarks 10-20"
-// @Success 200
+// @Param offset query string false "The number of bookmarks to offset the returned bookmarks by. For example, offset=10&count=10 would return bookmarks 10-20"
+// @Success 200 {object} response.BookmarkResponse
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks [get]
+// @Router /bookmarks/ [get]
 func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "get")
 
@@ -53,13 +54,29 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// Get the query parameters
-	queries := c.Queries()
-	queryCount := queries["count"]
-	queryOffset := queries["offset"]
+	bookmarkID := c.Query("bookmarkID", "")
+	queryCount := c.Query("count", "")
+	queryOffset := c.Query("offset", "")
+
+	// If bookmark is not nil, convert it to a UUID
+	var bookmarkUUID uuid.UUID
+	var err error
+	if bookmarkID != "" {
+		bookmarkUUID, err = uuid.Parse(bookmarkID)
+		if err != nil {
+			logger.DebugLogRequestUpdate("router", "bookmarks", "get", "Error parsing bookmarkID: "+bookmarkID)
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+		}
+	}
+
+	// If a bookmarkID is provided, fetch the specific bookmark
+	if bookmarkID != "" {
+		return br.Srv.Bookmarks.GetByID(c, &bookmarkUUID)
+	}
 
 	// If a count was provided, parse it
 	var count *int
-	if len(queryCount) > 0 {
+	if queryCount != "" {
 		countInt, err := strconv.Atoi(queryCount)
 		if err != nil {
 			logger.DebugLogRequestUpdate("router", "bookmarks", "get", "Error parsing count: "+queryCount)
@@ -70,7 +87,7 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 
 	// If an offset was provided, parse it
 	var offset *int
-	if len(queryOffset) > 0 {
+	if queryOffset != "" {
 		offsetInt, err := strconv.Atoi(queryOffset)
 		if err != nil {
 			log.Error().Err(err).Msg("Error parsing offset: " + queryOffset)
@@ -89,13 +106,13 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param postID path string true "Post ID"
-// @Success 200
+// @Success 200 {object} response.BookmarkResponse
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks/{:postID} [post]
+// @Router /bookmarks/{postID} [post]
 func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "create")
 
@@ -107,7 +124,7 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 	}
 
 	// Send request to service
-	return br.Srv.Bookmarks.Create(c, c.Locals("requestorID").(*uuid.UUID), &postID)
+	return br.Srv.Bookmarks.Create(c, &postID)
 }
 
 // @Summary Delete a bookmark by ID
@@ -117,7 +134,7 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 // @Produce  json
 // @Param bookmarkID query string true "The ID of the bookmark to delete"
 // @Param postID query string true "The ID of the post to delete the bookmark for"
-// @Success 200
+// @Success 200 {object} response.BookmarkResponse
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -135,5 +152,5 @@ func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 	}
 
 	// Send request to service layer
-	return br.Srv.Bookmarks.Delete(c, c.Locals("requestorID").(*uuid.UUID), &postID)
+	return br.Srv.Bookmarks.DeleteByPostID(c, &postID)
 }

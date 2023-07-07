@@ -8,6 +8,8 @@ import (
 
 type Bookmarks interface {
 	Base[Bookmark]
+	IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool
+	GetByPostID(postID *uuid.UUID) (*Bookmark, error)
 }
 
 type Bookmark struct {
@@ -32,6 +34,26 @@ func (br *BookmarkRepo) GetByID(id *uuid.UUID) (*Bookmark, error) {
 
 	var bookmark Bookmark
 	result := br.db.Preload("User").Preload("Post").First(&bookmark, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &bookmark, nil
+}
+
+func (br *BookmarkRepo) IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool {
+	logger.DebugLogRequestReceived("database", "BookmarkRepo", "IsOwner")
+
+	var bookmark Bookmark
+	result := br.db.Where("id = ? AND user_id = ?", bookmarkID, userID).First(&bookmark)
+	return result.Error == nil
+}
+
+func (br *BookmarkRepo) GetByPostID(postID *uuid.UUID) (*Bookmark, error) {
+	logger.DebugLogRequestReceived("database", "BookmarkRepo", "GetByPostID")
+
+	var bookmark Bookmark
+	result := br.db.Where("post_id = ?", postID).First(&bookmark)
 	if result.Error != nil {
 		return nil, result.Error
 	}
