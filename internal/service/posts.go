@@ -11,13 +11,13 @@ import (
 
 type PostRepo struct{}
 
-func (pr *PostRepo) Get(c *fiber.Ctx, userId *uuid.UUID) error {
+func (pr *PostRepo) Get(c *fiber.Ctx, userID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "post", "Get")
 
 	return nil
 }
 
-func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userId *uuid.UUID) error {
+func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
 	return nil
 }
 
@@ -25,11 +25,11 @@ func (pr *PostRepo) GetReplies() {
 
 }
 
-func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, mediaIds []string) error {
+func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, mediaIDs []string) error {
 	logger.DebugLogRequestReceived("service", "post", "Create")
 
 	// Get the userID from the token.
-	requestorID := c.Locals("requestorId").(*uuid.UUID)
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// Construct the post object
 	post := &database.Post{
@@ -39,7 +39,7 @@ func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, me
 		AuthorID: *requestorID,
 		Text:     text,
 		Privacy:  privacy,
-		MediaIDs: mediaIds,
+		MediaIDs: mediaIDs,
 	}
 
 	// Insert the post into the database

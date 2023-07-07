@@ -60,7 +60,7 @@ func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, phoneNum
 
 func (ur *UserRepo) Update(c *fiber.Ctx, bio *string, avatarID *uuid.UUID, coverID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "user", "Update")
-	requestorID := c.Locals("requestorId").(*uuid.UUID)
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// Get the existing user from the database
 	user, err := db.Users.GetByID(requestorID)
@@ -97,16 +97,16 @@ func (ur *UserRepo) Delete(c *fiber.Ctx) error {
 	/*
 		logger.DebugLogRequestReceived("service", "user", "Delete")
 
-		// Get the userId from context
-		userId := c.Locals("requestorId").(*uuid.UUID)
-		if userId == nil {
-			logger.ErrorLogRequestError("service", "user", "Delete", "userId not found in context", nil)
+		// Get the userID from context
+		userID := c.Locals("requestorID").(*uuid.UUID)
+		if userID == nil {
+			logger.ErrorLogRequestError("service", "user", "Delete", "userID not found in context", nil)
 			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
-		logger.DebugLogRequestUpdate("service", "user", "Delete", "userId found in context")
+		logger.DebugLogRequestUpdate("service", "user", "Delete", "userID found in context")
 
 		// Delete user from database
-		user, err := db.Users.Delete(userId)
+		user, err := db.Users.Delete(userID)
 		if err != nil {
 			logger.ErrorLogRequestError("service", "user", "Delete", "error deleting user", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

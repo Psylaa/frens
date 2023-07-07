@@ -1,5 +1,28 @@
 basePath: /v1
 definitions:
+  response.LoginAttr:
+    properties:
+      createdAt:
+        type: string
+      expiresAt:
+        type: string
+      value:
+        type: string
+    type: object
+  response.LoginData:
+    properties:
+      attributes:
+        $ref: '#/definitions/response.LoginAttr'
+      type:
+        $ref: '#/definitions/shared.DataType'
+    type: object
+  response.LoginResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.LoginData'
+        type: array
+    type: object
   router.CreateUserRequest:
     properties:
       email:
@@ -11,6 +34,18 @@ definitions:
       username:
         type: string
     type: object
+  shared.DataType:
+    enum:
+    - user
+    - post
+    - follow
+    - token
+    type: string
+    x-enum-varnames:
+    - DataTypeUser
+    - DataTypePost
+    - DataTypeFollow
+    - DataTypeToken
 host: localhost:3001
 info:
   contact:
@@ -57,7 +92,7 @@ paths:
       summary: Get bookmarks
       tags:
       - Bookmarks
-  /bookmarks/{:postId}:
+  /bookmarks/{:postID}:
     post:
       consumes:
       - application/json
@@ -65,7 +100,7 @@ paths:
       parameters:
       - description: Post ID
         in: path
-        name: postId
+        name: postID
         required: true
         type: string
       produces:
@@ -86,7 +121,7 @@ paths:
       summary: Create a bookmark for a post
       tags:
       - Bookmarks
-  /bookmarks/{bookmarkId}:
+  /bookmarks/{bookmarkID}:
     delete:
       consumes:
       - application/json
@@ -96,12 +131,12 @@ paths:
       parameters:
       - description: The ID of the bookmark to delete
         in: query
-        name: bookmarkId
+        name: bookmarkID
         required: true
         type: string
       - description: The ID of the post to delete the bookmark for
         in: query
-        name: postId
+        name: postID
         required: true
         type: string
       produces:
@@ -194,7 +229,7 @@ paths:
       parameters:
       - description: File ID
         in: path
-        name: fileId
+        name: fileID
         required: true
         type: string
       produces:
@@ -235,7 +270,7 @@ paths:
       summary: Create a new file
       tags:
       - Files
-  /files/{fileId}:
+  /files/{fileID}:
     delete:
       consumes:
       - application/json
@@ -243,7 +278,7 @@ paths:
       parameters:
       - description: File ID
         in: path
-        name: fileId
+        name: fileID
         required: true
         type: string
       produces:
@@ -269,7 +304,7 @@ paths:
       parameters:
       - description: User ID
         in: path
-        name: userId
+        name: userID
         required: true
         type: string
       produces:
@@ -286,7 +321,7 @@ paths:
       summary: Get a follow
       tags:
       - Follows
-  /follows/{userId}:
+  /follows/{userID}:
     delete:
       consumes:
       - application/json
@@ -347,7 +382,7 @@ paths:
       parameters:
       - description: Like ID
         in: path
-        name: likeId
+        name: likeID
         required: true
         type: string
       produces:
@@ -378,15 +413,15 @@ paths:
       parameters:
       - description: Like ID
         in: query
-        name: likeId
+        name: likeID
         type: string
       - description: Post ID
         in: query
-        name: postId
+        name: postID
         type: string
       - description: User ID
         in: query
-        name: userId
+        name: userID
         type: string
       produces:
       - application/json
@@ -410,7 +445,7 @@ paths:
       parameters:
       - description: Post ID
         in: body
-        name: postId
+        name: postID
         required: true
         schema:
           type: string
@@ -464,6 +499,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
         "400":
           description: Bad Request
         "401":
@@ -512,7 +549,7 @@ paths:
           type: string
       - description: The UUIDs of the media files attached to the post
         in: body
-        name: mediaIds
+        name: mediaIDs
         schema:
           items:
             type: string
@@ -529,7 +566,7 @@ paths:
       summary: Create a post
       tags:
       - Posts
-  /posts/{:postId}:
+  /posts/{:postID}:
     get:
       consumes:
       - application/json
@@ -537,7 +574,7 @@ paths:
       parameters:
       - description: Post ID
         in: path
-        name: postId
+        name: postID
         required: true
         type: string
       produces:
@@ -664,7 +701,7 @@ paths:
       summary: Delete self
       tags:
       - Users
-  /users/{userId}:
+  /users/{userID}:
     get:
       consumes:
       - application/json
@@ -672,7 +709,7 @@ paths:
       parameters:
       - description: User ID
         in: path
-        name: userId
+        name: userID
         required: true
         type: string
       produces:
@@ -711,21 +748,21 @@ paths:
         type: string
       - description: Avatar ID
         in: body
-        name: avatarId
+        name: avatarID
         schema:
           type: string
       - description: Avatar ID
         in: formData
-        name: avatarId
+        name: avatarID
         type: string
       - description: Cover ID
         in: body
-        name: coverId
+        name: coverID
         schema:
           type: string
       - description: Cover ID
         in: formData
-        name: coverId
+        name: coverID
         type: string
       produces:
       - application/json
@@ -743,6 +780,23 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a user
+      tags:
+      - Users
+  /users/self:
+    get:
+      consumes:
+      - application/json
+      description: Fetch information about the user making the request
+      produces:
+      - application/json
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get information about the authenticated user
       tags:
       - Users
 swagger: "2.0"

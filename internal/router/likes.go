@@ -32,9 +32,9 @@ func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Likes
 // @Accept  json
 // @Produce  json
-// @Param likeId query string false "Like ID"
-// @Param postId query string false "Post ID"
-// @Param userId query string false "User ID"
+// @Param likeID query string false "Like ID"
+// @Param postID query string false "Post ID"
+// @Param userID query string false "User ID"
 // @Success 200
 // @Failure 401
 // @Failure 500
@@ -45,9 +45,9 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 
 	// Get the query parameters
 	queries := c.Queries()
-	queryLikeID := queries["likeId"]
-	queryPostID := queries["postId"]
-	queryUserID := queries["userId"]
+	queryLikeID := queries["likeID"]
+	queryPostID := queries["postID"]
+	queryUserID := queries["userID"]
 
 	// If no query parameters were provided, return an error
 	if len(queryLikeID) == 0 && len(queryPostID) == 0 && len(queryUserID) == 0 {
@@ -103,7 +103,7 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 // @Tags Likes
 // @Accept  json
 // @Produce  json
-// @Param postId body string true "Post ID"
+// @Param postID body string true "Post ID"
 // @Success 200
 // @Failure 401
 // @Failure 500
@@ -113,7 +113,7 @@ func (lr *LikesRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "likes", "createLike")
 
 	// Get the post ID from the URL
-	postID := c.Params("postId")
+	postID := c.Params("postID")
 	if postID == "" {
 		logger.Log.Error().Msg("No post ID provided")
 		return c.Status(fiber.StatusBadRequest).SendString("No post ID provided")
@@ -135,7 +135,7 @@ func (lr *LikesRepo) create(c *fiber.Ctx) error {
 // @Tags Likes
 // @Accept  json
 // @Produce  json
-// @Param likeId path string true "Like ID"
+// @Param likeID path string true "Like ID"
 // @Success 200
 // @Failure 400
 // @Failure 401

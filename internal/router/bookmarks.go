@@ -28,7 +28,7 @@ func NewBookmarksRepo(db *database.Database, srv *service.Service) *BookmarksRep
 
 func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.get)
-	rtr.Post("/:postId", br.create)
+	rtr.Post("/:postID", br.create)
 	rtr.Delete("/", br.delete)
 }
 
@@ -50,7 +50,7 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "get")
 
 	// Get the requestorID from the token
-	requestorID := c.Locals("requestorId").(*uuid.UUID)
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// Get the query parameters
 	queries := c.Queries()
@@ -88,22 +88,21 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param postId path string true "Post ID"
+// @Param postID path string true "Post ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks/{:postId} [post]
+// @Router /bookmarks/{:postID} [post]
 func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "create")
 
 	// Parse the post ID
-	postId := c.Params("postId")
-	postID, err := uuid.Parse(postId)
+	postID, err := uuid.Parse(c.Params("postID"))
 	if err != nil {
-		log.Error().Err(err).Msg("Error parsing post ID: " + postId)
+		log.Error().Err(err).Msg("Error parsing post ID: " + postID.String())
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
 	}
 
@@ -116,15 +115,15 @@ func (br *BookmarksRepo) create(c *fiber.Ctx) error {
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param bookmarkId query string true "The ID of the bookmark to delete"
-// @Param postId query string true "The ID of the post to delete the bookmark for"
+// @Param bookmarkID query string true "The ID of the bookmark to delete"
+// @Param postID query string true "The ID of the post to delete the bookmark for"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks/{bookmarkId} [delete]
+// @Router /bookmarks/{bookmarkID} [delete]
 func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "delete")
 
@@ -136,5 +135,5 @@ func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 	}
 
 	// Send request to service layer
-	return br.Srv.Bookmarks.Delete(c, c.Locals("requestorId").(*uuid.UUID), &postID)
+	return br.Srv.Bookmarks.Delete(c, c.Locals("requestorID").(*uuid.UUID), &postID)
 }

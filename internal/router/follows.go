@@ -30,7 +30,7 @@ func (fr *FollowsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Follows
 // @Accept  json
 // @Produce  json
-// @Param userId path string true "User ID"
+// @Param userID path string true "User ID"
 // @Success 200
 // @Failure 400
 // @Failure 500
@@ -66,7 +66,7 @@ func (fr *FollowsRepo) get(c *fiber.Ctx) error {
 // @Failure 409
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /follows/{userId} [post]
+// @Router /follows/{userID} [post]
 func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "follows", "createFollow")
 	/*
@@ -112,7 +112,7 @@ func (fr *FollowsRepo) create(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /follows/{userId} [delete]
+// @Router /follows/{userID} [delete]
 func (fr *FollowsRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "follows", "deleteFollow")
 	/*

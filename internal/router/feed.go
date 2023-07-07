@@ -58,7 +58,7 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 		}
 	}
 
-	return fr.Srv.Feed.GetChrono(c, c.Locals("requestorId").(*uuid.UUID), cursor)
+	return fr.Srv.Feed.GetChrono(c, c.Locals("requestorID").(*uuid.UUID), cursor)
 }
 
 // @Summary Get algorithm-based feed

@@ -26,7 +26,7 @@ func NewFilesRepo(db *database.Database, srv *service.Service) *FilesRepo {
 func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", fr.get)
 	rtr.Post("/", fr.create)
-	rtr.Delete("/:fileId", fr.deleteByID)
+	rtr.Delete("/:fileID", fr.deleteByID)
 }
 
 // @Summary Get a file
@@ -34,7 +34,7 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Files
 // @Accept  json
 // @Produce  json
-// @Param fileId path string true "File ID"
+// @Param fileID path string true "File ID"
 // @Success 200
 // @Failure 400
 // @Failure 500
@@ -44,27 +44,27 @@ func (fr *FilesRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "files", "retrieveFile")
 
 	// Get the file name from the request
-	filename := c.Params("fileId")
+	filename := c.Params("fileID")
 	if filename == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotProvided))
 	}
 
 	// If extension is provided, remove it
-	var fileId string
+	var fileID string
 	if filepath.Ext(filename) != "" {
-		fileId = filename[:len(filename)-len(filepath.Ext(filename))]
+		fileID = filename[:len(filename)-len(filepath.Ext(filename))]
 	} else {
-		fileId = filename
+		fileID = filename
 	}
 
 	// Convert the file ID to a UUID
-	fileIdUUID, err := uuid.Parse(fileId)
+	fileIDUUID, err := uuid.Parse(fileID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotUUID))
 	}
 
 	// Send the request to the service package
-	return fr.Srv.Files.RetrieveByID(c, &fileIdUUID)
+	return fr.Srv.Files.RetrieveByID(c, &fileIDUUID)
 }
 
 // create handles the request to create a new file.
@@ -101,17 +101,17 @@ func (fr *FilesRepo) create(c *fiber.Ctx) error {
 // @Tags Files
 // @Accept  json
 // @Produce  json
-// @Param fileId path string true "File ID"
+// @Param fileID path string true "File ID"
 // @Success 200
 // @Failure 400
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /files/{fileId} [delete]
+// @Router /files/{fileID} [delete]
 func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "files", "deleteFile")
 
 	// Get the file name from the request
-	filename := c.Params("fileId")
+	filename := c.Params("fileID")
 	logger.Log.Debug().
 		Str("package", "router").
 		Str("router", "files").
@@ -120,27 +120,27 @@ func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 		Msg("Got file ID from request")
 
 	// If extension is provided, remove it
-	var fileId string
+	var fileID string
 	if filepath.Ext(filename) != "" {
-		fileId = filename[:len(filename)-len(filepath.Ext(filename))]
+		fileID = filename[:len(filename)-len(filepath.Ext(filename))]
 		logger.Log.Debug().
 			Str("package", "router").
 			Str("router", "files").
 			Str("method", "retrieveFile").
-			Str("file_id", fileId).
+			Str("file_id", fileID).
 			Msg("Removed file extension")
 	} else {
-		fileId = filename
+		fileID = filename
 	}
 
 	// Convert the file ID to a UUID
-	fileIdUUID, err := uuid.Parse(fileId)
+	fileIDUUID, err := uuid.Parse(fileID)
 	if err != nil {
 		logger.Log.Error().
 			Str("package", "router").
 			Str("router", "files").
 			Str("method", "retrieveFile").
-			Str("file_id", fileId).
+			Str("file_id", fileID).
 			Msg("Failed to convert file ID to UUID")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidFileID))
 	}
@@ -148,9 +148,9 @@ func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 		Str("package", "router").
 		Str("router", "files").
 		Str("method", "retrieveFile").
-		Str("file_id", fileIdUUID.String()).
+		Str("file_id", fileIDUUID.String()).
 		Msg("Converted file ID to UUID")
 
 	// Send the request to the service package
-	return fr.Srv.Files.DeleteByID(c, &fileIdUUID)
+	return fr.Srv.Files.DeleteByID(c, &fileIDUUID)
 }

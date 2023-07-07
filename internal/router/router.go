@@ -159,7 +159,7 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 	}
 
-	c.Locals("requestorId", uuidPtr)
+	c.Locals("requestorID", uuidPtr)
 
 	logger.DebugLogRequestUpdate("router", "extractRequestorID", "extractRequestorID", "parsed userID from token: "+uuidPtr.String())
 	return c.Next()

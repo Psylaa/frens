@@ -26,9 +26,9 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/self", ur.getSelf)
-	rtr.Get("/:userId", ur.get)
+	rtr.Get("/:userID", ur.get)
 	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
-	rtr.Patch("/:userId", ur.update)
+	rtr.Patch("/:userID", ur.update)
 	rtr.Delete("/", ur.delete)
 }
 
@@ -46,7 +46,7 @@ func (ur *UsersRepo) getSelf(c *fiber.Ctx) error {
 
 	// Get the userID from the token. This could vary depending on your authentication method.
 	// For example, if you are using JWT for authentication, you could retrieve the userID from the payload.
-	requestorID := c.Locals("requestorId").(*uuid.UUID)
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// If the user ID is not provided or invalid, return an error
 	if requestorID == nil {
@@ -64,19 +64,19 @@ func (ur *UsersRepo) getSelf(c *fiber.Ctx) error {
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param userId path string true "User ID"
+// @Param userID path string true "User ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/{userId} [get]
+// @Router /users/{userID} [get]
 func (ur *UsersRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "get")
 
 	// Parse userID from path
-	userID := c.Params("userId")
+	userID := c.Params("userID")
 	if userID == "" {
 		logger.Log.Info().Msg("No user ID provided")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
@@ -117,25 +117,25 @@ func (ur *UsersRepo) get(c *fiber.Ctx) error {
 // @Produce  json
 // @Param bio body string false "Bio"
 // @Param bio formData string false "Bio"
-// @Param avatarId body string false "Avatar ID"
-// @Param avatarId formData string false "Avatar ID"
-// @Param coverId body string false "Cover ID"
-// @Param coverId formData string false "Cover ID"
+// @Param avatarID body string false "Avatar ID"
+// @Param avatarID formData string false "Avatar ID"
+// @Param coverID body string false "Cover ID"
+// @Param coverID formData string false "Cover ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/{userId} [patch]
+// @Router /users/{userID} [patch]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "users", "update")
 
 	// Parse the request body
 	var body struct {
 		Bio      *string `form:"bio" json:"bio"`
-		AvatarID *string `form:"avatarId" json:"avatarId"`
-		CoverID  *string `form:"coverId" json:"coverId"`
+		AvatarID *string `form:"avatarID" json:"avatarID"`
+		CoverID  *string `form:"coverID" json:"coverID"`
 	}
 
 	if err := c.BodyParser(&body); err != nil {

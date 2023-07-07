@@ -75,7 +75,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/bookmarks/{:postId}": {
+        "/bookmarks/{:postID}": {
             "post": {
                 "security": [
                     {
@@ -97,7 +97,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Post ID",
-                        "name": "postId",
+                        "name": "postID",
                         "in": "path",
                         "required": true
                     }
@@ -121,7 +121,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/bookmarks/{bookmarkId}": {
+        "/bookmarks/{bookmarkID}": {
             "delete": {
                 "security": [
                     {
@@ -143,14 +143,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "The ID of the bookmark to delete",
-                        "name": "bookmarkId",
+                        "name": "bookmarkID",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "The ID of the post to delete the bookmark for",
-                        "name": "postId",
+                        "name": "postID",
                         "in": "query",
                         "required": true
                     }
@@ -300,7 +300,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "File ID",
-                        "name": "fileId",
+                        "name": "fileID",
                         "in": "path",
                         "required": true
                     }
@@ -356,7 +356,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/files/{fileId}": {
+        "/files/{fileID}": {
             "delete": {
                 "security": [
                     {
@@ -378,7 +378,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "File ID",
-                        "name": "fileId",
+                        "name": "fileID",
                         "in": "path",
                         "required": true
                     }
@@ -418,7 +418,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User ID",
-                        "name": "userId",
+                        "name": "userID",
                         "in": "path",
                         "required": true
                     }
@@ -436,7 +436,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/follows/{userId}": {
+        "/follows/{userID}": {
             "post": {
                 "security": [
                     {
@@ -542,19 +542,19 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Like ID",
-                        "name": "likeId",
+                        "name": "likeID",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Post ID",
-                        "name": "postId",
+                        "name": "postID",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "User ID",
-                        "name": "userId",
+                        "name": "userID",
                         "in": "query"
                     }
                 ],
@@ -591,7 +591,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Like ID",
-                        "name": "likeId",
+                        "name": "likeID",
                         "in": "path",
                         "required": true
                     }
@@ -636,7 +636,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Post ID",
-                        "name": "postId",
+                        "name": "postID",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -709,7 +709,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
@@ -788,7 +791,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "The UUIDs of the media files attached to the post",
-                        "name": "mediaIds",
+                        "name": "mediaIDs",
                         "in": "body",
                         "schema": {
                             "type": "array",
@@ -811,7 +814,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{:postId}": {
+        "/posts/{:postID}": {
             "get": {
                 "description": "Retrieve a post",
                 "consumes": [
@@ -828,7 +831,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Post ID",
-                        "name": "postId",
+                        "name": "postID",
                         "in": "path",
                         "required": true
                     }
@@ -1020,7 +1023,35 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{userId}": {
+        "/users/self": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetch information about the user making the request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get information about the authenticated user",
+                "responses": {
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/users/{userID}": {
             "get": {
                 "security": [
                     {
@@ -1042,7 +1073,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User ID",
-                        "name": "userId",
+                        "name": "userID",
                         "in": "path",
                         "required": true
                     }
@@ -1099,7 +1130,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "Avatar ID",
-                        "name": "avatarId",
+                        "name": "avatarID",
                         "in": "body",
                         "schema": {
                             "type": "string"
@@ -1108,12 +1139,12 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Avatar ID",
-                        "name": "avatarId",
+                        "name": "avatarID",
                         "in": "formData"
                     },
                     {
                         "description": "Cover ID",
-                        "name": "coverId",
+                        "name": "coverID",
                         "in": "body",
                         "schema": {
                             "type": "string"
@@ -1122,7 +1153,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Cover ID",
-                        "name": "coverId",
+                        "name": "coverID",
                         "in": "formData"
                     }
                 ],
@@ -1147,6 +1178,42 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.LoginAttr": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.LoginData": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/response.LoginAttr"
+                },
+                "type": {
+                    "$ref": "#/definitions/shared.DataType"
+                }
+            }
+        },
+        "response.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.LoginData"
+                    }
+                }
+            }
+        },
         "router.CreateUserRequest": {
             "type": "object",
             "properties": {
@@ -1163,6 +1230,21 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "shared.DataType": {
+            "type": "string",
+            "enum": [
+                "user",
+                "post",
+                "follow",
+                "token"
+            ],
+            "x-enum-varnames": [
+                "DataTypeUser",
+                "DataTypePost",
+                "DataTypeFollow",
+                "DataTypeToken"
+            ]
         }
     }
 }`

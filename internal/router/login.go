@@ -39,7 +39,7 @@ func (lr *LoginRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Param username formData string true "Username"
 // @Param password body string true "Password"
 // @Param password formData string true "Password"
-// @Success 200
+// @Success 200 {object} response.LoginResponse
 // @Failure 400
 // @Failure 401
 // @Failure 404

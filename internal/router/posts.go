@@ -23,10 +23,10 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/:postId", pr.get)
+	rtr.Get("/:postID", pr.get)
 	rtr.Post("", pr.create)
-	rtr.Put("/:postId", pr.update)
-	rtr.Delete("/:postId", pr.delete)
+	rtr.Put("/:postID", pr.update)
+	rtr.Delete("/:postID", pr.delete)
 }
 
 // @Summary Get a post
@@ -34,17 +34,17 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Posts
 // @Accept json
 // @Produce json
-// @Param postId path string true "Post ID"
+// @Param postID path string true "Post ID"
 // @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500
-// @Router /posts/{:postId} [get]
+// @Router /posts/{:postID} [get]
 func (pr *PostsRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "get")
 
 	// Parse the post ID from the URL parameter as a UUID
-	postID, err := uuid.Parse(c.Params("postId"))
+	postID, err := uuid.Parse(c.Params("postID"))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error parsing post id")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
@@ -57,7 +57,7 @@ func (pr *PostsRepo) get(c *fiber.Ctx) error {
 type CreatePostRequest struct {
 	Text     string         `json:"text"`
 	Privacy  shared.Privacy `json:"privacy"`
-	MediaIDs []string       `json:"mediaIds"`
+	MediaIDs []string       `json:"mediaIDs"`
 }
 
 // @Summary Create a post
@@ -67,7 +67,7 @@ type CreatePostRequest struct {
 // @Produce json
 // @Param text body string true "The text of the post"
 // @Param privacy body string true "The privacy setting of the post"
-// @Param mediaIds body []string false "The UUIDs of the media files attached to the post"
+// @Param mediaIDs body []string false "The UUIDs of the media files attached to the post"
 // @Success 200
 // @Failure 400
 // @Failure 500
@@ -114,7 +114,7 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /posts/{id} [put]
+// @Router /posts/{postID} [put]
 func (pr *PostsRepo) update(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "update")
 	return nil
@@ -131,7 +131,7 @@ func (pr *PostsRepo) update(c *fiber.Ctx) error {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /posts/{id} [delete]
+// @Router /posts/{postID} [delete]
 func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "delete")
 	/*

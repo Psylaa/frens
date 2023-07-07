@@ -17,7 +17,7 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	/*
 		logger.DebugLogRequestReceived("service", "files", "Create")
 
-		requestorId := c.Locals("requestorId").(*uuid.UUID)
+		requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 		// Get extension of file
 		ext := filepath.Ext(file.Filename)
@@ -27,7 +27,7 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 		fileObj := &database.File{
 			ID:        uuid.New(),
 			Extension: ext,
-			UserID:    *requestorId,
+			UserID:    *requestorID,
 		}
 
 		// Create file record in database
@@ -67,7 +67,7 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	return nil
 }
 
-func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
+func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileID *uuid.UUID) error {
 	/*
 		logger.DebugLogRequestReceived("service", "files", "Retrieve")
 
@@ -76,9 +76,9 @@ func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 			Str("package", "service").
 			Str("service", "files").
 			Str("method", "RetrieveByID").
-			Str("file_id", fileId.String()).
+			Str("file_id", fileID.String()).
 			Msg("Getting file data")
-		fileData, err := db.Files.GetByID(fileId)
+		fileData, err := db.Files.GetByID(fileID)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
@@ -91,7 +91,7 @@ func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 			Str("package", "service").
 			Str("service", "files").
 			Str("method", "RetrieveByID").
-			Str("file_id", fileId.String()).
+			Str("file_id", fileID.String()).
 			Str("file_extension", fileData.Extension).
 			Str("user_id", fileData.UserID.String()).
 			Str("directory", cfg.Storage.Local.Path).
@@ -106,12 +106,12 @@ func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 	return nil
 }
 
-func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileId *uuid.UUID) error {
+func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileID *uuid.UUID) error {
 	/*
 		logger.DebugLogRequestReceived("service", "files", "Delete")
 
 		// Get file data
-		fileData, err := db.Files.GetByID(fileId)
+		fileData, err := db.Files.GetByID(fileID)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
@@ -126,7 +126,7 @@ func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileId *uuid.UUID) error {
 		}
 
 		// Delete file from database
-		if err := db.Files.DeleteByID(fileId); err != nil {
+		if err := db.Files.DeleteByID(fileID); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 		}
 
