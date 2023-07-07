@@ -141,3 +141,63 @@ func (ur *UserRepo) CheckCredentials(username, password string) (*User, error) {
 
 	return user, nil
 }
+
+func (ur *UserRepo) UpdatePassword(id *uuid.UUID, password string) error {
+	logger.DebugLogRequestReceived("database", "users", "UpdatePassword")
+	hashedPass, err := shared.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	user, err := ur.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.Password = *hashedPass
+	return ur.db.Save(user).Error
+}
+
+func (ur *UserRepo) UpdateEmail(id *uuid.UUID, email string) error {
+	logger.DebugLogRequestReceived("database", "users", "UpdateEmail")
+	user, err := ur.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.Email = email
+	return ur.db.Save(user).Error
+}
+
+func (ur *UserRepo) UpdatePhoneNumber(id *uuid.UUID, phoneNumber string) error {
+	logger.DebugLogRequestReceived("database", "users", "UpdatePhoneNumber")
+	user, err := ur.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.PhoneNumber = &phoneNumber
+	return ur.db.Save(user).Error
+}
+
+func (ur *UserRepo) UpdateBio(id *uuid.UUID, bio string) error {
+	logger.DebugLogRequestReceived("database", "users", "UpdateBio")
+	user, err := ur.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.Bio = &bio
+	return ur.db.Save(user).Error
+}
+
+func (ur *UserRepo) UpdatePrivacy(id *uuid.UUID, privacy shared.Privacy) error {
+	logger.DebugLogRequestReceived("database", "users", "UpdatePrivacy")
+	user, err := ur.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.Privacy = privacy
+	return ur.db.Save(user).Error
+}

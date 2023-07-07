@@ -39,7 +39,7 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 400
 // @Failure 404
 // @Failure 500
-// @Router /posts/{:postID} [get]
+// @Router /posts/{postID} [get]
 func (pr *PostsRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "get")
 
@@ -99,8 +99,19 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
+	// Convert the media ID's to UUID's
+	mediaUUIDs := make([]*uuid.UUID, len(req.MediaIDs))
+	for i, id := range req.MediaIDs {
+		mediaID, err := uuid.Parse(id)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("error parsing media id")
+			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+		}
+		mediaUUIDs[i] = &mediaID
+	}
+
 	// Send the request to the service layer
-	return pr.Srv.Posts.Create(c, req.Text, req.Privacy, req.MediaIDs)
+	return pr.Srv.Posts.Create(c, req.Text, req.Privacy, mediaUUIDs)
 }
 
 // @Summary Update a post
@@ -134,37 +145,17 @@ func (pr *PostsRepo) update(c *fiber.Ctx) error {
 // @Router /posts/{postID} [delete]
 func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "delete")
-	/*
-		// Parse the post ID from the URL parameter.
-		postID, err := uuid.Parse(c.Params("id"))
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-		}
+	// Parse the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("postID"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+	postIDPtr := &postID
 
-		// Get the user ID from the JWT.
-		userID, err := getUserID(c)
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-		}
+	// Get the user ID from the JWT.
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
-		// First, check if the post exists and belongs to the user.
-		post, err := db.Posts.GetPost(postID)
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
-			}
-		}
-
-		// Check if the user owns the post.
-		if post.AuthorID != userID {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrUnauthorized))
-		}
-
-		// Delete the post.
-		err = db.Posts.DeletePost(postID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-	*/
-	return c.SendStatus(fiber.StatusNoContent)
+	// Send the request to the service layer.
+	return pr.Srv.Posts.Delete(c, requestorID, postIDPtr)
 }
