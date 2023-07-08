@@ -28,11 +28,10 @@ func NewBookmarksRepo(db *database.Database, srv *service.Service) *BookmarksRep
 
 func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.get)
-	rtr.Delete("/", br.delete)
 }
 
-// @Summary Get bookmarks
-// @Description Get bookmarks for the authenticated user. If an ID is provided, it will return an array with that specific bookmark if found. Alternatively, you can provide count and offset parameters to paginate through all of your bookmarks.
+// @Summary Search Bookmarks
+// @Description Search for bookmarks with query parameters. If no query parameters are provided, all bookmarks will be returned. Since bookmarks are private, only the authenticated user's bookmarks will be returned.
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
@@ -45,7 +44,7 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /bookmarks/ [get]
+// @Router /bookmarks [get]
 func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "bookmarks", "get")
 
@@ -97,81 +96,4 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 
 	// Send request to service layer
 	return br.Srv.Bookmarks.GetByUserID(c, requestorID, count, offset)
-}
-
-// @Summary Delete a bookmark by ID
-// @Description Delete a specific bookmark. Either a bookmark ID or a post ID must be provided. If both are provided, the bookmark ID will be used. Only the owner of the bookmark can delete it. Admins can delete any bookmark.
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param bookmarkID query string true "The ID of the bookmark to delete"
-// @Param postID query string true "The ID of the post to delete the bookmark for"
-// @Success 200 {object} response.BookmarkResponse
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /bookmarks/{bookmarkID} [delete]
-func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "bookmarks", "delete")
-
-	// Get post ID from request
-	id := c.Params("id")
-	postID, err := uuid.Parse(id)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status ID"})
-	}
-
-	// Send request to service layer
-	return br.Srv.Bookmarks.DeleteByPostID(c, &postID)
-}
-
-// @Summary Delete all bookmarks
-// @Description Delete all bookmarks for the authenticated user.
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Success 200
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /bookmarks/ [delete]
-func (br *BookmarksRepo) deleteAll(c *fiber.Ctx) error {
-	return nil
-}
-
-// @Summary Get a bookmark by ID
-// @Description Get a specific bookmark by its ID.
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param bookmarkID path string true "The ID of the bookmark to retrieve"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /bookmarks/{bookmarkID} [get]
-func (br *BookmarksRepo) getByID(c *fiber.Ctx) error {
-	return nil
-}
-
-// @Summary Get a bookmark by post ID
-// @Description Get a specific bookmark by its post ID.
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param postID path string true "The ID of the post to retrieve the bookmark for"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /bookmarks/{postID} [get]
-func (br *BookmarksRepo) getByPostID(c *fiber.Ctx) error {
-	return nil
 }

@@ -23,35 +23,30 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/:postID", pr.get)
-	rtr.Post("", pr.create)
+	rtr.Post("/", pr.create)
 	rtr.Put("/:postID", pr.update)
 	rtr.Delete("/:postID", pr.delete)
 }
 
-// @Summary Get a post
-// @Description Retrieve a post
+// @Summary Search Posts
+// @Description Search for posts with query parameters.
 // @Tags Posts
-// @Accept json
-// @Produce json
-// @Param postID path string true "Post ID"
+// @Accept  json
+// @Produce  json
+// @Param postID query string false "Post ID"
+// @Param userID query string false "User ID"
+// @Param count query string false "The number of posts to return."
+// @Param offset query string false "The number of posts to offset the returned posts by."
 // @Success 200
 // @Failure 400
+// @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /posts/{postID} [get]
-func (pr *PostsRepo) get(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "get")
-
-	// Parse the post ID from the URL parameter as a UUID
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer
-	return pr.Srv.Posts.Get(c, &postID)
+// @Security ApiKeyAuth
+// @Router /posts [get]
+func (pr *PostsRepo) search(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "search")
+	return nil
 }
 
 type CreatePostRequest struct {
@@ -194,59 +189,9 @@ func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Delete file from a post
-// @Description Delete a file from a post.
-// @Tags Files
-// @Accept json
-// @Produce json
-// @Param postID path string true "Post ID"
-// @Param fileID path string true "File ID"
-// @Success 204
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Router /posts/{postID}/files/{fileID} [delete]
-func (pr *PostsRepo) deleteFile(c *fiber.Ctx) error {
-	return nil
-}
-
-// @Summary Delete all files from a post
-// @Description Delete all files from a post.
-// @Tags Files
-// @Accept json
-// @Produce json
-// @Param postID path string true "Post ID"
-// @Success 204
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Router /posts/{postID}/files [delete]
-func (pr *PostsRepo) deleteAllFiles(c *fiber.Ctx) error {
-	return nil
-}
-
-// @Summary Add a file to a post
-// @Description Add a file to a post.
-// @Tags Files
-// @Accept json
-// @Produce json
-// @Param postID path string true "Post ID"
-// @Param fileID path string true "File ID"
-// @Success 204
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Router /posts/{postID}/files/{fileID} [post]
-func (pr *PostsRepo) addFile(c *fiber.Ctx) error {
-	return nil
-}
-
-// @Summary Get all files from a post
-// @Description Get all files from a post.
-// @Tags Files
+// @Summary Create a like
+// @Description Create a new like for a post.
+// @Tags Likes
 // @Accept json
 // @Produce json
 // @Param postID path string true "Post ID"
@@ -255,7 +200,26 @@ func (pr *PostsRepo) addFile(c *fiber.Ctx) error {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /posts/{postID}/files [get]
-func (pr *PostsRepo) getAllFiles(c *fiber.Ctx) error {
+// @Security ApiKeyAuth
+// @Router /posts/{postID}/likes [post]
+func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Delete a like
+// @Description Delete a like for a post.
+// @Tags Likes
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Param likeID path string true "Like ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /posts/{postID}/likes/{likeID} [delete]
+func (pr *PostsRepo) deleteLike(c *fiber.Ctx) error {
 	return nil
 }

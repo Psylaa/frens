@@ -32,15 +32,13 @@ type Router struct {
 }
 
 type Repos struct {
+	Auth      *AuthRepo
 	Bookmarks *BookmarksRepo
 	Feed      *FeedRepo
 	Files     *FilesRepo
-	Follows   *FollowsRepo
 	Likes     *LikesRepo
-	Login     *LoginRepo
 	Posts     *PostsRepo
 	Users     *UsersRepo
-	Signup    *SignupRepo
 }
 
 var tokenBlacklist []string
@@ -54,15 +52,13 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 		db:     db,
 		srv:    srv,
 		repos: Repos{
+			Auth:      NewAuthRepo(db, srv),
 			Bookmarks: NewBookmarksRepo(db, srv),
 			Feed:      NewFeedRepo(db, srv),
 			Files:     NewFilesRepo(db, srv),
-			Follows:   NewFollowsRepo(db, srv),
 			Likes:     NewLikesRepo(db, srv),
-			Login:     NewLoginRepo(db, srv),
 			Posts:     NewPostsRepo(db, srv),
 			Users:     NewUsersRepo(db, srv),
-			Signup:    NewSignupRepo(db, srv),
 		},
 	}
 
@@ -101,13 +97,11 @@ func (r *Router) configureMiddleware() {
 func (r *Router) configureRoutes() {
 	v1 := r.app.Group("/v1")
 
-	r.repos.Login.ConfigureRoutes(v1.Group("/login"))
-	r.repos.Signup.ConfigureRoutes(v1.Group("/signup"))
+	r.repos.Auth.ConfigureRoutes(v1.Group("/auth"))
 	r.addAuth()
 	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
 	r.repos.Files.ConfigureRoutes(v1.Group("/files"))
-	r.repos.Follows.ConfigureRoutes(v1.Group("/follows"))
 	r.repos.Likes.ConfigureRoutes(v1.Group("/likes"))
 	r.repos.Posts.ConfigureRoutes(v1.Group("/posts"))
 	r.repos.Users.ConfigureRoutes(v1.Group("/users"))

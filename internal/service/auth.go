@@ -9,9 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type LoginRepo struct{}
+type AuthRepo struct{}
 
-func (l *LoginRepo) Login(c *fiber.Ctx, body string, password string) error {
+func (l *AuthRepo) Login(c *fiber.Ctx, body string, password string) error {
 	logger.DebugLogRequestReceived("service", "login", "Login")
 
 	// Verify user credentials
@@ -38,5 +38,5 @@ func (l *LoginRepo) Login(c *fiber.Ctx, body string, password string) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(response.CreateLoginResponse(token, user, expiryDate))
+	return c.Status(fiber.StatusOK).JSON(response.CreateAuthResponse(token, user, expiryDate))
 }

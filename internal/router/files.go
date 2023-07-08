@@ -24,13 +24,12 @@ func NewFilesRepo(db *database.Database, srv *service.Service) *FilesRepo {
 }
 
 func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/:fileID", fr.getByID)
 	rtr.Post("/", fr.create)
 	rtr.Delete("/:fileID", fr.deleteByID)
 }
 
-// @Summary get all files owned by the authenticated user
-// @Description Get all files owned by the authenticated user
+// @Summary Search Files
+// @Description Search for files with query parameters. If no query parameters are provided, all files will be returned.
 // @Tags Files
 // @Accept  json
 // @Produce  json
@@ -40,46 +39,8 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /files [get]
-func (fr *FilesRepo) getAll(c *fiber.Ctx) error {
+func (fr *FilesRepo) search(c *fiber.Ctx) error {
 	return nil
-}
-
-// @Summary Get a file by ID
-// @Description Retrieve files by ID
-// @Tags Files
-// @Accept  json
-// @Produce  json
-// @Param fileID path string true "File ID"
-// @Success 200
-// @Failure 400
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /files/{fileID} [get]
-func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "files", "retrieveFile")
-
-	// Get the file name from the request
-	filename := c.Params("fileID")
-	if filename == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotProvided))
-	}
-
-	// If extension is provided, remove it
-	var fileID string
-	if filepath.Ext(filename) != "" {
-		fileID = filename[:len(filename)-len(filepath.Ext(filename))]
-	} else {
-		fileID = filename
-	}
-
-	// Convert the file ID to a UUID
-	fileIDUUID, err := uuid.Parse(fileID)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrFileIDNotUUID))
-	}
-
-	// Send the request to the service package
-	return fr.Srv.Files.RetrieveByID(c, &fileIDUUID)
 }
 
 // create handles the request to create a new file.
@@ -168,19 +129,4 @@ func (fr *FilesRepo) deleteByID(c *fiber.Ctx) error {
 
 	// Send the request to the service package
 	return fr.Srv.Files.DeleteByID(c, &fileIDUUID)
-}
-
-// @Summary Delete all files owned by the authenticated user
-// @Description Delete all files owned by the authenticated user
-// @Tags Files
-// @Accept  json
-// @Produce  json
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /files [delete]
-func (fr *FilesRepo) deleteAll(c *fiber.Ctx) error {
-	return nil
 }

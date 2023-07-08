@@ -7,27 +7,27 @@ import (
 	"github.com/bwoff11/frens/internal/shared"
 )
 
-type LoginResponse struct {
-	Data []*LoginData `json:"data"`
+type AuthResponse struct {
+	Data []*AuthData `json:"data"`
 }
 
-type LoginData struct {
+type AuthData struct {
 	Type       shared.DataType `json:"type"`
-	Attributes *LoginAttr      `json:"attributes"`
+	Attributes *AuthAttr       `json:"attributes"`
 }
 
-type LoginAttr struct {
+type AuthAttr struct {
 	Token     string    `json:"value"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }
 
-func CreateLoginResponse(token string, user *database.User, expiryDate time.Time) *LoginResponse {
-	return &LoginResponse{
-		Data: []*LoginData{
+func CreateAuthResponse(token string, user *database.User, expiryDate time.Time) *AuthResponse {
+	return &AuthResponse{
+		Data: []*AuthData{
 			{
 				Type: shared.DataTypeToken,
-				Attributes: &LoginAttr{
+				Attributes: &AuthAttr{
 					Token:     token,
 					CreatedAt: time.Now(),
 					ExpiresAt: expiryDate,

@@ -23,11 +23,9 @@ func NewLikesRepo(db *database.Database, srv *service.Service) *LikesRepo {
 
 func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", lr.get)
-	rtr.Post("/", lr.create)
-	rtr.Delete("/", lr.deleteByID)
 }
 
-// @Summary Get likes
+// @Summary Search Likes
 // @Description Retrieve likes. If a like ID is provided, it is always used. Otherwise, a postID will return all likes for that post. If a userID is also provided, it will return either the like for that user/post or an empty array. If only a userID is provided, it will return all likes by that user for any post.
 // @Tags Likes
 // @Accept  json
@@ -96,54 +94,4 @@ func (lr *LikesRepo) get(c *fiber.Ctx) error {
 	// If we got here, something went wrong
 	logger.Log.Error().Msg("Error parsing query parameters")
 	return c.Status(fiber.StatusBadRequest).SendString("Error parsing query parameters")
-}
-
-// @Summary Create a like
-// @Description Create a new like for a user based on the provided token
-// @Tags Likes
-// @Accept  json
-// @Produce  json
-// @Param postID body string true "Post ID"
-// @Success 200
-// @Failure 401
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /likes/{postID} [post]
-func (lr *LikesRepo) create(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "likes", "createLike")
-
-	// Get the post ID from the URL
-	postID := c.Params("postID")
-	if postID == "" {
-		logger.Log.Error().Msg("No post ID provided")
-		return c.Status(fiber.StatusBadRequest).SendString("No post ID provided")
-	}
-
-	// Convert the post ID to a UUID
-	postUUID, err := uuid.Parse(postID)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing post ID")
-		return c.Status(fiber.StatusBadRequest).SendString("Error parsing post ID")
-	}
-
-	// Send the request to the service layer
-	return lr.Srv.Likes.Create(c, &postUUID)
-}
-
-// @Summary Delete a like
-// @Description Delete a specific like
-// @Tags Likes
-// @Accept  json
-// @Produce  json
-// @Param likeID path string true "Like ID"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /likes/{postID} [delete]
-func (lr *LikesRepo) deleteByID(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "likes", "deleteLike")
-	return nil
 }

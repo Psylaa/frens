@@ -8,12 +8,12 @@ import (
 )
 
 type Service struct {
+	Auth      *AuthRepo
 	Blocks    *BlockRepo
 	Bookmarks *BookmarkRepo
 	Feed      *FeedRepo
 	Files     *FilesRepo
 	Likes     *LikeRepo
-	Login     *LoginRepo
 	Posts     *PostRepo
 	Users     *UserRepo
 }
