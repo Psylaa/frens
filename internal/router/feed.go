@@ -29,8 +29,23 @@ func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/explore", fr.getChrono)     // temp
 }
 
-// @Summary Get chronological feed
-// @Description Get posts in a chronological order
+// @Summary Retrieve Algorithmic Feed
+// @Description Retrieves the authenticated user's feed, sorted by an algorithm to highlight relevant content.
+// @Tags Feed
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /feeds/algorithmic [get]
+func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "feed", "getAlgo")
+	return nil
+}
+
+// @Summary Retrieve Chronological Feed
+// @Description Retrieves the authenticated user's feed, sorted by the time of the post's creation.
 // @Tags Feed
 // @Accept  json
 // @Produce  json
@@ -61,23 +76,8 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 	return fr.Srv.Feed.GetChrono(c, c.Locals("requestorID").(*uuid.UUID), cursor)
 }
 
-// @Summary Get algorithm-based feed
-// @Description Get posts based on a particular algorithm (Not Implemented)
-// @Tags Feed
-// @Accept  json
-// @Produce  json
-// @Success 200
-// @Failure 400
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /feeds/algorithmic [get]
-func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "feed", "getAlgo")
-	return nil
-}
-
-// @Summary Get explore feed
-// @Description Get posts for the explore section (Not Implemented)
+// @Summary Retrieve Explore Feed
+// @Description Retrieves a feed of trending or recommended content for the authenticated user to discover.
 // @Tags Feed
 // @Accept  json
 // @Produce  json

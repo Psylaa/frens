@@ -1,15 +1,10 @@
 package router
 
 import (
-	"regexp"
-
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"github.com/microcosm-cc/bluemonday"
 )
 
 type UsersRepo struct {
@@ -25,44 +20,31 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 }
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Get("/self", ur.getSelf)
-	rtr.Delete("/self", ur.delete)
-	rtr.Get("/:userID", ur.get)
-	//rtr.Get("/search", ur.search) To be implemented. This is here for now to remind me not to change the regular "get" route to have search functionality
-	rtr.Patch("/:userID", ur.update)
-	rtr.Post("/:userID/blocks", ur.block)
-	rtr.Delete("/:userID/blocks", ur.unblock)
 }
 
-// @Summary Get information about the authenticated user
-// @Description Fetch information about the user making the request
+// @Summary Search Users
+// @Description Search for users with query parameters.
 // @Tags Users
 // @Accept  json
 // @Produce  json
+// @Param userID query string false "User ID"
+// @Param username query string false "Username"
+// @Param count query string false "The number of users to return."
+// @Param offset query string false "The number of users to offset the returned users by."
+// @Success 200
+// @Failure 400
 // @Failure 401
+// @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/self [get]
-func (ur *UsersRepo) getSelf(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "users", "getSelf")
-
-	// Get the userID from the token. This could vary depending on your authentication method.
-	// For example, if you are using JWT for authentication, you could retrieve the userID from the payload.
-	requestorID := c.Locals("requestorID").(*uuid.UUID)
-
-	// If the user ID is not provided or invalid, return an error
-	if requestorID == nil {
-		logger.Log.Info().Msg("No valid user ID provided in the token")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-	}
-	logger.DebugLogRequestUpdate("router", "users", "getSelf", "parsed userID from token: "+requestorID.String())
-
-	// Send the request to the service layer
-	return ur.Srv.Users.Get(c, requestorID)
+// @Router /users [get]
+func (ur *UsersRepo) search(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "users", "search")
+	return nil
 }
 
-// @Summary Get a user by ID
-// @Description Fetch a specific user by their ID.
+// @Summary Retrieve User by ID
+// @Description Retrieves a user by ID.
 // @Tags Users
 // @Accept  json
 // @Produce  json
@@ -74,128 +56,28 @@ func (ur *UsersRepo) getSelf(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID} [get]
-func (ur *UsersRepo) get(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "users", "get")
-
-	// Parse userID from path
-	userID := c.Params("userID")
-	if userID == "" {
-		logger.Log.Info().Msg("No user ID provided")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	logger.DebugLogRequestUpdate("router", "users", "get", "parsed userID from path: "+userID)
-
-	// Sanitize the input
-	p := bluemonday.UGCPolicy()
-	userID = p.Sanitize(userID)
-
-	// Validate the user ID format
-	if matched, _ := regexp.MatchString(`\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b`, userID); !matched {
-		logger.Log.Error().Msg("Invalid user ID format")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	logger.DebugLogRequestUpdate("router", "users", "get", "validated user ID format with regex")
-
-	// Convert userID to UUID
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing user ID to UUID")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	logger.DebugLogRequestUpdate("router", "users", "get", "converted userID to UUID")
-	if userUUID == uuid.Nil {
-		logger.Log.Error().Msg("Invalid user ID")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	// Send the request to the service layer
-	return ur.Srv.Users.Get(c, &userUUID)
+func (ur *UsersRepo) getByID(c *fiber.Ctx) error {
+	return nil
 }
 
-// @Summary Update a user
-// @Description Update a users information including bio, avatar, and cover. Note that avatar and cover must first be uploaded to the server and UUIDs must be provided.
+// @Summary Update User
+// @Description Update the authenticated user's profile.
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param bio body string false "Bio"
-// @Param bio formData string false "Bio"
-// @Param avatarID body string false "Avatar ID"
-// @Param avatarID formData string false "Avatar ID"
-// @Param coverID body string false "Cover ID"
-// @Param coverID formData string false "Cover ID"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users/{userID} [patch]
+// @Router /users [put]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "users", "update")
-
-	// Parse the request body
-	var body struct {
-		Bio      *string `form:"bio" json:"bio"`
-		AvatarID *string `form:"avatarID" json:"avatarID"`
-		CoverID  *string `form:"coverID" json:"coverID"`
-	}
-
-	if err := c.BodyParser(&body); err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	logger.DebugLogRequestUpdate("router", "users", "update", "parsed request body")
-
-	// Sanitize the input
-	p := bluemonday.UGCPolicy()
-	if body.Bio != nil {
-		*body.Bio = p.Sanitize(*body.Bio)
-		if len(*body.Bio) > 256 {
-			logger.Log.Error().Msg("Bio is too long")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-		}
-	}
-
-	if body.AvatarID != nil {
-		*body.AvatarID = p.Sanitize(*body.AvatarID)
-	}
-
-	if body.CoverID != nil {
-		*body.CoverID = p.Sanitize(*body.CoverID)
-	}
-	logger.DebugLogRequestUpdate("router", "users", "update", "sanitized request body")
-
-	// Convert avatarID and coverID to UUID
-	var err error
-
-	// Avatar ID
-	var avatarUUID, coverUUID *uuid.UUID
-	if body.AvatarID != nil {
-		avatarUUID = new(uuid.UUID)
-		*avatarUUID, err = uuid.Parse(*body.AvatarID)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing avatar ID to UUID")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidAvatarUUID))
-		}
-	}
-	logger.DebugLogRequestUpdate("router", "users", "update", "parsed avatar ID to UUID")
-
-	// Cover ID
-	if body.CoverID != nil {
-		coverUUID = new(uuid.UUID)
-		*coverUUID, err = uuid.Parse(*body.CoverID)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error parsing cover ID to UUID")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCoverUUID))
-		}
-	}
-	logger.DebugLogRequestUpdate("router", "users", "update", "parsed cover ID to UUID")
-
-	return ur.Srv.Users.Update(c, body.Bio, avatarUUID, coverUUID)
+	return nil
 }
 
-// @Summary Delete self
-// @Description Delete the user associated with the provided access token.
+// @Summary Delete User
+// @Description Delete the authenticated user's profile.
 // @Tags Users
 // @Accept  json
 // @Produce  json
@@ -207,13 +89,28 @@ func (ur *UsersRepo) update(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /users/self [delete]
 func (ur *UsersRepo) delete(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "users", "delete")
-
-	return ur.Srv.Users.Delete(c)
+	return nil
 }
 
-// @Summary Block a user
-// @Description Block a user by their ID.
+// @Summary Confirm Delete User
+// @Description Confirm the deletion of the authenticated user's profile.
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param confirmationCode query string true "Confirmation Code"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/self/confirm [delete]
+func (ur *UsersRepo) confirmDelete(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Block User
+// @Description Blocks the specified user from interacting with the authenticated user.
 // @Tags Blocks
 // @Accept  json
 // @Produce  json
@@ -229,8 +126,8 @@ func (ur *UsersRepo) block(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Unblock a user
-// @Description Unblock a user by their ID.
+// @Summary Unblock User
+// @Description Removes block on the specified user, allowing them to interact with the authenticated user.
 // @Tags Blocks
 // @Accept  json
 // @Produce  json
@@ -246,9 +143,45 @@ func (ur *UsersRepo) unblock(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Get users that are being followed by the user.
+// @Summary Retrieve Users Who are Following the Authenticated User
+// @Description Retrieves a list of users following the authenticated user.
+// @Tags Follows
+// @Accept  json
+// @Produce  json
+// @Param count query string false "The number of follows to return."
+// @Param offset query string false "The number of follows to offset the returned follows by."
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/self/followers [get]
+func (fr *FollowsRepo) getSelfFollowers(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Retrieve Users that the Authenticated User is Following
+// @Description Retrieves a list of users the authenticated user is following.
+// @Tags Follows
+// @Accept  json
+// @Produce  json
+// @Param count query string false "The number of follows to return."
+// @Param offset query string false "The number of follows to offset the returned follows by."
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/self/following [get]
+func (fr *FollowsRepo) getSelfFollowing(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get Users Who are Following the Specified User
 // @Description Get a list of all users that are following a user by user ID
-// @Tags Followers
+// @Tags Follows
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -258,13 +191,13 @@ func (ur *UsersRepo) unblock(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID}/followers [get]
-func (ur *UsersRepo) GetFollowersByUserID(c *fiber.Ctx) error {
+func (ur *UsersRepo) getFollowersByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Get users that are following the user
+// @Summary Get Users that the Specified User is Following
 // @Description Get a list of all users that a user is following by user ID
-// @Tags Followers
+// @Tags Follows
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -274,13 +207,13 @@ func (ur *UsersRepo) GetFollowersByUserID(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID}/following [get]
-func (ur *UsersRepo) GetFollowingByUserID(c *fiber.Ctx) error {
+func (ur *UsersRepo) getFollowingByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
 // @Summary Follow a user by user ID
 // @Description Follow a user by user ID
-// @Tags Followers
+// @Tags Follows
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -290,13 +223,13 @@ func (ur *UsersRepo) GetFollowingByUserID(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID}/followers [post]
-func (ur *UsersRepo) FollowUserByUserID(c *fiber.Ctx) error {
+func (ur *UsersRepo) followUserByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
 // @Summary Unfollow a user by user ID
 // @Description Unfollow a user by user ID
-// @Tags Followers
+// @Tags Follows
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -306,7 +239,7 @@ func (ur *UsersRepo) FollowUserByUserID(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID}/followers [delete]
-func (ur *UsersRepo) UnfollowUserByUserID(c *fiber.Ctx) error {
+func (ur *UsersRepo) unfollowUserByUserID(c *fiber.Ctx) error {
 	return nil
 }
 
@@ -324,6 +257,6 @@ func (ur *UsersRepo) UnfollowUserByUserID(c *fiber.Ctx) error {
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /users/{userID}/likes [get]
-func (ur *UsersRepo) GetLikesByUserID(c *fiber.Ctx) error {
+func (ur *UsersRepo) getLikesByUserID(c *fiber.Ctx) error {
 	return nil
 }

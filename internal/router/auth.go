@@ -33,7 +33,7 @@ func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Post("/register", lr.register)
 }
 
-// @Summary User Login
+// @Summary Authenticate User
 // @Description Authenticate a user with the given credentials and return a JWT token.
 // @Tags Auth
 // @Accept  json,xml,x-www-form-urlencoded,multipart/form-data
@@ -47,7 +47,7 @@ func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /login [post]
+// @Router /auth/login [post]
 func (lr *AuthRepo) login(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "Auth", "Auth")
 
@@ -73,8 +73,8 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 	return lr.Srv.Auth.Login(c, body.Username, body.Password)
 }
 
-// @Summary Verify Token
-// @Description Verify the validity of the provided JWT token.
+// @Summary Verify Authentication Token
+// @Description Verifies the authenticity of the provided authentication token.
 // @Tags Auth
 // @Accept  json
 // @Produce  json
@@ -97,8 +97,8 @@ type CreateUserRequest struct {
 	Password string `json:"password"`
 }
 
-// @Summary User Registration
-// @Description Register a new user with the provided account details.
+// @Summary Register New User
+// @Description Creates a new user account and returns a confirmation.
 // @Tags Auth
 // @Accept json
 // @Produce json

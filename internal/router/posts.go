@@ -49,6 +49,24 @@ func (pr *PostsRepo) search(c *fiber.Ctx) error {
 	return nil
 }
 
+// @Summary Retrieve Post by ID
+// @Description Retrieves a post by ID.
+// @Tags Posts
+// @Accept  json
+// @Produce  json
+// @Param postID path string true "Post ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /posts/{postID} [get]
+func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "getByID")
+	return nil
+}
+
 type CreatePostRequest struct {
 	Text     string         `json:"text"`
 	Privacy  shared.Privacy `json:"privacy"`
@@ -155,8 +173,8 @@ func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	return pr.Srv.Posts.Delete(c, requestorID, postIDPtr)
 }
 
-// @Summary Create a bookmark
-// @Description Create a new bookmark for a post.
+// @Summary Bookmark a Post
+// @Description Adds the specified post to the authenticated user's bookmarks.
 // @Tags Bookmarks
 // @Accept json
 // @Produce json
@@ -172,8 +190,8 @@ func (pr *PostsRepo) createBookmark(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Delete a bookmark
-// @Description Delete a bookmark for a post.
+// @Summary Unbookmark a Post
+// @Description Removes the specified post from the authenticated user's bookmarks.
 // @Tags Bookmarks
 // @Accept json
 // @Produce json
@@ -189,7 +207,7 @@ func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Create a like
+// @Summary Like a Post
 // @Description Create a new like for a post.
 // @Tags Likes
 // @Accept json
@@ -206,7 +224,7 @@ func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Delete a like
+// @Summary Unlike a Post
 // @Description Delete a like for a post.
 // @Tags Likes
 // @Accept json

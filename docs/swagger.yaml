@@ -66,303 +66,7 @@ info:
   title: Frens API
   version: "1.0"
 paths:
-  /auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user with the provided account details.
-      parameters:
-      - description: The user account to create
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/router.CreateUserRequest'
-      - in: formData
-        name: email
-        type: string
-      - in: formData
-        name: password
-        type: string
-      - in: formData
-        name: phone
-        type: string
-      - in: formData
-        name: username
-        type: string
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: User Registration
-      tags:
-      - Auth
-  /auth/verify:
-    get:
-      consumes:
-      - application/json
-      description: Verify the validity of the provided JWT token.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-      security:
-      - ApiKeyAuth: []
-      summary: Verify Token
-      tags:
-      - Auth
-  /blocks:
-    get:
-      consumes:
-      - application/json
-      description: Search for blocks with query parameters. If no query parameters
-        are provided, all blocks will be returned. Since blocks are private, only
-        the authenticated user's blocks will be returned.
-      parameters:
-      - description: The number of blocks to return.
-        in: query
-        name: count
-        type: string
-      - description: The number of blocks to offset the returned blocks by.
-        in: query
-        name: offset
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Search Blocks
-      tags:
-      - Blocks
-  /bookmarks:
-    get:
-      consumes:
-      - application/json
-      description: Search for bookmarks with query parameters. If no query parameters
-        are provided, all bookmarks will be returned. Since bookmarks are private,
-        only the authenticated user's bookmarks will be returned.
-      parameters:
-      - description: The ID of a specific bookmark to retrieve
-        in: query
-        name: bookmarkID
-        type: string
-      - description: The number of bookmarks to return.
-        in: query
-        name: count
-        type: string
-      - description: The number of bookmarks to offset the returned bookmarks by.
-          For example, offset=10&count=10 would return bookmarks 10-20
-        in: query
-        name: offset
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.BookmarkResponse'
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Search Bookmarks
-      tags:
-      - Bookmarks
-  /feeds/algorithmic:
-    get:
-      consumes:
-      - application/json
-      description: Get posts based on a particular algorithm (Not Implemented)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Get algorithm-based feed
-      tags:
-      - Feed
-  /feeds/chronological:
-    get:
-      consumes:
-      - application/json
-      description: Get posts in a chronological order
-      parameters:
-      - description: Cursor for pagination
-        in: query
-        name: cursor
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Get chronological feed
-      tags:
-      - Feed
-  /feeds/explore:
-    get:
-      consumes:
-      - application/json
-      description: Get posts for the explore section (Not Implemented)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Get explore feed
-      tags:
-      - Feed
-  /files:
-    get:
-      consumes:
-      - application/json
-      description: Search for files with query parameters. If no query parameters
-        are provided, all files will be returned.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Search Files
-      tags:
-      - Files
-    post:
-      consumes:
-      - multipart/form-data
-      description: Create a new file from the provided form data
-      parameters:
-      - description: File to upload
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new file
-      tags:
-      - Files
-  /files/{fileID}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a specific file using its ID
-      parameters:
-      - description: File ID
-        in: path
-        name: fileID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a file by ID
-      tags:
-      - Files
-  /likes:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve likes. If a like ID is provided, it is always used. Otherwise,
-        a postID will return all likes for that post. If a userID is also provided,
-        it will return either the like for that user/post or an empty array. If only
-        a userID is provided, it will return all likes by that user for any post.
-      parameters:
-      - description: Like ID
-        in: query
-        name: likeID
-        type: string
-      - description: Post ID
-        in: query
-        name: postID
-        type: string
-      - description: User ID
-        in: query
-        name: userID
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Search Likes
-      tags:
-      - Likes
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -407,9 +111,300 @@ paths:
           description: Not Found
         "500":
           description: Internal Server Error
-      summary: User Login
+      summary: Authenticate User
       tags:
       - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account and returns a confirmation.
+      parameters:
+      - description: The user account to create
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/router.CreateUserRequest'
+      - in: formData
+        name: email
+        type: string
+      - in: formData
+        name: password
+        type: string
+      - in: formData
+        name: phone
+        type: string
+      - in: formData
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Register New User
+      tags:
+      - Auth
+  /auth/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verifies the authenticity of the provided authentication token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Verify Authentication Token
+      tags:
+      - Auth
+  /blocks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of users blocked by the authenticated user.
+      parameters:
+      - description: The number of blocks to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of blocks to offset the returned blocks by.
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Blocked Users
+      tags:
+      - Blocks
+  /bookmarks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of posts bookmarked by the authenticated user.
+      parameters:
+      - description: The number of bookmarks to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of bookmarks to offset the returned bookmarks by.
+          For example, offset=10&count=10 would return bookmarks 10-20
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BookmarkResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve User's Bookmarks
+      tags:
+      - Bookmarks
+  /feeds/algorithmic:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's feed, sorted by an algorithm
+        to highlight relevant content.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Algorithmic Feed
+      tags:
+      - Feed
+  /feeds/chronological:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's feed, sorted by the time of
+        the post's creation.
+      parameters:
+      - description: Cursor for pagination
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Chronological Feed
+      tags:
+      - Feed
+  /feeds/explore:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a feed of trending or recommended content for the authenticated
+        user to discover.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Explore Feed
+      tags:
+      - Feed
+  /files:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of files uploaded by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve User's Files
+      tags:
+      - Files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a new file and assigns it to the authenticated user.
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Upload File
+      tags:
+      - Files
+  /files/{fileID}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the specified file from the authenticated user's uploaded
+        files.
+      parameters:
+      - description: File ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete File
+      tags:
+      - Files
+  /likes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve likes. If a like ID is provided, it is always used. Otherwise,
+        a postID will return all likes for that post. If a userID is also provided,
+        it will return either the like for that user/post or an empty array. If only
+        a userID is provided, it will return all likes by that user for any post.
+      parameters:
+      - description: Like ID
+        in: query
+        name: likeID
+        type: string
+      - description: Post ID
+        in: query
+        name: postID
+        type: string
+      - description: User ID
+        in: query
+        name: userID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Search Likes
+      tags:
+      - Likes
   /posts:
     get:
       consumes:
@@ -513,6 +508,34 @@ paths:
       summary: Delete a post
       tags:
       - Posts
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a post by ID.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Post by ID
+      tags:
+      - Posts
     put:
       consumes:
       - application/json
@@ -543,7 +566,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a bookmark for a post.
+      description: Removes the specified post from the authenticated user's bookmarks.
       parameters:
       - description: Post ID
         in: path
@@ -563,13 +586,13 @@ paths:
           description: Not Found
         "500":
           description: Internal Server Error
-      summary: Delete a bookmark
+      summary: Unbookmark a Post
       tags:
       - Bookmarks
     post:
       consumes:
       - application/json
-      description: Create a new bookmark for a post.
+      description: Adds the specified post to the authenticated user's bookmarks.
       parameters:
       - description: Post ID
         in: path
@@ -589,7 +612,7 @@ paths:
           description: Not Found
         "500":
           description: Internal Server Error
-      summary: Create a bookmark
+      summary: Bookmark a Post
       tags:
       - Bookmarks
   /posts/{postID}/likes:
@@ -618,7 +641,7 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Create a like
+      summary: Like a Post
       tags:
       - Likes
   /posts/{postID}/likes/{likeID}:
@@ -652,14 +675,76 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Delete a like
+      summary: Unlike a Post
       tags:
       - Likes
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Search for users with query parameters.
+      parameters:
+      - description: User ID
+        in: query
+        name: userID
+        type: string
+      - description: Username
+        in: query
+        name: username
+        type: string
+      - description: The number of users to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of users to offset the returned users by.
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Search Users
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update User
+      tags:
+      - Users
   /users/{userID}:
     get:
       consumes:
       - application/json
-      description: Fetch a specific user by their ID.
+      description: Retrieves a user by ID.
       parameters:
       - description: User ID
         in: path
@@ -681,66 +766,15 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get a user by ID
-      tags:
-      - Users
-    patch:
-      consumes:
-      - application/json
-      description: Update a users information including bio, avatar, and cover. Note
-        that avatar and cover must first be uploaded to the server and UUIDs must
-        be provided.
-      parameters:
-      - description: Bio
-        in: body
-        name: bio
-        schema:
-          type: string
-      - description: Bio
-        in: formData
-        name: bio
-        type: string
-      - description: Avatar ID
-        in: body
-        name: avatarID
-        schema:
-          type: string
-      - description: Avatar ID
-        in: formData
-        name: avatarID
-        type: string
-      - description: Cover ID
-        in: body
-        name: coverID
-        schema:
-          type: string
-      - description: Cover ID
-        in: formData
-        name: coverID
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Update a user
+      summary: Retrieve User by ID
       tags:
       - Users
   /users/{userID}/blocks:
     delete:
       consumes:
       - application/json
-      description: Unblock a user by their ID.
+      description: Removes block on the specified user, allowing them to interact
+        with the authenticated user.
       parameters:
       - description: User ID
         in: path
@@ -762,13 +796,14 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Unblock a user
+      summary: Unblock User
       tags:
       - Blocks
     post:
       consumes:
       - application/json
-      description: Block a user by their ID.
+      description: Blocks the specified user from interacting with the authenticated
+        user.
       parameters:
       - description: User ID
         in: path
@@ -790,7 +825,7 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Block a user
+      summary: Block User
       tags:
       - Blocks
   /users/{userID}/followers:
@@ -819,7 +854,7 @@ paths:
       - ApiKeyAuth: []
       summary: Unfollow a user by user ID
       tags:
-      - Followers
+      - Follows
     get:
       consumes:
       - application/json
@@ -843,9 +878,9 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get users that are being followed by the user.
+      summary: Get Users Who are Following the Specified User
       tags:
-      - Followers
+      - Follows
     post:
       consumes:
       - application/json
@@ -871,7 +906,7 @@ paths:
       - ApiKeyAuth: []
       summary: Follow a user by user ID
       tags:
-      - Followers
+      - Follows
   /users/{userID}/following:
     get:
       consumes:
@@ -896,9 +931,9 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get users that are following the user
+      summary: Get Users that the Specified User is Following
       tags:
-      - Followers
+      - Follows
   /users/{userID}/likes:
     get:
       consumes:
@@ -938,7 +973,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete the user associated with the provided access token.
+      description: Delete the authenticated user's profile.
       produces:
       - application/json
       responses:
@@ -954,23 +989,100 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Delete self
+      summary: Delete User
       tags:
       - Users
-    get:
+  /users/self/confirm:
+    delete:
       consumes:
       - application/json
-      description: Fetch information about the user making the request
+      description: Confirm the deletion of the authenticated user's profile.
+      parameters:
+      - description: Confirmation Code
+        in: query
+        name: confirmationCode
+        required: true
+        type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get information about the authenticated user
+      summary: Confirm Delete User
       tags:
       - Users
+  /users/self/followers:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of users following the authenticated user.
+      parameters:
+      - description: The number of follows to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of follows to offset the returned follows by.
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Users Who are Following the Authenticated User
+      tags:
+      - Follows
+  /users/self/following:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of users the authenticated user is following.
+      parameters:
+      - description: The number of follows to return.
+        in: query
+        name: count
+        type: string
+      - description: The number of follows to offset the returned follows by.
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve Users that the Authenticated User is Following
+      tags:
+      - Follows
 swagger: "2.0"

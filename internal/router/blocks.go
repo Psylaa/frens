@@ -26,8 +26,8 @@ func (br *BlockRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.get)
 }
 
-// @Summary Search Blocks
-// @Description Search for blocks with query parameters. If no query parameters are provided, all blocks will be returned. Since blocks are private, only the authenticated user's blocks will be returned.
+// @Summary Retrieve Blocked Users
+// @Description Retrieves a list of users blocked by the authenticated user.
 // @Tags Blocks
 // @Accept  json
 // @Produce  json

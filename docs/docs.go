@@ -24,9 +24,78 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate a user with the given credentials and return a JWT token.",
+                "consumes": [
+                    "application/json",
+                    "text/xml",
+                    "application/x-www-form-urlencoded",
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate User",
+                "parameters": [
+                    {
+                        "description": "Username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "Password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
-                "description": "Register a new user with the provided account details.",
+                "description": "Creates a new user account and returns a confirmation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -36,7 +105,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "User Registration",
+                "summary": "Register New User",
                 "parameters": [
                     {
                         "description": "The user account to create",
@@ -85,7 +154,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Verify the validity of the provided JWT token.",
+                "description": "Verifies the authenticity of the provided authentication token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -95,7 +164,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Verify Token",
+                "summary": "Verify Authentication Token",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -113,7 +182,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Search for blocks with query parameters. If no query parameters are provided, all blocks will be returned. Since blocks are private, only the authenticated user's blocks will be returned.",
+                "description": "Retrieves a list of users blocked by the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -123,7 +192,7 @@ const docTemplate = `{
                 "tags": [
                     "Blocks"
                 ],
-                "summary": "Search Blocks",
+                "summary": "Retrieve Blocked Users",
                 "parameters": [
                     {
                         "type": "string",
@@ -164,7 +233,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Search for bookmarks with query parameters. If no query parameters are provided, all bookmarks will be returned. Since bookmarks are private, only the authenticated user's bookmarks will be returned.",
+                "description": "Retrieves a list of posts bookmarked by the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -174,14 +243,8 @@ const docTemplate = `{
                 "tags": [
                     "Bookmarks"
                 ],
-                "summary": "Search Bookmarks",
+                "summary": "Retrieve User's Bookmarks",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The ID of a specific bookmark to retrieve",
-                        "name": "bookmarkID",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "The number of bookmarks to return.",
@@ -224,7 +287,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get posts based on a particular algorithm (Not Implemented)",
+                "description": "Retrieves the authenticated user's feed, sorted by an algorithm to highlight relevant content.",
                 "consumes": [
                     "application/json"
                 ],
@@ -234,7 +297,7 @@ const docTemplate = `{
                 "tags": [
                     "Feed"
                 ],
-                "summary": "Get algorithm-based feed",
+                "summary": "Retrieve Algorithmic Feed",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -255,7 +318,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get posts in a chronological order",
+                "description": "Retrieves the authenticated user's feed, sorted by the time of the post's creation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -265,7 +328,7 @@ const docTemplate = `{
                 "tags": [
                     "Feed"
                 ],
-                "summary": "Get chronological feed",
+                "summary": "Retrieve Chronological Feed",
                 "parameters": [
                     {
                         "type": "string",
@@ -297,7 +360,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get posts for the explore section (Not Implemented)",
+                "description": "Retrieves a feed of trending or recommended content for the authenticated user to discover.",
                 "consumes": [
                     "application/json"
                 ],
@@ -307,7 +370,7 @@ const docTemplate = `{
                 "tags": [
                     "Feed"
                 ],
-                "summary": "Get explore feed",
+                "summary": "Retrieve Explore Feed",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -328,7 +391,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Search for files with query parameters. If no query parameters are provided, all files will be returned.",
+                "description": "Retrieves a list of files uploaded by the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -338,7 +401,7 @@ const docTemplate = `{
                 "tags": [
                     "Files"
                 ],
-                "summary": "Search Files",
+                "summary": "Retrieve User's Files",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -360,7 +423,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Create a new file from the provided form data",
+                "description": "Uploads a new file and assigns it to the authenticated user.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -370,7 +433,7 @@ const docTemplate = `{
                 "tags": [
                     "Files"
                 ],
-                "summary": "Create a new file",
+                "summary": "Upload File",
                 "parameters": [
                     {
                         "type": "file",
@@ -400,7 +463,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete a specific file using its ID",
+                "description": "Deletes the specified file from the authenticated user's uploaded files.",
                 "consumes": [
                     "application/json"
                 ],
@@ -410,7 +473,7 @@ const docTemplate = `{
                 "tags": [
                     "Files"
                 ],
-                "summary": "Delete a file by ID",
+                "summary": "Delete File",
                 "parameters": [
                     {
                         "type": "string",
@@ -477,75 +540,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/login": {
-            "post": {
-                "description": "Authenticate a user with the given credentials and return a JWT token.",
-                "consumes": [
-                    "application/json",
-                    "text/xml",
-                    "application/x-www-form-urlencoded",
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "User Login",
-                "parameters": [
-                    {
-                        "description": "Username",
-                        "name": "username",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Username",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "description": "Password",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -672,6 +666,50 @@ const docTemplate = `{
             }
         },
         "/posts/{postID}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves a post by ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Retrieve Post by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "put": {
                 "description": "Update an existing post.",
                 "consumes": [
@@ -753,7 +791,7 @@ const docTemplate = `{
         },
         "/posts/{postID}/bookmarks": {
             "post": {
-                "description": "Create a new bookmark for a post.",
+                "description": "Adds the specified post to the authenticated user's bookmarks.",
                 "consumes": [
                     "application/json"
                 ],
@@ -763,7 +801,7 @@ const docTemplate = `{
                 "tags": [
                     "Bookmarks"
                 ],
-                "summary": "Create a bookmark",
+                "summary": "Bookmark a Post",
                 "parameters": [
                     {
                         "type": "string",
@@ -792,7 +830,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a bookmark for a post.",
+                "description": "Removes the specified post from the authenticated user's bookmarks.",
                 "consumes": [
                     "application/json"
                 ],
@@ -802,7 +840,7 @@ const docTemplate = `{
                 "tags": [
                     "Bookmarks"
                 ],
-                "summary": "Delete a bookmark",
+                "summary": "Unbookmark a Post",
                 "parameters": [
                     {
                         "type": "string",
@@ -848,7 +886,7 @@ const docTemplate = `{
                 "tags": [
                     "Likes"
                 ],
-                "summary": "Create a like",
+                "summary": "Like a Post",
                 "parameters": [
                     {
                         "type": "string",
@@ -894,7 +932,7 @@ const docTemplate = `{
                 "tags": [
                     "Likes"
                 ],
-                "summary": "Delete a like",
+                "summary": "Unlike a Post",
                 "parameters": [
                     {
                         "type": "string",
@@ -930,14 +968,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/self": {
+        "/users": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Fetch information about the user making the request",
+                "description": "Search for users with query parameters.",
                 "consumes": [
                     "application/json"
                 ],
@@ -947,23 +985,58 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get information about the authenticated user",
+                "summary": "Search Users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of users to return.",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of users to offset the returned users by.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     },
                     "500": {
                         "description": "Internal Server Error"
                     }
                 }
             },
-            "delete": {
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete the user associated with the provided access token.",
+                "description": "Update the authenticated user's profile.",
                 "consumes": [
                     "application/json"
                 ],
@@ -973,7 +1046,192 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Delete self",
+                "summary": "Update User",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/users/self": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete the authenticated user's profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete User",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/users/self/confirm": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Confirm the deletion of the authenticated user's profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Confirm Delete User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Confirmation Code",
+                        "name": "confirmationCode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/users/self/followers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of users following the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Follows"
+                ],
+                "summary": "Retrieve Users Who are Following the Authenticated User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The number of follows to return.",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of follows to offset the returned follows by.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/users/self/following": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of users the authenticated user is following.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Follows"
+                ],
+                "summary": "Retrieve Users that the Authenticated User is Following",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The number of follows to return.",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The number of follows to offset the returned follows by.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -1000,7 +1258,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Fetch a specific user by their ID.",
+                "description": "Retrieves a user by ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1010,7 +1268,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get a user by ID",
+                "summary": "Retrieve User by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -1018,85 +1276,6 @@ const docTemplate = `{
                         "name": "userID",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update a users information including bio, avatar, and cover. Note that avatar and cover must first be uploaded to the server and UUIDs must be provided.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update a user",
-                "parameters": [
-                    {
-                        "description": "Bio",
-                        "name": "bio",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Bio",
-                        "name": "bio",
-                        "in": "formData"
-                    },
-                    {
-                        "description": "Avatar ID",
-                        "name": "avatarID",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Avatar ID",
-                        "name": "avatarID",
-                        "in": "formData"
-                    },
-                    {
-                        "description": "Cover ID",
-                        "name": "coverID",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Cover ID",
-                        "name": "coverID",
-                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1125,7 +1304,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Block a user by their ID.",
+                "description": "Blocks the specified user from interacting with the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1135,7 +1314,7 @@ const docTemplate = `{
                 "tags": [
                     "Blocks"
                 ],
-                "summary": "Block a user",
+                "summary": "Block User",
                 "parameters": [
                     {
                         "type": "string",
@@ -1169,7 +1348,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Unblock a user by their ID.",
+                "description": "Removes block on the specified user, allowing them to interact with the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1179,7 +1358,7 @@ const docTemplate = `{
                 "tags": [
                     "Blocks"
                 ],
-                "summary": "Unblock a user",
+                "summary": "Unblock User",
                 "parameters": [
                     {
                         "type": "string",
@@ -1223,9 +1402,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Followers"
+                    "Follows"
                 ],
-                "summary": "Get users that are being followed by the user.",
+                "summary": "Get Users Who are Following the Specified User",
                 "parameters": [
                     {
                         "type": "string",
@@ -1264,7 +1443,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Followers"
+                    "Follows"
                 ],
                 "summary": "Follow a user by user ID",
                 "parameters": [
@@ -1305,7 +1484,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Followers"
+                    "Follows"
                 ],
                 "summary": "Unfollow a user by user ID",
                 "parameters": [
@@ -1348,9 +1527,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Followers"
+                    "Follows"
                 ],
-                "summary": "Get users that are following the user",
+                "summary": "Get Users that the Specified User is Following",
                 "parameters": [
                     {
                         "type": "string",

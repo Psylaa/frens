@@ -30,12 +30,11 @@ func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.get)
 }
 
-// @Summary Search Bookmarks
-// @Description Search for bookmarks with query parameters. If no query parameters are provided, all bookmarks will be returned. Since bookmarks are private, only the authenticated user's bookmarks will be returned.
+// @Summary Retrieve User's Bookmarks
+// @Description Retrieves a list of posts bookmarked by the authenticated user.
 // @Tags Bookmarks
 // @Accept  json
 // @Produce  json
-// @Param bookmarkID query string false "The ID of a specific bookmark to retrieve"
 // @Param count query string false "The number of bookmarks to return."
 // @Param offset query string false "The number of bookmarks to offset the returned bookmarks by. For example, offset=10&count=10 would return bookmarks 10-20"
 // @Success 200 {object} response.BookmarkResponse
