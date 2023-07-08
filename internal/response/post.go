@@ -2,6 +2,7 @@ package response
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
@@ -13,21 +14,27 @@ type PostResponse struct {
 }
 
 type PostData struct {
-	Type       shared.DataType `json:"type"`
-	ID         uuid.UUID       `json:"id"`
-	Attributes PostAttr        `json:"attributes"`
-	Links      PostLinks       `json:"links"`
+	Type          shared.DataType `json:"type"`
+	ID            uuid.UUID       `json:"id"`
+	Attributes    PostAttr        `json:"attributes"`
+	Links         PostLinks       `json:"links"`
+	Relationships PostRel         `json:"relationships"`
 }
 
 type PostAttr struct {
-	Author   UserAttr `json:"author"`
-	Privacy  string   `json:"privacy"`
-	Text     string   `json:"text"`
-	MediaIDs []string `json:"media_ids"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Text      string    `json:"text"`
+	Privacy   string    `json:"privacy"`
+	MediaIDs  []string  `json:"media_ids"`
 }
 
 type PostLinks struct {
 	Self string `json:"self"`
+}
+
+type PostRel struct {
+	Author UserResponse `json:"author"`
 }
 
 func CreatePostsResponse(posts []*database.Post) *PostResponse {
@@ -46,15 +53,17 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 			Type: shared.DataTypePost,
 			ID:   post.ID,
 			Attributes: PostAttr{
-				Author: UserAttr{
-					Username: post.Author.Username,
-				},
-				Privacy:  string(post.Privacy),
-				Text:     post.Text,
-				MediaIDs: mediaIDs,
+				CreatedAt: post.CreatedAt,
+				UpdatedAt: post.UpdatedAt,
+				Privacy:   string(post.Privacy),
+				Text:      post.Text,
+				MediaIDs:  mediaIDs,
 			},
 			Links: PostLinks{
 				Self: selfLink,
+			},
+			Relationships: PostRel{
+				Author: *CreateUsersResponse([]*database.User{&post.Author}),
 			},
 		})
 	}
