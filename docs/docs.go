@@ -113,7 +113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/router.CreateUserRequest"
+                            "$ref": "#/definitions/router.RegisterRequest"
                         }
                     },
                     {
@@ -122,19 +122,19 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
+                        "minLength": 8,
                         "type": "string",
                         "name": "password",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "phone",
-                        "in": "formData"
-                    },
-                    {
+                        "maxLength": 24,
+                        "minLength": 1,
                         "type": "string",
                         "name": "username",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1029,7 +1029,9 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            },
+            }
+        },
+        "/users/self": {
             "put": {
                 "security": [
                     {
@@ -1064,9 +1066,7 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            }
-        },
-        "/users/self": {
+            },
             "delete": {
                 "security": [
                     {
@@ -1656,20 +1656,24 @@ const docTemplate = `{
                 }
             }
         },
-        "router.CreateUserRequest": {
+        "router.RegisterRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 8
                 },
                 "username": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 24,
+                    "minLength": 1
                 }
             }
         },

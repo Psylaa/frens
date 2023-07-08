@@ -28,16 +28,20 @@ definitions:
           $ref: '#/definitions/response.BookmarkData'
         type: array
     type: object
-  router.CreateUserRequest:
+  router.RegisterRequest:
     properties:
       email:
         type: string
       password:
-        type: string
-      phone:
+        minLength: 8
         type: string
       username:
+        maxLength: 24
+        minLength: 1
         type: string
+    required:
+    - password
+    - username
     type: object
   shared.DataType:
     enum:
@@ -125,18 +129,20 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/router.CreateUserRequest'
+          $ref: '#/definitions/router.RegisterRequest'
       - in: formData
         name: email
         type: string
       - in: formData
+        minLength: 8
         name: password
+        required: true
         type: string
       - in: formData
-        name: phone
-        type: string
-      - in: formData
+        maxLength: 24
+        minLength: 1
         name: username
+        required: true
         type: string
       produces:
       - application/json
@@ -718,28 +724,6 @@ paths:
       summary: Search Users
       tags:
       - Users
-    put:
-      consumes:
-      - application/json
-      description: Update the authenticated user's profile.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Update User
-      tags:
-      - Users
   /users/{userID}:
     get:
       consumes:
@@ -990,6 +974,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update User
       tags:
       - Users
   /users/self/confirm:

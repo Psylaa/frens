@@ -45,3 +45,9 @@ const (
 type ErrResp struct {
 	Error RespErr `json:"error"`
 }
+
+func CreateErrorResponse(err RespErr) *Response {
+	return &Response{
+		Errors: []*RespErr{&err},
+	}
+}

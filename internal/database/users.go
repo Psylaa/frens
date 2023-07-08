@@ -16,7 +16,6 @@ type Users interface {
 	GetByUsername(username string) (*User, error)
 	UsernameExists(username string) bool
 	EmailExists(email string) bool
-	PhoneNumberExists(phone string) bool
 	IsVerifiedByID(id *uuid.UUID) (bool, error)
 	CheckCredentials(username, password string) (*User, error)
 }
@@ -56,32 +55,6 @@ func NewUserRepo(db *gorm.DB) Users {
 	return &UserRepo{NewBaseRepo[User](db)}
 }
 
-func NewUser(username string, email string, phoneNumber string, password string) User {
-	logger.DebugLogRequestReceived("database", "users", "NewUser")
-
-	// Check if the phoneNumber parameter is empty
-	// This is necessary for weirdness with gorm and the unique constraint
-	var phonePtr *string
-	if phoneNumber != "" {
-		phonePtr = &phoneNumber
-	}
-
-	// Hash the password
-	hashedPass, _ := shared.HashPassword(password)
-
-	return User{
-		BaseModel: BaseModel{
-			ID: uuid.New(),
-		},
-		Username:    username,
-		Email:       email,
-		PhoneNumber: phonePtr,
-		Password:    *hashedPass,
-		Privacy:     shared.PrivacyPublic,
-		Role:        shared.RoleUser,
-	}
-}
-
 func (ur *UserRepo) GetByEmail(email string) (*User, error) {
 	logger.DebugLogRequestReceived("database", "users", "GetByEmail")
 	var user User
@@ -107,13 +80,6 @@ func (ur *UserRepo) EmailExists(email string) bool {
 	logger.DebugLogRequestReceived("database", "users", "EmailExists")
 	var user User
 	result := ur.db.Where("email = ?", email).First(&user)
-	return !result.RecordNotFound()
-}
-
-func (ur *UserRepo) PhoneNumberExists(phoneNumber string) bool {
-	logger.DebugLogRequestReceived("database", "users", "PhoneNumberExists")
-	var user User
-	result := ur.db.Where("phone_number = ?", phoneNumber).First(&user)
 	return !result.RecordNotFound()
 }
 

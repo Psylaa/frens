@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
@@ -8,6 +9,7 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -41,8 +43,6 @@ type Repos struct {
 	Posts     *PostsRepo
 	Users     *UsersRepo
 }
-
-var tokenBlacklist []string
 
 // New creates a new router instance
 func New(cfg *config.Config, db *database.Database, srv *service.Service) *Router {
@@ -101,6 +101,7 @@ func (r *Router) configureRoutes() {
 
 	r.repos.Auth.ConfigureRoutes(v1.Group("/auth"))
 	r.addAuth()
+
 	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
 	r.repos.Files.ConfigureRoutes(v1.Group("/files"))
@@ -160,4 +161,44 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 
 	logger.DebugLogRequestUpdate("router", "extractRequestorID", "extractRequestorID", "parsed userID from token: "+uuidPtr.String())
 	return c.Next()
+}
+
+// Validation utility
+func validateRequest(v *validator.Validate, req interface{}) ([]map[string]interface{}, error) {
+	if err := v.Struct(req); err != nil {
+		// Convert the error into a validation.Errors object
+		errList := err.(validator.ValidationErrors)
+
+		// Create a new slice to hold the JSON API error objects
+		jsonErrs := createJsonApiErrors(errList)
+
+		// Return the error response
+		return jsonErrs, err
+	}
+	return nil, nil
+}
+
+// JSON API errors utility
+func createJsonApiErrors(errList validator.ValidationErrors) []map[string]interface{} {
+	jsonErrs := make([]map[string]interface{}, len(errList))
+
+	// Loop through the validation errors
+	for i, e := range errList {
+		// Create an error object
+		jsonErr := make(map[string]interface{})
+
+		jsonErr["status"] = "400"
+		jsonErr["source"] = map[string]string{"pointer": "/data/attributes/" + e.Field()}
+		jsonErr["title"] = "Invalid Attribute"
+
+		detail := fmt.Sprintf("%s validation failed on the '%s' tag", e.Field(), e.ActualTag())
+		if e.Param() != "" {
+			detail = fmt.Sprintf("%s validation failed on the '%s' tag, condition: %s", e.Field(), e.ActualTag(), e.Param())
+		}
+		jsonErr["detail"] = detail
+
+		jsonErrs[i] = jsonErr
+	}
+
+	return jsonErrs
 }

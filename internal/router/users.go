@@ -71,7 +71,7 @@ func (ur *UsersRepo) getByID(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /users [put]
+// @Router /users/self [put]
 func (ur *UsersRepo) update(c *fiber.Ctx) error {
 	return nil
 }

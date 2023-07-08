@@ -4,6 +4,7 @@ import (
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -25,7 +26,7 @@ func (ur *UserRepo) Get(c *fiber.Ctx, userID *uuid.UUID) error {
 	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{user}))
 }
 
-func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, phoneNumber string, password string) error {
+func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, password string) error {
 	logger.DebugLogRequestReceived("service", "user", "Create")
 
 	// Check if username is taken
@@ -37,25 +38,35 @@ func (ur *UserRepo) Create(c *fiber.Ctx, username string, email string, phoneNum
 		logger.ErrorLogRequestError("service", "user", "Create", "email already taken", nil)
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenEmail))
 	}
-	if db.Users.PhoneNumberExists(phoneNumber) {
-		logger.ErrorLogRequestError("service", "user", "Create", "phone already taken", nil)
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrTakenPhone))
-	}
 	logger.DebugLogRequestUpdate("service", "user", "Create", "username and email are available")
 
-	// Create user object
-	newUser := database.NewUser(username, email, phoneNumber, password)
-
-	// Create user in database
-	err := db.Users.Create(&newUser)
+	// Hash password
+	hashedPassword, err := shared.HashPassword(password)
 	if err != nil {
-		logger.ErrorLogRequestError("service", "user", "Create", "error creating user", err)
+		logger.ErrorLogRequestError("service", "user", "Create", "error hashing password", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
-	logger.DebugLogRequestUpdate("service", "user", "Create", "user created in database")
+
+	// Create user object
+	newUser := &database.User{
+		BaseModel: database.BaseModel{
+			ID: uuid.New(),
+		},
+		Username: username,
+		Email:    email,
+		Password: *hashedPassword,
+		Role:     shared.RoleUser,
+	}
+
+	// Insert user into database
+	err = db.Users.Create(newUser)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "user", "Create", "error inserting user into database", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
 	// Return the user
-	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{&newUser}))
+	return c.Status(fiber.StatusOK).JSON(response.CreateUsersResponse([]*database.User{newUser}))
 }
 
 func (ur *UserRepo) Update(c *fiber.Ctx, bio *string, avatarID *uuid.UUID, coverID *uuid.UUID) error {

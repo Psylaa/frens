@@ -82,12 +82,6 @@ func Init(config *config.Config) {
 	defaultBio = config.Users.DefaultBio
 }
 
-func CreateErrorResponse(err RespErr) *Response {
-	return &Response{
-		Errors: []*RespErr{&err},
-	}
-}
-
 func CreateCountResponse(count int) *Response {
 	return &Response{
 		Meta: &Meta{

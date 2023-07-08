@@ -1,8 +1,7 @@
 package router
 
 import (
-	"regexp"
-
+	"github.com/go-playground/validator/v10"
 	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -18,6 +17,12 @@ type AuthRepo struct {
 	Srv *service.Service
 }
 
+type RegisterRequest struct {
+	Username string `json:"username" validate:"required,min=1,max=24"`
+	Email    string `json:"email" validate:"omitempty,email"`
+	Password string `json:"password" validate:"required"`
+}
+
 // NewAuthRepo creates a new AuthRepo instance.
 func NewAuthRepo(db *database.Database, srv *service.Service) *AuthRepo {
 	return &AuthRepo{
@@ -28,7 +33,7 @@ func NewAuthRepo(db *database.Database, srv *service.Service) *AuthRepo {
 
 // ConfigureRoutes configures the routes associated with Auth functionality.
 func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
-	rtr.Post("/", lr.login)
+	rtr.Post("/login", lr.login)
 	rtr.Get("/verify", lr.verify)
 	rtr.Post("/register", lr.register)
 }
@@ -89,21 +94,13 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// CreateUserRequest represents the request body for creating a new user account.
-type CreateUserRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-}
-
 // @Summary Register New User
 // @Description Creates a new user account and returns a confirmation.
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param user body CreateUserRequest true "The user account to create"
-// @Param user formData CreateUserRequest true "The user account to create"
+// @Param user body RegisterRequest true "The user account to create"
+// @Param user formData RegisterRequest true "The user account to create"
 // @Failure 400
 // @Failure 500
 // @Router /auth/register [post]
@@ -111,7 +108,7 @@ func (sr *AuthRepo) register(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "auth", "register")
 
 	// Parse the request body
-	req := new(CreateUserRequest)
+	req := new(RegisterRequest)
 	if err := c.BodyParser(req); err != nil {
 		logger.Log.Error().Err(err).Msg("Error parsing request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUserID))
@@ -121,32 +118,14 @@ func (sr *AuthRepo) register(c *fiber.Ctx) error {
 	p := bluemonday.UGCPolicy()
 	req.Username = p.Sanitize(req.Username)
 	req.Email = p.Sanitize(req.Email)
-	req.Phone = p.Sanitize(req.Phone)
 	// Don't sanitize password - it might unintentionally change it.
 
-	// Validate email or phone format
-	if req.Email == "" && req.Phone == "" {
-		logger.Log.Error().Msg("Email or phone must be provided")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	if req.Email != "" {
-		if matched, _ := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, req.Email); !matched {
-			logger.Log.Error().Msg("Invalid email format")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidEmail))
-		}
-	}
-	if req.Phone != "" {
-		if matched, _ := regexp.MatchString(`^[0-9]{10}$`, req.Phone); !matched {
-			logger.Log.Error().Msg("Invalid phone format")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidPhone))
-		}
+	// Validate using validator package
+	v := validator.New()
+	if jsonErrs, err := validateRequest(v, req); err != nil {
+		logger.Log.Error().Err(err).Msg("Validation error")
+		return c.Status(fiber.StatusBadRequest).JSON(map[string]interface{}{"errors": jsonErrs})
 	}
 
-	// Validate username and password - they should not be empty
-	if req.Username == "" || req.Password == "" {
-		logger.Log.Error().Msg("Username or password is empty")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	return sr.Srv.Users.Create(c, req.Username, req.Email, req.Phone, req.Password)
+	return sr.Srv.Users.Create(c, req.Username, req.Email, req.Password)
 }
