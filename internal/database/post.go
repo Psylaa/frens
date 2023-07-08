@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
@@ -10,6 +12,8 @@ import (
 // Posts represents the interface for a Post repository
 type Posts interface {
 	Base[Post]
+	GetByID(id *uuid.UUID) (*Post, error)
+	GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count int) ([]*Post, error)
 }
 
 // Post struct represents the post table in the database with appropriate gorm tags.
@@ -55,4 +59,21 @@ func (pr *PostRepo) GetByID(id *uuid.UUID) (*Post, error) {
 	post.Media = media
 
 	return &post, nil
+}
+
+func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count int) ([]*Post, error) {
+	logger.DebugLogRequestReceived("database", "PostRepo", "GetByUserIDs")
+
+	var posts []*Post
+	result := pr.db.
+		Preload("Author").
+		Where("author_id IN (?) AND created_at < ?", userIDs, cursor).
+		Order("created_at DESC").
+		Limit(count).
+		Find(&posts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return posts, nil
 }

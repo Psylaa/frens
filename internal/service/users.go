@@ -11,7 +11,7 @@ import (
 
 type UserRepo struct{}
 
-func (ur *UserRepo) Get(c *fiber.Ctx, userID *uuid.UUID) error {
+func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "user", "GetByID")
 
 	// Get user from database

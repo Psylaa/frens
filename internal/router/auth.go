@@ -34,8 +34,11 @@ func NewAuthRepo(db *database.Database, srv *service.Service) *AuthRepo {
 // ConfigureRoutes configures the routes associated with Auth functionality.
 func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Post("/login", lr.login)
-	rtr.Get("/verify", lr.verify)
 	rtr.Post("/register", lr.register)
+}
+
+func (lr *AuthRepo) ConfigureAuthRoutes(rtr fiber.Router) {
+	rtr.Get("/verify", lr.verify)
 }
 
 // @Summary Authenticate User

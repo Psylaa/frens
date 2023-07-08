@@ -8,10 +8,14 @@ import (
 
 type Follows interface {
 	Base[Follow]
+	GetByID(id *uuid.UUID) (*Follow, error)
+	GetFollowing(userID *uuid.UUID) ([]*User, error)
 }
 
 type Follow struct {
 	BaseModel
+	SourceID uuid.UUID `gorm:"type:uuid;not null"`
+	TargetID uuid.UUID `gorm:"type:uuid;not null"`
 }
 
 type FollowRepo struct {
@@ -32,4 +36,20 @@ func (fr *FollowRepo) GetByID(id *uuid.UUID) (*Follow, error) {
 	}
 
 	return &follow, nil
+}
+
+func (fr *FollowRepo) GetFollowing(sourceID *uuid.UUID) ([]*User, error) {
+	logger.DebugLogRequestReceived("database", "FollowRepo", "GetFollowing")
+
+	var users []*User
+	result := fr.db.Model(&User{}).
+		Joins("JOIN follows ON follows.target_id = users.id").
+		Where("follows.source_id = ?", sourceID).
+		Find(&users)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return users, nil
 }

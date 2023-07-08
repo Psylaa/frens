@@ -101,6 +101,7 @@ func (r *Router) configureRoutes() {
 
 	r.repos.Auth.ConfigureRoutes(v1.Group("/auth"))
 	r.addAuth()
+	r.repos.Auth.ConfigureAuthRoutes(v1.Group("/auth")) // Necessary for /verify route to be after auth middleware
 
 	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
@@ -118,7 +119,7 @@ func (r *Router) addAuth() {
 		SigningKey: jwtware.SigningKey{Key: []byte(r.config.Server.JWTSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if err.Error() == "Missing or malformed JWT" {
-				logger.Log.Warn().Msg("token is missing or malformed")
+				logger.Log.Warn().Msg("token is missing or malformed: " + err.Error())
 				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
 			}
 			logger.Log.Warn().Msg("unknown token error: " + err.Error())

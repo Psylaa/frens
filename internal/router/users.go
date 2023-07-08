@@ -3,8 +3,10 @@ package router
 import (
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type UsersRepo struct {
@@ -20,6 +22,9 @@ func NewUsersRepo(db *database.Database, srv *service.Service) *UsersRepo {
 }
 
 func (ur *UsersRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/", ur.search)
+	rtr.Get("/self", ur.search)
+	rtr.Get("/:userID", ur.getByID)
 }
 
 // @Summary Search Users
@@ -57,7 +62,19 @@ func (ur *UsersRepo) search(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /users/{userID} [get]
 func (ur *UsersRepo) getByID(c *fiber.Ctx) error {
-	return nil
+	logger.DebugLogRequestReceived("router", "users", "getByID")
+
+	// Get target user by ID from params
+	userID := c.Params("userID")
+
+	// Parse as UUID
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUUID))
+	}
+
+	// Send to service layer
+	return ur.Srv.Users.GetByID(c, &userUUID)
 }
 
 // @Summary Update User
