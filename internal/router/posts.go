@@ -26,6 +26,10 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Post("/", pr.create)
 	rtr.Put("/:postID", pr.update)
 	rtr.Delete("/:postID", pr.delete)
+	rtr.Post("/:postID/bookmarks", pr.createBookmark)
+	rtr.Delete("/:postID/bookmarks", pr.deleteBookmark)
+	rtr.Post("/:postID/likes", pr.createLike)
+	rtr.Delete("/:postID/likes/:likeID", pr.deleteLike)
 }
 
 // @Summary Search Posts
