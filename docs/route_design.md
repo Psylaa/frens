@@ -34,10 +34,11 @@ Bookmark - A user ID and post ID.
 | View all my bookmarks                        | GET         | /bookmarks                      | Covered |
 | View my bookmarks in batches (pagination)    | GET         | /bookmarks?count=n&offset=m     | Covered |
 | View one of my bookmarks by bookmark ID      | GET         | /bookmarks/{bookmarkID}         | Pending |
+| View the number of bookmarks a post has      | GET         | /posts/{postID}                 | Pending |
 | View one of my bookmarks by post ID          | GET         | /posts/{postID}/bookmarks       | Pending |
 | View the total count of bookmarks for a post | GET         | /posts/{postID}/bookmarks       | Pending |
 | Check if I've bookmarked a post              | GET         | /posts/{postID}/bookmarks       | Pending |
-| View the number of bookmarks a post has      | GET         | /posts/{postID}/bookmarks/count | Pending |
+| Delete all bookmarks                         | DELETE      | /bookmarks                      | Pending |
 | Delete a bookmark by bookmark ID             | DELETE      | /bookmarks/{bookmarkID}         | Covered |
 | Delete a bookmark by post ID                 | DELETE      | /posts/{postID}/bookmarks       | Pending |
 # Follows

@@ -28,7 +28,6 @@ func NewBookmarksRepo(db *database.Database, srv *service.Service) *BookmarksRep
 
 func (br *BookmarksRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", br.get)
-	rtr.Post("/:postID", br.create)
 	rtr.Delete("/", br.delete)
 }
 
@@ -100,33 +99,6 @@ func (br *BookmarksRepo) get(c *fiber.Ctx) error {
 	return br.Srv.Bookmarks.GetByUserID(c, requestorID, count, offset)
 }
 
-// @Summary Create a bookmark for a post
-// @Description Create a bookmark for a specific post based on the provided ID
-// @Tags Bookmarks
-// @Accept  json
-// @Produce  json
-// @Param postID path string true "Post ID"
-// @Success 200 {object} response.BookmarkResponse
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
-// @Security ApiKeyAuth
-// @Router /bookmarks/{postID} [post]
-func (br *BookmarksRepo) create(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "bookmarks", "create")
-
-	// Parse the post ID
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		log.Error().Err(err).Msg("Error parsing post ID: " + postID.String())
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send request to service
-	return br.Srv.Bookmarks.Create(c, &postID)
-}
-
 // @Summary Delete a bookmark by ID
 // @Description Delete a specific bookmark. Either a bookmark ID or a post ID must be provided. If both are provided, the bookmark ID will be used. Only the owner of the bookmark can delete it. Admins can delete any bookmark.
 // @Tags Bookmarks
@@ -153,4 +125,53 @@ func (br *BookmarksRepo) delete(c *fiber.Ctx) error {
 
 	// Send request to service layer
 	return br.Srv.Bookmarks.DeleteByPostID(c, &postID)
+}
+
+// @Summary Delete all bookmarks
+// @Description Delete all bookmarks for the authenticated user.
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /bookmarks/ [delete]
+func (br *BookmarksRepo) deleteAll(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get a bookmark by ID
+// @Description Get a specific bookmark by its ID.
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param bookmarkID path string true "The ID of the bookmark to retrieve"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /bookmarks/{bookmarkID} [get]
+func (br *BookmarksRepo) getByID(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get a bookmark by post ID
+// @Description Get a specific bookmark by its post ID.
+// @Tags Bookmarks
+// @Accept  json
+// @Produce  json
+// @Param postID path string true "The ID of the post to retrieve the bookmark for"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /bookmarks/{postID} [get]
+func (br *BookmarksRepo) getByPostID(c *fiber.Ctx) error {
+	return nil
 }

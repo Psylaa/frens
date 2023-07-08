@@ -39,7 +39,7 @@ func (br *BlockRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /blocks/ [get]
+// @Router /blocks [get]
 func (br *BlockRepo) get(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "blocks", "get")
 
@@ -62,4 +62,52 @@ func (br *BlockRepo) get(c *fiber.Ctx) error {
 
 	// Send to the service layer
 	return br.Srv.Blocks.Get(c, count, offset)
+}
+
+// @Summary Get a block by block ID
+// @Description Retrieve a block by block ID
+// @Tags Blocks
+// @Accept json
+// @Produce json
+// @Param blockID path string true "Block ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /blocks/{blockID} [get]
+func (br *BlockRepo) getByID(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Delete all blocks
+// @Description Delete all blocks for the authenticated user.
+// @Tags Blocks
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /blocks [delete]
+func (br *BlockRepo) deleteAll(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Delete a block by block ID
+// @Description Delete a block by block ID
+// @Tags Blocks
+// @Accept json
+// @Produce json
+// @Param blockID path string true "Block ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /blocks/{blockID} [delete]
+func (br *BlockRepo) deleteByID(c *fiber.Ctx) error {
+	return nil
 }

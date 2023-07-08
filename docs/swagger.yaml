@@ -89,7 +89,29 @@ info:
   title: Frens API
   version: "1.0"
 paths:
-  /blocks/:
+  /blocks:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all blocks for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete all blocks
+      tags:
+      - Blocks
     get:
       consumes:
       - application/json
@@ -121,7 +143,80 @@ paths:
       summary: Get blocks
       tags:
       - Blocks
+  /blocks/{blockID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a block by block ID
+      parameters:
+      - description: Block ID
+        in: path
+        name: blockID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a block by block ID
+      tags:
+      - Blocks
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a block by block ID
+      parameters:
+      - description: Block ID
+        in: path
+        name: blockID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a block by block ID
+      tags:
+      - Blocks
   /bookmarks/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all bookmarks for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete all bookmarks
+      tags:
+      - Bookmarks
     get:
       consumes:
       - application/json
@@ -201,15 +296,14 @@ paths:
       summary: Delete a bookmark by ID
       tags:
       - Bookmarks
-  /bookmarks/{postID}:
-    post:
+    get:
       consumes:
       - application/json
-      description: Create a bookmark for a specific post based on the provided ID
+      description: Get a specific bookmark by its ID.
       parameters:
-      - description: Post ID
+      - description: The ID of the bookmark to retrieve
         in: path
-        name: postID
+        name: bookmarkID
         required: true
         type: string
       produces:
@@ -217,8 +311,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/response.BookmarkResponse'
         "400":
           description: Bad Request
         "401":
@@ -229,7 +321,36 @@ paths:
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Create a bookmark for a post
+      summary: Get a bookmark by ID
+      tags:
+      - Bookmarks
+  /bookmarks/{postID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific bookmark by its post ID.
+      parameters:
+      - description: The ID of the post to retrieve the bookmark for
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a bookmark by post ID
       tags:
       - Bookmarks
   /feeds/algorithmic:
@@ -297,16 +418,10 @@ paths:
       tags:
       - Feed
   /files:
-    get:
+    delete:
       consumes:
       - application/json
-      description: Retrieve files
-      parameters:
-      - description: File ID
-        in: path
-        name: fileID
-        required: true
-        type: string
+      description: Delete all files owned by the authenticated user
       produces:
       - application/json
       responses:
@@ -314,11 +429,33 @@ paths:
           description: OK
         "400":
           description: Bad Request
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get a file
+      summary: Delete all files owned by the authenticated user
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get all files owned by the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: get all files owned by the authenticated user
       tags:
       - Files
     post:
@@ -370,18 +507,78 @@ paths:
       summary: Delete a file by ID
       tags:
       - Files
+    get:
+      consumes:
+      - application/json
+      description: Retrieve files by ID
+      parameters:
+      - description: File ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a file by ID
+      tags:
+      - Files
+  /followers:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all users that are following the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a list of all users that are following the authenticated user
+      tags:
+      - Followers
+  /followers/count:
+    get:
+      consumes:
+      - application/json
+      description: Get a count of all users that are following the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
+      summary: Get a count of all users that are following the authenticated user
+      tags:
+      - Followers
   /follows:
     get:
       consumes:
       - application/json
-      description: Retrieve a follow relationship between a source user and a target
-        user
-      parameters:
-      - description: User ID
-        in: path
-        name: userID
-        required: true
-        type: string
+      description: Get a list of all users that the authenticated user is following
       produces:
       - application/json
       responses:
@@ -389,18 +586,20 @@ paths:
           description: OK
         "400":
           description: Bad Request
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get a follow
+      summary: Get a list of all users that the authenticated user is following
       tags:
       - Follows
   /follows/{userID}:
-    delete:
+    get:
       consumes:
       - application/json
-      description: Delete a follow relationship with the target user
+      description: Get a list of all users that are following a user by user ID
       parameters:
       - description: User ID
         in: path
@@ -414,19 +613,18 @@ paths:
           description: OK
         "400":
           description: Bad Request
-        "404":
-          description: Not Found
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Unfollow a user
+      summary: Get a list of all users that are following a user by user ID
       tags:
       - Follows
-    post:
+  /follows/{userID}/count:
+    get:
       consumes:
       - application/json
-      description: Create a follow relationship with the target user
+      description: Get a count of all users that are following a user by user ID
       parameters:
       - description: User ID
         in: path
@@ -436,17 +634,36 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
         "400":
           description: Bad Request
-        "409":
-          description: Conflict
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Get a count of all users that are following a user by user ID
+      tags:
+      - Follows
+  /follows/count:
+    get:
+      consumes:
+      - application/json
+      description: Get a count of all users that the authenticated user is following
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Follow a user
+      summary: Get a count of all users that the authenticated user is following
       tags:
       - Follows
   /likes:
@@ -718,6 +935,175 @@ paths:
       summary: Update a post
       tags:
       - Posts
+  /posts/{postID}/bookmarks:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a bookmark for a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Delete a bookmark
+      tags:
+      - Bookmarks
+    post:
+      consumes:
+      - application/json
+      description: Create a new bookmark for a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Create a bookmark
+      tags:
+      - Bookmarks
+  /posts/{postID}/files:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all files from a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Delete all files from a post
+      tags:
+      - Files
+    get:
+      consumes:
+      - application/json
+      description: Get all files from a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get all files from a post
+      tags:
+      - Files
+  /posts/{postID}/files/{fileID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a file from a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Delete file from a post
+      tags:
+      - Files
+    post:
+      consumes:
+      - application/json
+      description: Add a file to a post.
+      parameters:
+      - description: Post ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Add a file to a post
+      tags:
+      - Files
   /signup:
     post:
       consumes:
@@ -833,6 +1219,170 @@ paths:
       summary: Update a user
       tags:
       - Users
+  /users/{userID}/blocks:
+    delete:
+      consumes:
+      - application/json
+      description: Unblock a user by their ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Unblock a user
+      tags:
+      - Blocks
+    get:
+      consumes:
+      - application/json
+      description: Get a block by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a block by user ID
+      tags:
+      - Blocks
+    post:
+      consumes:
+      - application/json
+      description: Block a user by their ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Block a user
+      tags:
+      - Blocks
+  /users/{userID}/followers:
+    delete:
+      consumes:
+      - application/json
+      description: Unfollow a user by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Unfollow a user by user ID
+      tags:
+      - Followers
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all users that are following a user by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get a list of all users that are following a user by user ID
+      tags:
+      - Followers
+    post:
+      consumes:
+      - application/json
+      description: Follow a user by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Follow a user by user ID
+      tags:
+      - Followers
   /users/self:
     delete:
       consumes:

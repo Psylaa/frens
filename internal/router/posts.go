@@ -159,3 +159,103 @@ func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	// Send the request to the service layer.
 	return pr.Srv.Posts.Delete(c, requestorID, postIDPtr)
 }
+
+// @Summary Create a bookmark
+// @Description Create a new bookmark for a post.
+// @Tags Bookmarks
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/bookmarks [post]
+func (pr *PostsRepo) createBookmark(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "createBookmark")
+	return nil
+}
+
+// @Summary Delete a bookmark
+// @Description Delete a bookmark for a post.
+// @Tags Bookmarks
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/bookmarks [delete]
+func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "posts", "deleteBookmark")
+	return nil
+}
+
+// @Summary Delete file from a post
+// @Description Delete a file from a post.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Param fileID path string true "File ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/files/{fileID} [delete]
+func (pr *PostsRepo) deleteFile(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Delete all files from a post
+// @Description Delete all files from a post.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/files [delete]
+func (pr *PostsRepo) deleteAllFiles(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Add a file to a post
+// @Description Add a file to a post.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Param fileID path string true "File ID"
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/files/{fileID} [post]
+func (pr *PostsRepo) addFile(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get all files from a post
+// @Description Get all files from a post.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param postID path string true "Post ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /posts/{postID}/files [get]
+func (pr *PostsRepo) getAllFiles(c *fiber.Ctx) error {
+	return nil
+}

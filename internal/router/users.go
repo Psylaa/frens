@@ -224,7 +224,7 @@ func (ur *UsersRepo) delete(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /{userID}/blocks [post]
+// @Router /users/{userID}/blocks [post]
 func (ur *UsersRepo) block(c *fiber.Ctx) error {
 	return nil
 }
@@ -241,7 +241,72 @@ func (ur *UsersRepo) block(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /{userID}/blocks [delete]
+// @Router /users/{userID}/blocks [delete]
 func (ur *UsersRepo) unblock(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get a block by user ID
+// @Description Get a block by user ID
+// @Tags Blocks
+// @Accept  json
+// @Produce  json
+// @Param userID path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{userID}/blocks [get]
+func (ur *UsersRepo) getBlock(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Get a list of all users that are following a user by user ID
+// @Description Get a list of all users that are following a user by user ID
+// @Tags Followers
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{userID}/followers [get]
+func (ur *UsersRepo) GetFollowersByUserID(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Follow a user by user ID
+// @Description Follow a user by user ID
+// @Tags Followers
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{userID}/followers [post]
+func (ur *UsersRepo) FollowUserByUserID(c *fiber.Ctx) error {
+	return nil
+}
+
+// @Summary Unfollow a user by user ID
+// @Description Unfollow a user by user ID
+// @Tags Followers
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /users/{userID}/followers [delete]
+func (ur *UsersRepo) UnfollowUserByUserID(c *fiber.Ctx) error {
 	return nil
 }
