@@ -218,7 +218,16 @@ func (pr *PostsRepo) createBookmark(c *fiber.Ctx) error {
 // @Router /posts/{postID}/bookmarks [delete]
 func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "deleteBookmark")
-	return nil
+
+	// Get the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("postID"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Send the request to the service layer.
+	return pr.Srv.Bookmarks.Delete(c, &postID)
 }
 
 // @Summary Like a Post
