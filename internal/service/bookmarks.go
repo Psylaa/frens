@@ -22,8 +22,20 @@ func (br *BookmarkRepo) Get(c *fiber.Ctx, count int, cursor time.Time) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
+	// Convert to a list of postIDs
+	var postIDs []*uuid.UUID
+	for _, bookmark := range bookmarks {
+		postIDs = append(postIDs, &bookmark.PostID)
+	}
+
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
+	// Get all posts
+	posts, err := db.Posts.GetByIDs(postIDs, requestorID)
+
 	// Send the response
-	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse(bookmarks))
+	return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse(posts))
 }
 
 func (br *BookmarkRepo) Create(c *fiber.Ctx, postID *uuid.UUID) error {

@@ -13,6 +13,7 @@ import (
 type Posts interface {
 	Base[Post]
 	GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error)
+	GetByIDs(ids []*uuid.UUID, requestorID *uuid.UUID) ([]*Post, error)
 	GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count int, requestorID *uuid.UUID) ([]*Post, error)
 }
 
@@ -39,45 +40,70 @@ func NewPostRepo(db *gorm.DB) Posts {
 	return &PostRepo{NewBaseRepo[Post](db)}
 }
 
-// GetByID returns the post with the given ID, preloading the Author and Media data
+// GetByID returns the post with the given ID, preloading the Author data
 func (pr *PostRepo) GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error) {
 	logger.DebugLogRequestReceived("database", "PostRepo", "GetByID")
 
 	var post Post
-	result := pr.db.
+	err := pr.db.
 		Preload("Author").
-		Select("posts.*, CASE WHEN likes.id IS NOT NULL THEN true ELSE false END AS is_liked").
-		Joins("LEFT JOIN likes ON likes.post_id = posts.id AND likes.user_id = ?", requestorID).
-		Joins("LEFT JOIN bookmarks ON bookmarks.post_id = posts.id AND bookmarks.user_id = ?", requestorID).
 		Where("id = ?", id).
-		First(&post)
+		First(&post).Error
 
-	if result.Error != nil {
-		return nil, result.Error
+	if err != nil {
+		return nil, err
 	}
 
-	// I wasnt able to get the more complex queries working to get this running in one request, so we need to loop through the posts and get isliked and isbookmarked for each post
-	// I dont think DB performance is a huge issue at this point, but this is something to keep in mind for the future
-	var like Like
-	result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&like)
-	if result.Error == nil {
-		post.IsLiked = true
+	likes, err := pr.getLikes([]uuid.UUID{*id}, *requestorID)
+	if err != nil {
+		return nil, err
 	}
 
-	var bookmark Bookmark
-	result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&bookmark)
-	if result.Error == nil {
-		post.IsBookmarked = true
+	bookmarks, err := pr.getBookmarks([]uuid.UUID{*id}, *requestorID)
+	if err != nil {
+		return nil, err
 	}
 
-	var media []*File
-	result = pr.db.Where("id IN (?)", post.MediaIDs).Find(&media)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	post.Media = media
+	post.IsLiked = likes[*id]
+	post.IsBookmarked = bookmarks[*id]
 
 	return &post, nil
+}
+
+func (pr *PostRepo) GetByIDs(ids []*uuid.UUID, requestorID *uuid.UUID) ([]*Post, error) {
+	logger.DebugLogRequestReceived("database", "PostRepo", "GetByIDs")
+
+	var posts []*Post
+	err := pr.db.
+		Preload("Author").
+		Where("id IN (?)", ids).
+		Find(&posts).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	postIDs := make([]uuid.UUID, len(posts))
+	for i, post := range posts {
+		postIDs[i] = post.ID
+	}
+
+	likes, err := pr.getLikes(postIDs, *requestorID)
+	if err != nil {
+		return nil, err
+	}
+
+	bookmarks, err := pr.getBookmarks(postIDs, *requestorID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, post := range posts {
+		post.IsLiked = likes[post.ID]
+		post.IsBookmarked = bookmarks[post.ID]
+	}
+
+	return posts, nil
 }
 
 func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count int, requestorID *uuid.UUID) ([]*Post, error) {
@@ -118,4 +144,40 @@ func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count i
 	}
 
 	return posts, nil
+}
+
+// getLikes returns a map of postID to isLiked status.
+func (pr *PostRepo) getLikes(postIDs []uuid.UUID, userID uuid.UUID) (map[uuid.UUID]bool, error) {
+	var likes []Like
+	err := pr.db.
+		Where("post_id IN (?) AND user_id = ?", postIDs, userID).
+		Find(&likes).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	isLiked := make(map[uuid.UUID]bool)
+	for _, like := range likes {
+		isLiked[*like.PostID] = true
+	}
+	return isLiked, nil
+}
+
+// getBookmarks returns a map of postID to isBookmarked status.
+func (pr *PostRepo) getBookmarks(postIDs []uuid.UUID, userID uuid.UUID) (map[uuid.UUID]bool, error) {
+	var bookmarks []Bookmark
+	err := pr.db.
+		Where("post_id IN (?) AND user_id = ?", postIDs, userID).
+		Find(&bookmarks).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	isBookmarked := make(map[uuid.UUID]bool)
+	for _, bookmark := range bookmarks {
+		isBookmarked[bookmark.PostID] = true
+	}
+	return isBookmarked, nil
 }
