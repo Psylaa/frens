@@ -261,7 +261,17 @@ func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
 // @Failure 404
 // @Failure 500
 // @Security ApiKeyAuth
-// @Router /posts/{postID}/likes/{likeID} [delete]
+// @Router /posts/{postID}/likes/ [delete]
 func (pr *PostsRepo) deleteLike(c *fiber.Ctx) error {
-	return nil
+	logger.DebugLogRequestReceived("router", "posts", "deleteLike")
+
+	// Get the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("postID"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Send the request to the service layer.
+	return pr.Srv.Likes.Delete(c, &postID)
 }

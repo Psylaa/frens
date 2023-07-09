@@ -8,6 +8,8 @@ import (
 
 type Likes interface {
 	Create(like *Like) error
+	DeleteByID(id *uuid.UUID) error
+	DeleteByUserIDAndPostID(userID *uuid.UUID, postID *uuid.UUID) error
 	GetByID(id *uuid.UUID) (*Like, error)
 	Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error)
 }
@@ -32,6 +34,20 @@ func (lr *LikeRepo) Create(like *Like) error {
 	logger.DebugLogRequestReceived("database", "LikeRepo", "Create")
 
 	result := lr.db.Create(like)
+	return result.Error
+}
+
+func (lr *LikeRepo) DeleteByID(id *uuid.UUID) error {
+	logger.DebugLogRequestReceived("database", "LikeRepo", "DeleteByID")
+
+	result := lr.db.Delete(&Like{}, id)
+	return result.Error
+}
+
+func (lr *LikeRepo) DeleteByUserIDAndPostID(userID *uuid.UUID, postID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("database", "LikeRepo", "DeleteByUserIDAndPostID")
+
+	result := lr.db.Where("user_id = ? AND post_id = ?", userID, postID).Delete(&Like{})
 	return result.Error
 }
 
