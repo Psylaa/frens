@@ -33,7 +33,6 @@ definitions:
       email:
         type: string
       password:
-        minLength: 8
         type: string
       username:
         maxLength: 24
@@ -134,7 +133,6 @@ paths:
         name: email
         type: string
       - in: formData
-        minLength: 8
         name: password
         required: true
         type: string
@@ -462,12 +460,22 @@ paths:
         required: true
         schema:
           type: string
+      - description: The text of the post
+        in: formData
+        name: text
+        required: true
+        type: string
       - description: The privacy setting of the post
         in: body
         name: privacy
         required: true
         schema:
           type: string
+      - description: The privacy setting of the post
+        in: formData
+        name: privacy
+        required: true
+        type: string
       - description: The UUIDs of the media files attached to the post
         in: body
         name: mediaIDs
@@ -475,6 +483,13 @@ paths:
           items:
             type: string
           type: array
+      - collectionFormat: csv
+        description: The UUIDs of the media files attached to the post
+        in: formData
+        items:
+          type: string
+        name: mediaIDs
+        type: array
       produces:
       - application/json
       responses:
@@ -953,6 +968,41 @@ paths:
       summary: Get likes by user ID
       tags:
       - Likes
+  /users/{userID}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Get posts by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The number of posts to return.
+        in: query
+        name: count
+        type: integer
+      - description: Cursor to start the page from.
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get Posts by User ID
+      tags:
+      - Users
   /users/self:
     delete:
       consumes:

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -25,8 +27,17 @@ func (pr *PostRepo) Get(c *fiber.Ctx, postID *uuid.UUID) error {
 	return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse([]*database.Post{post}))
 }
 
-func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID) error {
-	return nil
+func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, cursor time.Time, count int) error {
+
+	// Retrieve the posts from the database
+	posts, err := db.Posts.GetByUserIDs([]*uuid.UUID{userID}, cursor, count)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error getting posts")
+		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreatePostsResponse(posts))
 }
 
 func (pr *PostRepo) GetReplies() {

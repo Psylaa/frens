@@ -23,13 +23,14 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
+	rtr.Get("/", pr.search)
 	rtr.Post("/", pr.create)
 	rtr.Put("/:postID", pr.update)
 	rtr.Delete("/:postID", pr.delete)
 	rtr.Post("/:postID/bookmarks", pr.createBookmark)
 	rtr.Delete("/:postID/bookmarks", pr.deleteBookmark)
 	rtr.Post("/:postID/likes", pr.createLike)
-	rtr.Delete("/:postID/likes/:likeID", pr.deleteLike)
+	rtr.Delete("/:postID/likes/", pr.deleteLike)
 }
 
 // @Summary Search Posts

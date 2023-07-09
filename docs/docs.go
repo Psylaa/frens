@@ -122,7 +122,6 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "minLength": 8,
                         "type": "string",
                         "name": "password",
                         "in": "formData",
@@ -632,6 +631,13 @@ const docTemplate = `{
                         }
                     },
                     {
+                        "type": "string",
+                        "description": "The text of the post",
+                        "name": "text",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
                         "description": "The privacy setting of the post",
                         "name": "privacy",
                         "in": "body",
@@ -639,6 +645,13 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "The privacy setting of the post",
+                        "name": "privacy",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "description": "The UUIDs of the media files attached to the post",
@@ -650,6 +663,16 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "The UUIDs of the media files attached to the post",
+                        "name": "mediaIDs",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1609,6 +1632,61 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{userID}/posts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get posts by user ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get Posts by User ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "The number of posts to return.",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor to start the page from.",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1667,8 +1745,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 8
+                    "type": "string"
                 },
                 "username": {
                     "type": "string",
