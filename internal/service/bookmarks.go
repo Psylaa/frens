@@ -14,7 +14,7 @@ func (br *BookmarkRepo) GetByID(c *fiber.Ctx, id *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "bookmark", "GetByID")
 
 	// Make sure the user owns the bookmark
-	isOwner := db.Bookmarks.IsOwner(id, c.Locals("requestorID").(*uuid.UUID))
+	isOwner := db.Bookmarks.Exists(id, c.Locals("requestorID").(*uuid.UUID))
 	if !isOwner {
 		return c.Status(fiber.StatusForbidden).JSON(response.CreateErrorResponse(response.ErrForbidden))
 	}
@@ -95,7 +95,7 @@ func (br *BookmarkRepo) DeleteByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
 	}
 
 	// Make sure the user owns the bookmark
-	isOwner := db.Bookmarks.IsOwner(&bookmark.ID, requestorID)
+	isOwner := db.Bookmarks.Exists(&bookmark.ID, requestorID)
 	if !isOwner {
 		return c.Status(fiber.StatusForbidden).JSON(response.CreateErrorResponse(response.ErrForbidden))
 	}

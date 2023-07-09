@@ -2,6 +2,7 @@ package response
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
@@ -20,7 +21,9 @@ type BookmarkData struct {
 }
 
 type BookmarkAttr struct {
-	PostID uuid.UUID `json:"post_id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UserID    uuid.UUID `json:"userId"`
+	PostID    uuid.UUID `json:"postId"`
 }
 
 type BookmarkLinks struct {
@@ -37,7 +40,9 @@ func CreateBookmarksResponse(bookmarks []*database.Bookmark) *BookmarkResponse {
 			Type: shared.DataTypeBookmark,
 			ID:   bookmark.ID,
 			Attributes: BookmarkAttr{
-				PostID: bookmark.PostID,
+				CreatedAt: bookmark.CreatedAt,
+				UserID:    bookmark.UserID,
+				PostID:    bookmark.PostID,
 			},
 			Links: BookmarkLinks{
 				Self: selfLink,

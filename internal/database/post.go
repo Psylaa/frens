@@ -56,7 +56,20 @@ func (pr *PostRepo) GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error
 		return nil, result.Error
 	}
 
-	// Manual preload for Media
+	// I wasnt able to get the more complex queries working to get this running in one request, so we need to loop through the posts and get isliked and isbookmarked for each post
+	// I dont think DB performance is a huge issue at this point, but this is something to keep in mind for the future
+	var like Like
+	result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&like)
+	if result.Error == nil {
+		post.IsLiked = true
+	}
+
+	var bookmark Bookmark
+	result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&bookmark)
+	if result.Error == nil {
+		post.IsBookmarked = true
+	}
+
 	var media []*File
 	result = pr.db.Where("id IN (?)", post.MediaIDs).Find(&media)
 	if result.Error != nil {
@@ -73,20 +86,29 @@ func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count i
 	var posts []*Post
 	result := pr.db.
 		Preload("Author").
-		Select("posts.*, CASE WHEN likes.id IS NOT NULL THEN true ELSE false END AS is_liked, CASE WHEN bookmarks.id IS NOT NULL THEN true ELSE false END AS is_bookmarked").
-		Joins("LEFT JOIN likes ON likes.post_id = posts.id AND likes.user_id = ?", requestorID).
-		Joins("LEFT JOIN bookmarks ON bookmarks.post_id = posts.id AND bookmarks.user_id = ?", requestorID).
-		Where("posts.author_id IN (?) AND posts.created_at < ?", userIDs, cursor).
-		Order("posts.created_at DESC").
+		Where("author_id IN (?) AND created_at < ?", userIDs, cursor).
+		Order("created_at DESC").
 		Limit(count).
 		Find(&posts)
-
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	// Manual preload for Media
+	// I wasnt able to get the more complex queries working to get this running in one request, so we need to loop through the posts and get isliked and isbookmarked for each post
+	// I dont think DB performance is a huge issue at this point, but this is something to keep in mind for the future
 	for _, post := range posts {
+		var like Like
+		result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&like)
+		if result.Error == nil {
+			post.IsLiked = true
+		}
+
+		var bookmark Bookmark
+		result = pr.db.Where("user_id = ? AND post_id = ?", post.AuthorID, post.ID).First(&bookmark)
+		if result.Error == nil {
+			post.IsBookmarked = true
+		}
+
 		var media []*File
 		result = pr.db.Where("id IN (?)", post.MediaIDs).Find(&media)
 		if result.Error != nil {

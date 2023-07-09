@@ -9,6 +9,7 @@ import (
 type Likes interface {
 	Create(like *Like) error
 	GetByID(id *uuid.UUID) (*Like, error)
+	Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error)
 }
 
 type Like struct {
@@ -44,4 +45,19 @@ func (lr *LikeRepo) GetByID(id *uuid.UUID) (*Like, error) {
 	}
 
 	return &like, nil
+}
+
+func (lr *LikeRepo) Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error) {
+	logger.DebugLogRequestReceived("database", "LikeRepo", "Exists")
+
+	var like Like
+	result := lr.db.Where("user_id = ? AND post_id = ?", userID, postID).First(&like)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, result.Error
+	}
+
+	return true, nil
 }

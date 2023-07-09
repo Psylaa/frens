@@ -9,9 +9,9 @@ import (
 type Bookmarks interface {
 	Base[Bookmark]
 	GetByID(id *uuid.UUID) (*Bookmark, error)
-	IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool
 	GetByPostID(postID *uuid.UUID) (*Bookmark, error)
 	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error)
+	Exists(userID *uuid.UUID, postID *uuid.UUID) bool
 }
 
 type Bookmark struct {
@@ -43,7 +43,7 @@ func (br *BookmarkRepo) GetByID(id *uuid.UUID) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (br *BookmarkRepo) IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool {
+func (br *BookmarkRepo) Exists(bookmarkID *uuid.UUID, userID *uuid.UUID) bool {
 	logger.DebugLogRequestReceived("database", "BookmarkRepo", "IsOwner")
 
 	var bookmark Bookmark
