@@ -7,19 +7,17 @@ import (
 )
 
 type Likes interface {
-	Create(like *Like) error
-	DeleteByID(id *uuid.UUID) error
-	DeleteByUserIDAndPostID(userID *uuid.UUID, postID *uuid.UUID) error
-	GetByID(id *uuid.UUID) (*Like, error)
+	Base[Like]
+	GetByPostIDAndUserID(postID *uuid.UUID, userID *uuid.UUID) (*Like, error)
 	Exists(userID *uuid.UUID, postID *uuid.UUID) (bool, error)
 }
 
 type Like struct {
 	BaseModel
-	UserID *uuid.UUID
-	User   User `gorm:"foreignKey:UserID"`
-	PostID *uuid.UUID
-	Post   Post `gorm:"foreignKey:PostID"`
+	UserID *uuid.UUID `gorm:"type:uuid;not null"`
+	User   User       `gorm:"foreignKey:UserID"`
+	PostID *uuid.UUID `gorm:"type:uuid;not null"`
+	Post   Post       `gorm:"foreignKey:PostID"`
 }
 
 type LikeRepo struct {
@@ -30,32 +28,11 @@ func NewLikeRepo(db *gorm.DB) Likes {
 	return &LikeRepo{NewBaseRepo[Like](db)}
 }
 
-func (lr *LikeRepo) Create(like *Like) error {
-	logger.DebugLogRequestReceived("database", "LikeRepo", "Create")
-
-	result := lr.db.Create(like)
-	return result.Error
-}
-
-func (lr *LikeRepo) DeleteByID(id *uuid.UUID) error {
-	logger.DebugLogRequestReceived("database", "LikeRepo", "DeleteByID")
-
-	result := lr.db.Delete(&Like{}, id)
-	return result.Error
-}
-
-func (lr *LikeRepo) DeleteByUserIDAndPostID(userID *uuid.UUID, postID *uuid.UUID) error {
-	logger.DebugLogRequestReceived("database", "LikeRepo", "DeleteByUserIDAndPostID")
-
-	result := lr.db.Where("user_id = ? AND post_id = ?", userID, postID).Delete(&Like{})
-	return result.Error
-}
-
-func (lr *LikeRepo) GetByID(id *uuid.UUID) (*Like, error) {
-	logger.DebugLogRequestReceived("database", "LikeRepo", "GetByID")
+func (lr *LikeRepo) GetByPostIDAndUserID(postID *uuid.UUID, userID *uuid.UUID) (*Like, error) {
+	logger.DebugLogRequestReceived("database", "LikeRepo", "GetByUserIDAndPostID")
 
 	var like Like
-	result := lr.db.First(&like, id)
+	result := lr.db.Where("user_id = ? AND post_id = ?", userID, postID).First(&like)
 	if result.Error != nil {
 		return nil, result.Error
 	}

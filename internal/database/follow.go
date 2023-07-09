@@ -8,7 +8,6 @@ import (
 
 type Follows interface {
 	Base[Follow]
-	GetByID(id *uuid.UUID) (*Follow, error)
 	GetFollowing(userID *uuid.UUID) ([]*User, error)
 }
 

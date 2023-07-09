@@ -25,7 +25,7 @@ type Base[T Entity] interface {
 	Update(entity *T) error
 
 	// DeleteByID deletes an entity by its ID
-	DeleteByID(id *uuid.UUID) error
+	Delete(entity *T) error
 }
 
 type BaseRepo[T Entity] struct {
@@ -52,9 +52,8 @@ func (repo *BaseRepo[T]) Update(entity *T) error {
 }
 
 // Deletes an entity with the given ID
-func (repo *BaseRepo[T]) DeleteByID(id *uuid.UUID) error {
-	logger.DebugLogRequestReceived("database", "BaseRepo", "DeleteByID")
-	var entity T
-	result := repo.db.Where("id = ?", id).Delete(&entity)
+func (repo *BaseRepo[T]) Delete(entity *T) error {
+	logger.DebugLogRequestReceived("database", "BaseRepo", "Delete")
+	result := repo.db.Delete(entity)
 	return result.Error
 }

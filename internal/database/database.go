@@ -41,8 +41,8 @@ func New(cfg *config.Config) (*Database, error) {
 	logger.Log.Info().Msg("Auto migration completed")
 
 	// Manually create the composite unique index
-	//db.Model(&Like{}).AddUniqueIndex("idx_user_post", "user_id", "post_id")
-	logger.Log.Info().Msg("Created unique index for Like")
+	db.Model(&Like{}).AddUniqueIndex("idx_like_user_post", "user_id", "post_id")
+	db.Model(&Bookmark{}).AddUniqueIndex("idx_bm_user_post", "user_id", "post_id")
 
 	return &Database{
 		Blocks:    NewBlockRepo(db),

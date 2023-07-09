@@ -101,7 +101,7 @@ func (pr *PostRepo) Delete(c *fiber.Ctx, postID *uuid.UUID) error {
 	}
 
 	// Send the request to the database layer
-	err = db.Posts.DeleteByID(postID)
+	err = db.Posts.Delete(post)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error deleting post")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
