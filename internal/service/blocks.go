@@ -16,7 +16,7 @@ func (br *BlockRepo) Get(c *fiber.Ctx, count int, offset int) error {
 	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
 	// Get the blocks from the database
-	blocks, err := db.Blocks.Get(requestorID, &count, &offset)
+	blocks, err := db.Blocks.GetByUserID(requestorID, &count, &offset)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error getting blocks")
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))

@@ -22,11 +22,13 @@ type PostData struct {
 }
 
 type PostAttr struct {
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Text      string    `json:"text"`
-	Privacy   string    `json:"privacy"`
-	MediaIDs  []string  `json:"media_ids"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+	Text         string    `json:"text"`
+	Privacy      string    `json:"privacy"`
+	MediaIDs     []string  `json:"media_ids"`
+	IsLiked      bool      `json:"isLiked"`
+	IsBookmarked bool      `json:"isBookmarked"`
 }
 
 type PostLinks struct {
@@ -53,11 +55,13 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 			Type: shared.DataTypePost,
 			ID:   post.ID,
 			Attributes: PostAttr{
-				CreatedAt: post.CreatedAt,
-				UpdatedAt: post.UpdatedAt,
-				Privacy:   string(post.Privacy),
-				Text:      post.Text,
-				MediaIDs:  mediaIDs,
+				CreatedAt:    post.CreatedAt,
+				UpdatedAt:    post.UpdatedAt,
+				Privacy:      string(post.Privacy),
+				Text:         post.Text,
+				MediaIDs:     mediaIDs,
+				IsLiked:      post.IsLiked,
+				IsBookmarked: post.IsBookmarked,
 			},
 			Links: PostLinks{
 				Self: selfLink,

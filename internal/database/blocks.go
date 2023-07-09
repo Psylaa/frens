@@ -7,7 +7,8 @@ import (
 
 type Blocks interface {
 	Base[Block]
-	Get(userID *uuid.UUID, count *int, offset *int) ([]Block, error)
+	GetByID(id *uuid.UUID) (*Block, error)
+	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]Block, error)
 }
 
 type Block struct {
@@ -24,8 +25,18 @@ func NewBlockRepo(db *gorm.DB) Blocks {
 	return &BlockRepo{NewBaseRepo[Block](db)}
 }
 
+func (br *BlockRepo) GetByID(id *uuid.UUID) (*Block, error) {
+	var block Block
+	result := br.db.First(&block, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &block, nil
+}
+
 // Returns a paginated list of entities. Count defines the number of entities, and offset the starting position.
-func (br *BlockRepo) Get(userID *uuid.UUID, count *int, offset *int) ([]Block, error) {
+func (br *BlockRepo) GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]Block, error) {
 	var blocks []Block
 	result := br.db.Where("source_user_id = ?", userID).Limit(count).Offset(offset).Find(&blocks)
 	if result.Error != nil {

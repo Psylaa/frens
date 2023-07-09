@@ -8,6 +8,7 @@ import (
 
 type Bookmarks interface {
 	Base[Bookmark]
+	GetByID(id *uuid.UUID) (*Bookmark, error)
 	IsOwner(bookmarkID *uuid.UUID, userID *uuid.UUID) bool
 	GetByPostID(postID *uuid.UUID) (*Bookmark, error)
 	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error)

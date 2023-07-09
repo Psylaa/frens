@@ -12,6 +12,7 @@ import (
 
 type Users interface {
 	Base[User]
+	GetByID(id *uuid.UUID) (*User, error)
 	GetByEmail(email string) (*User, error)
 	GetByUsername(username string) (*User, error)
 	UsernameExists(username string) bool
@@ -53,6 +54,13 @@ type UserRepo struct {
 
 func NewUserRepo(db *gorm.DB) Users {
 	return &UserRepo{NewBaseRepo[User](db)}
+}
+
+func (ur *UserRepo) GetByID(id *uuid.UUID) (*User, error) {
+	logger.DebugLogRequestReceived("database", "users", "GetByID")
+	var user User
+	result := ur.db.First(&user, id)
+	return &user, result.Error
 }
 
 func (ur *UserRepo) GetByEmail(email string) (*User, error) {

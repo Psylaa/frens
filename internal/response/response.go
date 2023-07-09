@@ -142,35 +142,3 @@ func CreateFilesResponse(files []*database.File) *Response {
 	*/
 	return nil
 }
-
-func CreateLikesResponse(user *database.User, post *database.Post, likes []*database.Like) *Response {
-	/*
-		var data []Data
-		for _, like := range likes {
-			selfLink := fmt.Sprintf("%s/likes/%s", baseURL, like.ID)
-			ownerLink := fmt.Sprintf("%s/users/%s", baseURL, like.UserID)
-
-			data = append(data, Data{
-				Type: LikeType,
-				ID:   like.ID,
-				Attributes: Attributes{
-					CreatedAt: like.CreatedAt,
-					UpdatedAt: &like.UpdatedAt,
-				},
-				Relationships: &Relationships{
-					Owner: CreateUsersResponse([]*database.User{user}),
-					Post:  CreatePostsResponse([]*database.Post{post}),
-				},
-				Links: Links{
-					Self:  selfLink,
-					Owner: ownerLink,
-				},
-			})
-		}
-
-		return &Response{
-			Data: data,
-		}
-	*/
-	return nil
-}

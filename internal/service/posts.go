@@ -16,8 +16,11 @@ type PostRepo struct{}
 func (pr *PostRepo) Get(c *fiber.Ctx, postID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "post", "Get")
 
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
 	// Retrieve the posts from the database
-	post, err := db.Posts.GetByID(postID)
+	post, err := db.Posts.GetByID(postID, requestorID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error getting post")
 		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
@@ -29,8 +32,11 @@ func (pr *PostRepo) Get(c *fiber.Ctx, postID *uuid.UUID) error {
 
 func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, cursor time.Time, count int) error {
 
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
 	// Retrieve the posts from the database
-	posts, err := db.Posts.GetByUserIDs([]*uuid.UUID{userID}, cursor, count)
+	posts, err := db.Posts.GetByUserIDs([]*uuid.UUID{userID}, cursor, count, requestorID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error getting posts")
 		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))
@@ -74,11 +80,14 @@ func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, me
 
 func (pr *PostRepo) Update() {}
 
-func (pr *PostRepo) Delete(c *fiber.Ctx, requestorID *uuid.UUID, postID *uuid.UUID) error {
+func (pr *PostRepo) Delete(c *fiber.Ctx, postID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "post", "Delete")
 
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
 	// Get the post
-	post, err := db.Posts.GetByID(postID)
+	post, err := db.Posts.GetByID(postID, requestorID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("error getting post")
 		return c.Status(fiber.StatusNotFound).JSON(response.CreateErrorResponse(response.ErrNotFound))

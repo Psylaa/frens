@@ -24,9 +24,6 @@ type Base[T Entity] interface {
 	// Update modifies an existing entity in the database
 	Update(entity *T) error
 
-	// GetByID fetches an entity by its ID
-	GetByID(id *uuid.UUID) (*T, error)
-
 	// DeleteByID deletes an entity by its ID
 	DeleteByID(id *uuid.UUID) error
 }
@@ -52,14 +49,6 @@ func (repo *BaseRepo[T]) Update(entity *T) error {
 	logger.DebugLogRequestReceived("database", "BaseRepo", "Update")
 	result := repo.db.Save(entity)
 	return result.Error
-}
-
-// Returns an entity with the given ID
-func (repo *BaseRepo[T]) GetByID(id *uuid.UUID) (*T, error) {
-	logger.DebugLogRequestReceived("database", "BaseRepo", "GetByID")
-	var entity T
-	result := repo.db.Where("id = ?", id).First(&entity)
-	return &entity, result.Error
 }
 
 // Deletes an entity with the given ID

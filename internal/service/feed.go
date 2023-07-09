@@ -41,7 +41,7 @@ func (f *FeedRepo) GetChrono(c *fiber.Ctx, userID *uuid.UUID, cursor time.Time) 
 	followingIDs = append(followingIDs, requestorID)
 
 	// Get the posts from the users that the authenticated user is following
-	posts, err := db.Posts.GetByUserIDs(followingIDs, cursor, 25) //Default to 25. Get from config at some point
+	posts, err := db.Posts.GetByUserIDs(followingIDs, cursor, 25, requestorID)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting posts")
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())

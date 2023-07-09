@@ -174,11 +174,8 @@ func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 	}
 	postIDPtr := &postID
 
-	// Get the user ID from the JWT.
-	requestorID := c.Locals("requestorID").(*uuid.UUID)
-
 	// Send the request to the service layer.
-	return pr.Srv.Posts.Delete(c, requestorID, postIDPtr)
+	return pr.Srv.Posts.Delete(c, postIDPtr)
 }
 
 // @Summary Bookmark a Post
@@ -229,7 +226,17 @@ func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /posts/{postID}/likes [post]
 func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
-	return nil
+	logger.DebugLogRequestReceived("router", "posts", "createLike")
+
+	// Get the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("postID"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Send the request to the service layer.
+	return pr.Srv.Likes.Create(c, &postID)
 }
 
 // @Summary Unlike a Post

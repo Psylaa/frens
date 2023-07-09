@@ -39,6 +39,7 @@ func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
 
 func (lr *AuthRepo) ConfigureAuthRoutes(rtr fiber.Router) {
 	rtr.Get("/verify", lr.verify)
+	rtr.Post("/logout", lr.logout)
 }
 
 // @Summary Authenticate User
@@ -79,6 +80,21 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 	}
 
 	return lr.Srv.Auth.Login(c, body.Username, body.Password)
+}
+
+// @Summary Logout User
+// @Description Logs out the user associated with the provided authentication token. The token will no longer be valid.
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 401
+// @Security ApiKeyAuth
+// @Router /auth/logout [post]
+func (lr *AuthRepo) logout(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "Auth", "logout")
+
+	return c.SendStatus(fiber.StatusOK)
 }
 
 // @Summary Verify Authentication Token

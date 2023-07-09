@@ -7,11 +7,16 @@ import (
 )
 
 type Likes interface {
-	Base[Like]
+	Create(like *Like) error
+	GetByID(id *uuid.UUID) (*Like, error)
 }
 
 type Like struct {
 	BaseModel
+	UserID *uuid.UUID
+	User   User `gorm:"foreignKey:UserID"`
+	PostID *uuid.UUID
+	Post   Post `gorm:"foreignKey:PostID"`
 }
 
 type LikeRepo struct {
@@ -20,6 +25,13 @@ type LikeRepo struct {
 
 func NewLikeRepo(db *gorm.DB) Likes {
 	return &LikeRepo{NewBaseRepo[Like](db)}
+}
+
+func (lr *LikeRepo) Create(like *Like) error {
+	logger.DebugLogRequestReceived("database", "LikeRepo", "Create")
+
+	result := lr.db.Create(like)
+	return result.Error
 }
 
 func (lr *LikeRepo) GetByID(id *uuid.UUID) (*Like, error) {

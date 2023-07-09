@@ -1,6 +1,9 @@
 package service
 
 import (
+	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -62,55 +65,28 @@ func (lr *LikeRepo) GetByPostIDAndUserID(c *fiber.Ctx, postID *uuid.UUID, userID
 }
 
 func (lr *LikeRepo) Create(c *fiber.Ctx, postID *uuid.UUID) error {
-	/*
-		logger.DebugLogRequestReceived("service", "like", "Create")
 
-		// Get the user id
-		userID := c.Locals("requestorID").(*uuid.UUID)
+	// Get the requestorID from the token
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
-		// Check if the user has already liked the post
-		liked, err := db.Likes.ExistsByPostAndUserID(postID, userID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "like", "Create", "Error checking if like exists", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "like", "Create", "Like exists")
+	// Construct the like object
+	newLike := &database.Like{
+		BaseModel: database.BaseModel{
+			ID: uuid.New(),
+		},
+		UserID: requestorID,
+		PostID: postID,
+	}
 
-		// If the user has already liked the post, return an error
-		if liked {
-			logger.ErrorLogRequestError("service", "like", "Create", "Like already exists", err)
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrExists))
-		}
-		logger.DebugLogRequestUpdate("service", "like", "Create", "Like does not exist")
+	// Insert the like into the database
+	err := db.Likes.Create(newLike)
+	if err != nil {
+		logger.ErrorLogRequestError("service", "like", "Create", "Error creating like", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Create the like
-		like, err := db.Likes.Create(userID, postID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "like", "Create", "Error creating like", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "like", "Create", "Like created")
-
-		// Retrieve the user - probably can be replaced at some point by preloading the user directly in the create function
-		user, err := db.Users.GetByID(userID, userID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "like", "Create", "Error retrieving user", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "like", "Create", "User retrieved")
-
-		// Retrieve the post - probably can be replaced at some point by preloading the post directly in the create function
-		post, err := db.Posts.GetByID(userID, postID)
-		if err != nil {
-			logger.ErrorLogRequestError("service", "like", "Create", "Error retrieving post", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
-		logger.DebugLogRequestUpdate("service", "like", "Create", "Post retrieved")
-
-		// Return the like
-		return c.Status(fiber.StatusOK).JSON(response.CreateLikesResponse(user, post, []*database.Like{like}))
-	*/
-	return nil
+	// Return the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateLikesResponse([]*database.Like{newLike}))
 }
 
 func (lr *LikeRepo) Delete(c *fiber.Ctx, postID *uuid.UUID) error {
