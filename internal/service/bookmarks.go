@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -9,6 +11,20 @@ import (
 )
 
 type BookmarkRepo struct{}
+
+func (br *BookmarkRepo) Get(c *fiber.Ctx, count int, cursor time.Time) error {
+	logger.DebugLogRequestReceived("service", "bookmark", "Get")
+
+	// Get all bookmarks
+	bookmarks, err := db.Bookmarks.Get(count, &cursor)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error getting bookmarks")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusOK).JSON(response.CreateBookmarksResponse(bookmarks))
+}
 
 func (br *BookmarkRepo) Create(c *fiber.Ctx, postID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "bookmark", "Create")

@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -8,6 +10,7 @@ import (
 
 type Bookmarks interface {
 	Base[Bookmark]
+	Get(count int, cursor *time.Time) ([]*Bookmark, error)
 	GetByID(id *uuid.UUID) (*Bookmark, error)
 	GetByUserID(userID *uuid.UUID, count *int, offset *int) ([]*Bookmark, error)
 	GetByPostIDAndUserID(postID *uuid.UUID, userID *uuid.UUID) (*Bookmark, error)
@@ -30,7 +33,23 @@ func NewBookmarkRepo(db *gorm.DB) Bookmarks {
 	return &BookmarkRepo{NewBaseRepo[Bookmark](db)}
 }
 
-// GetByID returns the bookmark with the given ID
+func (br *BookmarkRepo) Get(count int, cursor *time.Time) ([]*Bookmark, error) {
+	logger.DebugLogRequestReceived("database", "BookmarkRepo", "Get")
+
+	var bookmarks []*Bookmark
+	var result *gorm.DB
+	if cursor == nil {
+		result = br.db.Limit(count).Find(&bookmarks)
+	} else {
+		result = br.db.Where("created_at < ?", cursor).Limit(count).Find(&bookmarks)
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookmarks, nil
+}
+
 func (br *BookmarkRepo) GetByID(id *uuid.UUID) (*Bookmark, error) {
 	logger.DebugLogRequestReceived("database", "BookmarkRepo", "GetByID")
 
