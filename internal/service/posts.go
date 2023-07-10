@@ -13,7 +13,35 @@ import (
 
 type PostRepo struct{}
 
-func (pr *PostRepo) Get(c *fiber.Ctx, postID *uuid.UUID) error {
+func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, mediaIDs []*uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "post", "Create")
+
+	// Get the userID from the token.
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
+
+	// Construct the post object
+	post := &database.Post{
+		BaseModel: database.BaseModel{
+			ID: uuid.New(),
+		},
+		AuthorID: *requestorID,
+		Text:     text,
+		Privacy:  privacy,
+		MediaIDs: mediaIDs,
+	}
+
+	// Create the post and update the files
+	err := db.Posts.CreateWithMedia(post, mediaIDs, db.Files)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error creating post")
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
+
+	// Send the response
+	return c.Status(fiber.StatusCreated).JSON(response.CreatePostsResponse([]*database.Post{post}))
+}
+
+func (pr *PostRepo) GetByID(c *fiber.Ctx, postID *uuid.UUID) error {
 	logger.DebugLogRequestReceived("service", "post", "Get")
 
 	// Get the requestorID from the token
@@ -48,34 +76,6 @@ func (ur *PostRepo) GetByUserID(c *fiber.Ctx, userID *uuid.UUID, cursor time.Tim
 
 func (pr *PostRepo) GetReplies() {
 
-}
-
-func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, mediaIDs []*uuid.UUID) error {
-	logger.DebugLogRequestReceived("service", "post", "Create")
-
-	// Get the userID from the token.
-	requestorID := c.Locals("requestorID").(*uuid.UUID)
-
-	// Construct the post object
-	post := &database.Post{
-		BaseModel: database.BaseModel{
-			ID: uuid.New(),
-		},
-		AuthorID: *requestorID,
-		Text:     text,
-		Privacy:  privacy,
-		MediaIDs: mediaIDs,
-	}
-
-	// Insert the post into the database
-	err := db.Posts.Create(post)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error creating post")
-		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-	}
-
-	// Send the response
-	return c.Status(fiber.StatusCreated).JSON(response.CreatePostsResponse([]*database.Post{post}))
 }
 
 func (pr *PostRepo) Update() {}

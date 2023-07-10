@@ -5,8 +5,9 @@ import "golang.org/x/crypto/bcrypt"
 type Privacy string
 
 const (
-	PrivacyPublic  Privacy = "public"
-	PrivacyPrivate Privacy = "private"
+	PrivacyPublic    Privacy = "public"
+	PrivacyProtected Privacy = "protected"
+	PrivacyPrivate   Privacy = "private"
 )
 
 type DataType string
@@ -28,9 +29,9 @@ const (
 	RoleUser  Role = "user"
 )
 
-func (p *Privacy) IsValid() bool {
-	switch *p {
-	case PrivacyPublic, PrivacyPrivate:
+func (p Privacy) IsValid() bool {
+	switch p {
+	case PrivacyPublic, PrivacyProtected, PrivacyPrivate:
 		return true
 	}
 	return false

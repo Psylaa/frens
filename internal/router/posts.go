@@ -1,6 +1,9 @@
 package router
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/response"
@@ -25,6 +28,7 @@ func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 	rtr.Get("/", pr.search)
 	rtr.Post("/", pr.create)
+	rtr.Get("/:postID", pr.getByID)
 	rtr.Put("/:postID", pr.update)
 	rtr.Delete("/:postID", pr.delete)
 	rtr.Post("/:postID/bookmarks", pr.createBookmark)
@@ -69,13 +73,22 @@ func (pr *PostsRepo) search(c *fiber.Ctx) error {
 // @Router /posts/{postID} [get]
 func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "posts", "getByID")
-	return nil
+
+	// Parse the post ID from the URL parameter.
+	postID, err := uuid.Parse(c.Params("postID"))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error parsing post id")
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
+	}
+
+	// Send the request to the service layer.
+	return pr.Srv.Posts.GetByID(c, &postID)
 }
 
 type CreatePostRequest struct {
-	Text     string         `json:"text"`
-	Privacy  shared.Privacy `json:"privacy"`
-	MediaIDs []string       `json:"mediaIDs"`
+	Text     string   `json:"text"`
+	Privacy  string   `json:"privacy"`
+	MediaIDs []string `json:"mediaIDs"`
 }
 
 // @Summary Create a post
@@ -84,11 +97,8 @@ type CreatePostRequest struct {
 // @Accept json
 // @Produce json
 // @Param text body string true "The text of the post"
-// @Param text formData string true "The text of the post"
 // @Param privacy body string true "The privacy setting of the post"
-// @Param privacy formData string true "The privacy setting of the post"
 // @Param mediaIDs body []string false "The UUIDs of the media files attached to the post"
-// @Param mediaIDs formData []string false "The UUIDs of the media files attached to the post"
 // @Success 200
 // @Failure 400
 // @Failure 500
@@ -105,24 +115,26 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 
 	// Fill in default values
 	if req.Privacy == "" {
-		req.Privacy = shared.PrivacyPublic
+		req.Privacy = string(shared.PrivacyPublic)
 	}
 
-	//// Validate the request body
+	// Validate the request body
 	// Ensure one of text or media is provided
 	if req.Text == "" && len(req.MediaIDs) == 0 {
 		logger.Log.Error().Msg("no text or media provided in request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 	// Ensure the privacy setting is valid
-	if !req.Privacy.IsValid() {
-		logger.Log.Error().Msg("invalid privacy setting provided in request body")
+	privacy := shared.Privacy(req.Privacy)
+	if !privacy.IsValid() {
+		logger.Log.Error().Msg(fmt.Sprintf("invalid privacy setting provided in request body: %s", req.Privacy))
 		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
 	}
 
 	// Convert the media ID's to UUID's
 	mediaUUIDs := make([]*uuid.UUID, len(req.MediaIDs))
 	for i, id := range req.MediaIDs {
+		log.Println(id)
 		mediaID, err := uuid.Parse(id)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("error parsing media id")
@@ -132,7 +144,7 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 	}
 
 	// Send the request to the service layer
-	return pr.Srv.Posts.Create(c, req.Text, req.Privacy, mediaUUIDs)
+	return pr.Srv.Posts.Create(c, req.Text, privacy, mediaUUIDs)
 }
 
 // @Summary Update a post

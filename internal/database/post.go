@@ -12,6 +12,7 @@ import (
 // Posts represents the interface for a Post repository
 type Posts interface {
 	Base[Post]
+	CreateWithMedia(post *Post, mediaIDs []*uuid.UUID, fr Files) error
 	GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error)
 	GetByIDs(ids []*uuid.UUID, requestorID *uuid.UUID) ([]*Post, error)
 	GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count int, requestorID *uuid.UUID) ([]*Post, error)
@@ -24,7 +25,7 @@ type Post struct {
 	Author       User           `gorm:"foreignKey:AuthorID" json:"author"`   // The author of the post
 	Privacy      shared.Privacy `gorm:"type:varchar(20)" json:"privacy"`     // Privacy setting of the post
 	Text         string         `gorm:"type:text" json:"text"`               // Text content of the post
-	Media        []*File        `gorm:"-" json:"media"`                      // Media content of the post
+	Media        []*File        `json:"media"`                               // Media content of the post
 	MediaIDs     []*uuid.UUID   `gorm:"-" json:"-"`                          // Helper field to hold the Media ID's while processing a request
 	IsLiked      bool           `gorm:"-" json:"isLiked"`                    // Indicates if post is liked by user
 	IsBookmarked bool           `gorm:"-" json:"isBookmarked"`               // Indicates if post is bookmarked by user
@@ -40,6 +41,32 @@ func NewPostRepo(db *gorm.DB) Posts {
 	return &PostRepo{NewBaseRepo[Post](db)}
 }
 
+func (pr *PostRepo) CreateWithMedia(post *Post, mediaIDs []*uuid.UUID, fr Files) error {
+	logger.DebugLogRequestReceived("database", "PostRepo", "CreateWithMedia")
+
+	tx := pr.db.Begin()
+
+	// Create post
+	err := tx.Create(post).Error
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error creating post")
+		tx.Rollback()
+		return err
+	}
+
+	// Update the files
+	for _, mediaID := range mediaIDs {
+		err := fr.UpdatePostIDInTx(tx, *mediaID, post.ID)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("error updating post id in file")
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
+}
+
 // GetByID returns the post with the given ID, preloading the Author data
 func (pr *PostRepo) GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error) {
 	logger.DebugLogRequestReceived("database", "PostRepo", "GetByID")
@@ -47,6 +74,7 @@ func (pr *PostRepo) GetByID(id *uuid.UUID, requestorID *uuid.UUID) (*Post, error
 	var post Post
 	err := pr.db.
 		Preload("Author").
+		Preload("Media").
 		Where("id = ?", id).
 		First(&post).Error
 
@@ -76,6 +104,7 @@ func (pr *PostRepo) GetByIDs(ids []*uuid.UUID, requestorID *uuid.UUID) ([]*Post,
 	var posts []*Post
 	err := pr.db.
 		Preload("Author").
+		Preload("Media").
 		Where("id IN (?)", ids).
 		Find(&posts).Error
 

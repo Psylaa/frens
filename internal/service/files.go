@@ -55,7 +55,7 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	}
 
 	// Return file data
-	return c.JSON(response.CreateFilesResponse([]*database.File{fileData}))
+	return c.JSON(response.CreateFileResponse([]*database.File{fileData}))
 }
 
 func (fr *FilesRepo) GetByID(c *fiber.Ctx, fileID *uuid.UUID) error {

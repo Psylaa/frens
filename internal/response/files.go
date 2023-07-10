@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type FilesResponse struct {
+type FileResponse struct {
 	Data []*FileData `json:"data"`
 }
 
@@ -29,7 +29,7 @@ type FileLinks struct {
 	Self string `json:"self"`
 }
 
-func CreateFilesResponse(files []*database.File) *FilesResponse {
+func CreateFileResponse(files []*database.File) *FileResponse {
 	var filesData []*FileData
 
 	for _, file := range files {
@@ -48,7 +48,7 @@ func CreateFilesResponse(files []*database.File) *FilesResponse {
 			},
 		})
 	}
-	return &FilesResponse{
+	return &FileResponse{
 		Data: filesData,
 	}
 }

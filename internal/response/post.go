@@ -2,6 +2,7 @@ package response
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -37,6 +38,7 @@ type PostLinks struct {
 
 type PostRel struct {
 	Author UserResponse `json:"author"`
+	Media  FileResponse `json:"media"`
 }
 
 func CreatePostsResponse(posts []*database.Post) *PostResponse {
@@ -50,6 +52,11 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 		for _, media := range post.Media {
 			mediaIDs = append(mediaIDs, media.ID.String())
 		}
+
+		log.Println(len(post.Media))
+		log.Println(len(post.Media))
+		log.Println(len(post.Media))
+		log.Println(len(post.Media))
 
 		postData = append(postData, &PostData{
 			Type: shared.DataTypePost,
@@ -68,6 +75,7 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 			},
 			Relationships: PostRel{
 				Author: *CreateUsersResponse([]*database.User{&post.Author}),
+				Media:  *CreateFileResponse(post.Media),
 			},
 		})
 	}
