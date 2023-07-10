@@ -93,6 +93,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Logs out the user associated with the provided authentication token. The token will no longer be valid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout User",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Creates a new user account and returns a confirmation.",
@@ -252,8 +280,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "The number of bookmarks to offset the returned bookmarks by. For example, offset=10\u0026count=10 would return bookmarks 10-20",
-                        "name": "offset",
+                        "description": "Cursor for pagination.",
+                        "name": "cursor",
                         "in": "query"
                     }
                 ],
@@ -456,6 +484,50 @@ const docTemplate = `{
             }
         },
         "/files/{fileID}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves the specified file from the authenticated user's uploaded files.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Retrieve File by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File ID",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -938,7 +1010,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{postID}/likes/{likeID}": {
+        "/posts/{postID}/likes/": {
             "delete": {
                 "security": [
                     {
@@ -1648,7 +1720,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Posts"
                 ],
                 "summary": "Get Posts by User ID",
                 "parameters": [
@@ -1693,7 +1765,13 @@ const docTemplate = `{
         "response.BookmarkAttr": {
             "type": "object",
             "properties": {
-                "post_id": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "postId": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -1761,14 +1839,18 @@ const docTemplate = `{
                 "post",
                 "follow",
                 "token",
-                "bookmark"
+                "bookmark",
+                "like",
+                "file"
             ],
             "x-enum-varnames": [
                 "DataTypeUser",
                 "DataTypePost",
                 "DataTypeFollow",
                 "DataTypeToken",
-                "DataTypeBookmark"
+                "DataTypeBookmark",
+                "DataTypeLike",
+                "DataTypeFile"
             ]
         }
     }

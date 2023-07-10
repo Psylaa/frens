@@ -31,13 +31,12 @@ func NewAuthRepo(db *database.Database, srv *service.Service) *AuthRepo {
 	}
 }
 
-// ConfigureRoutes configures the routes associated with Auth functionality.
-func (lr *AuthRepo) ConfigureRoutes(rtr fiber.Router) {
+func (lr *AuthRepo) ConfigurePublicRoutes(rtr fiber.Router) {
 	rtr.Post("/login", lr.login)
 	rtr.Post("/register", lr.register)
 }
 
-func (lr *AuthRepo) ConfigureAuthRoutes(rtr fiber.Router) {
+func (lr *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
 	rtr.Get("/verify", lr.verify)
 	rtr.Post("/logout", lr.logout)
 }

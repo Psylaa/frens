@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
 )
@@ -88,30 +87,4 @@ func CreateCountResponse(count int) *Response {
 			Count: count,
 		},
 	}
-}
-
-func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
-	/*
-		var data []Data
-		for _, b := range bookmark {
-			selfLink := fmt.Sprintf("%s/bookmarks/%s", baseURL, b.ID)
-			ownerLink := fmt.Sprintf("%s/users/%s", baseURL, b.Owner.ID)
-
-			data = append(data, Data{
-				Type:          BookmarkType,
-				ID:            b.ID,
-				Attributes:    Attributes{},
-				Relationships: &Relationships{},
-				Links: Links{
-					Self:  selfLink,
-					Owner: ownerLink,
-				},
-			})
-		}
-
-		return &Response{
-			Data: data,
-		}
-	*/
-	return nil
 }

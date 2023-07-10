@@ -33,7 +33,7 @@ func CreateFilesResponse(files []*database.File) *FilesResponse {
 	var filesData []*FileData
 
 	for _, file := range files {
-		selfLink := baseURL + "/files/" + file.ID.String()
+		selfLink := baseURL + "/v1/files/" + file.ID.String()
 
 		filesData = append(filesData, &FileData{
 			Type: shared.DataTypeFile,

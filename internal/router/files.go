@@ -23,7 +23,12 @@ func NewFilesRepo(db *database.Database, srv *service.Service) *FilesRepo {
 	}
 }
 
-func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
+func (fr *FilesRepo) ConfigurePublicRoutes(rtr fiber.Router) {
+	rtr.Get("/:fileID", fr.getByID)
+}
+
+func (fr *FilesRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
+	rtr.Get("/", fr.search)
 	rtr.Post("/", fr.create)
 	rtr.Delete("/:fileID", fr.deleteByID)
 }
@@ -41,6 +46,32 @@ func (fr *FilesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Router /files [get]
 func (fr *FilesRepo) search(c *fiber.Ctx) error {
 	return nil
+}
+
+// @Summary Retrieve File by ID
+// @Description Retrieves the specified file from the authenticated user's uploaded files.
+// @Tags Files
+// @Accept  json
+// @Produce  json
+// @Param fileID path string true "File ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /files/{fileID} [get]
+func (fr *FilesRepo) getByID(c *fiber.Ctx) error {
+	logger.DebugLogRequestReceived("router", "files", "getFile")
+
+	// Get the file id from the request
+	filename, err := uuid.Parse(c.Params("fileID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidFileID))
+	}
+
+	// Send the request to the service package
+	return fr.Srv.Files.GetByID(c, &filename)
 }
 
 // @Summary Upload File

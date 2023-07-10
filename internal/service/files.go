@@ -14,10 +14,6 @@ import (
 
 type FilesRepo struct{}
 
-func (fr *FilesRepo) GetByID(c *fiber.Ctx) error {
-	return nil
-}
-
 func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	logger.DebugLogRequestReceived("service", "files", "Create")
 
@@ -62,43 +58,25 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 	return c.JSON(response.CreateFilesResponse([]*database.File{fileData}))
 }
 
-func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileID *uuid.UUID) error {
-	/*
-		logger.DebugLogRequestReceived("service", "files", "Retrieve")
+func (fr *FilesRepo) GetByID(c *fiber.Ctx, fileID *uuid.UUID) error {
+	logger.DebugLogRequestReceived("service", "files", "Retrieve")
 
-		// Get file data
-		logger.Log.Debug().
-			Str("package", "service").
-			Str("service", "files").
-			Str("method", "RetrieveByID").
-			Str("file_id", fileID.String()).
-			Msg("Getting file data")
-		fileData, err := db.Files.GetByID(fileID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Get file data
+	fileData, err := db.Files.GetByID(fileID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Get file path
-		filePath := filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+fileData.Extension)
+	// Get file path
+	filePath := filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+fileData.Extension)
 
-		// Check if file exists
-		logger.Log.Debug().
-			Str("package", "service").
-			Str("service", "files").
-			Str("method", "RetrieveByID").
-			Str("file_id", fileID.String()).
-			Str("file_extension", fileData.Extension).
-			Str("user_id", fileData.UserID.String()).
-			Str("directory", cfg.Storage.Local.Path).
-			Msg("Checking if file exists on disk")
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Return file
-		return c.SendFile(filePath)
-	*/
-	return nil
+	// Return file
+	return c.SendFile(filePath)
 }
 
 func (fr *FilesRepo) DeleteByID(c *fiber.Ctx, fileID *uuid.UUID) error {

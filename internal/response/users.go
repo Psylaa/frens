@@ -31,7 +31,7 @@ func CreateUsersResponse(users []*database.User) *UserResponse {
 	var userData []*UserData
 
 	for _, user := range users {
-		selfLink := fmt.Sprintf("%s/users/%s", baseURL, user.ID.String())
+		selfLink := fmt.Sprintf("%s/v1/users/%s", baseURL, user.ID.String())
 
 		userData = append(userData, &UserData{
 			Type: shared.DataTypeUser,

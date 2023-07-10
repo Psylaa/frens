@@ -34,7 +34,7 @@ func CreateBookmarksResponse(bookmarks []*database.Bookmark) *BookmarkResponse {
 	var bookmarkData []*BookmarkData
 
 	for _, bookmark := range bookmarks {
-		selfLink := fmt.Sprintf("%s/bookmarks/%s", baseURL, bookmark.ID.String())
+		selfLink := fmt.Sprintf("%s/v1/bookmarks/%s", baseURL, bookmark.ID.String())
 
 		bookmarkData = append(bookmarkData, &BookmarkData{
 			Type: shared.DataTypeBookmark,

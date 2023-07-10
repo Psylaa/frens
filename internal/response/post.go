@@ -43,7 +43,7 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 	var postData []*PostData
 
 	for _, post := range posts {
-		selfLink := fmt.Sprintf("%s/posts/%s", baseURL, post.ID.String())
+		selfLink := fmt.Sprintf("%s/v1/posts/%s", baseURL, post.ID.String())
 
 		// Extract media IDs
 		var mediaIDs []string

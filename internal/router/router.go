@@ -99,13 +99,13 @@ func (r *Router) configureMiddleware() {
 func (r *Router) configureRoutes() {
 	v1 := r.app.Group("/v1")
 
-	r.repos.Auth.ConfigureRoutes(v1.Group("/auth"))
+	r.repos.Auth.ConfigurePublicRoutes(v1.Group("/auth"))
+	r.repos.Files.ConfigurePublicRoutes(v1.Group("/files"))
 	r.addAuth()
-	r.repos.Auth.ConfigureAuthRoutes(v1.Group("/auth")) // Necessary for /verify route to be after auth middleware
-
+	r.repos.Auth.ConfigureProtectedRoutes(v1.Group("/auth"))
 	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
-	r.repos.Files.ConfigureRoutes(v1.Group("/files"))
+	r.repos.Files.ConfigureProtectedRoutes(v1.Group("/files"))
 	r.repos.Follows.ConfigureRoutes(v1.Group("/follows"))
 	r.repos.Likes.ConfigureRoutes(v1.Group("/likes"))
 	r.repos.Posts.ConfigureRoutes(v1.Group("/posts"))
