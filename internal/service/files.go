@@ -2,7 +2,12 @@ package service
 
 import (
 	"mime/multipart"
+	"os"
+	"path/filepath"
 
+	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -14,57 +19,47 @@ func (fr *FilesRepo) GetByID(c *fiber.Ctx) error {
 }
 
 func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
-	/*
-		logger.DebugLogRequestReceived("service", "files", "Create")
+	logger.DebugLogRequestReceived("service", "files", "Create")
 
-		requestorID := c.Locals("requestorID").(*uuid.UUID)
+	requestorID := c.Locals("requestorID").(*uuid.UUID)
 
-		// Get extension of file
-		ext := filepath.Ext(file.Filename)
+	// Get extension of file
+	ext := filepath.Ext(file.Filename)
 
-		// Create file object
+	// Create file object
 
-		fileObj := &database.File{
-			ID:        uuid.New(),
-			Extension: ext,
-			UserID:    *requestorID,
-		}
+	fileObj := &database.File{
+		BaseModel: database.BaseModel{
+			ID: uuid.New(),
+		},
+		Extension: ext,
+		OwnerID:   *requestorID,
+	}
 
-		// Create file record in database
-		err := db.Files.Create(fileObj)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Create file record in database
+	err := db.Files.Create(fileObj)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Retrieve file data from database with owner
-		fileData, err := db.Files.GetByID(&fileObj.ID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Retrieve file data from database with owner
+	fileData, err := db.Files.GetByID(&fileObj.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Make directory if it doesn't exist
-		logger.Log.Debug().
-			Str("package", "service").
-			Str("service", "files").
-			Str("method", "Create").
-			Str("file_id", fileData.ID.String()).
-			Str("file_extension", fileData.Extension).
-			Str("user_id", fileData.UserID.String()).
-			Str("directory", cfg.Storage.Local.Path).
-			Msg("Creating directory if it doesn't exist")
-		if err := os.MkdirAll(cfg.Storage.Local.Path, os.ModePerm); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Make directory if it doesn't exist
+	if err := os.MkdirAll(cfg.Storage.Local.Path, os.ModePerm); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Save file to directory
-		if err := c.SaveFile(file, filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
-		}
+	// Save file to directory
+	if err := c.SaveFile(file, filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
+	}
 
-		// Return file data
-		return c.JSON(response.CreateFilesResponse([]*database.File{fileData}))
-	*/
-	return nil
+	// Return file data
+	return c.JSON(response.CreateFilesResponse([]*database.File{fileData}))
 }
 
 func (fr *FilesRepo) RetrieveByID(c *fiber.Ctx, fileID *uuid.UUID) error {

@@ -8,6 +8,7 @@ import (
 
 type Files interface {
 	Base[File]
+	GetByID(id *uuid.UUID) (*File, error)
 }
 
 type File struct {
@@ -28,7 +29,7 @@ func (fr *FileRepo) GetByID(id *uuid.UUID) (*File, error) {
 	logger.DebugLogRequestReceived("database", "FileRepo", "GetByID")
 
 	var file File
-	result := fr.db.First(&file, id)
+	result := fr.db.First(&file, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}

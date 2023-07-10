@@ -18,6 +18,7 @@ const (
 	DataTypeToken    DataType = "token"
 	DataTypeBookmark DataType = "bookmark"
 	DataTypeLike     DataType = "like"
+	DataTypeFile     DataType = "file"
 )
 
 type Role string

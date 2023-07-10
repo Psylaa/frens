@@ -115,30 +115,3 @@ func CreateBookmarkResponse(bookmark []*database.Bookmark) *Response {
 	*/
 	return nil
 }
-
-func CreateFilesResponse(files []*database.File) *Response {
-	/*
-		var data []Data
-		for _, file := range files {
-			selfLink := fmt.Sprintf("%s/files/%s%s", baseURL, file.ID, file.Extension)
-
-			data = append(data, Data{
-				Type: "file",
-				ID:   file.ID,
-				Attributes: Attributes{
-					CreatedAt: file.CreatedAt,
-					UpdatedAt: &file.UpdatedAt,
-					Extenion:  &file.Extension,
-				},
-				Links: Links{
-					Self: selfLink,
-				},
-			})
-		}
-
-		return &Response{
-			Data: data,
-		}
-	*/
-	return nil
-}
