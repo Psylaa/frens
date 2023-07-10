@@ -59,7 +59,7 @@ func NewUserRepo(db *gorm.DB) Users {
 func (ur *UserRepo) GetByID(id *uuid.UUID) (*User, error) {
 	logger.DebugLogRequestReceived("database", "users", "GetByID")
 	var user User
-	result := ur.db.First(&user, id)
+	result := ur.db.First(&user, "id = ?", id)
 	return &user, result.Error
 }
 
