@@ -72,21 +72,38 @@ func (c *Config) Validate() error {
 	return validate.Struct(c)
 }
 
-// ReadConfig function reads configuration from a file or environment variables and validates it
 func ReadConfig(filename string) (*Config, error) {
 
 	// Set the file name of the configurations file
 	viper.SetConfigFile(filename)
 
-	// Set default values for the database configs
-	// They will be used if no other value is provided through file or environment variable
-	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", "5432")
-	viper.SetDefault("database.user", "sampleuser")
-	viper.SetDefault("database.password", "pass")
+	// Manually binding each environment variable
+	// AutoEnv wasn't working for some reason, so we may revisit this later
+	viper.BindEnv("server.base_url", "BASE_URL")
+	viper.BindEnv("server.port", "PORT")
+	viper.BindEnv("server.log_level", "LOG_LEVEL")
+	viper.BindEnv("server.jwt_secret", "JWT_SECRET")
+	viper.BindEnv("server.jwt_duration", "JWT_DURATION")
+	viper.BindEnv("server.allow_origins", "ALLOW_ORIGINS")
 
-	// viper.AutomaticEnv() sucks ass so we're specifying manually
-	viper.BindEnv("database.host", "DATABASE_HOST")
+	viper.BindEnv("database.host", "DB_HOST")
+	viper.BindEnv("database.port", "DB_PORT")
+	viper.BindEnv("database.name", "DB_NAME")
+	viper.BindEnv("database.user", "DB_USER")
+	viper.BindEnv("database.password", "DB_PASSWORD")
+	viper.BindEnv("database.sslmode", "SSL_MODE")
+	viper.BindEnv("database.log_mode", "LOG_MODE")
+	viper.BindEnv("database.max_idle_conns", "MAX_IDLE_CONNS")
+	viper.BindEnv("database.max_open_conns", "MAX_OPEN_CONNS")
+
+	viper.BindEnv("storage.type", "STORAGE_TYPE")
+	viper.BindEnv("storage.local.path", "LOCAL_PATH")
+	viper.BindEnv("storage.s3.bucket", "S3_BUCKET")
+	viper.BindEnv("storage.s3.region", "S3_REGION")
+	viper.BindEnv("storage.s3.access_key", "S3_ACCESS_KEY")
+	viper.BindEnv("storage.s3.secret_key", "S3_SECRET_KEY")
+
+	viper.BindEnv("users.default_bio", "DEFAULT_BIO")
 
 	// Try to read the config file and output any encountered error
 	if err := viper.ReadInConfig(); err != nil {
@@ -94,7 +111,6 @@ func ReadConfig(filename string) (*Config, error) {
 	}
 
 	// Once the config file has been read, unmarshal it to the Config struct
-	// UnmarshalExact requires all fields in the Config struct to be present in the config file
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
