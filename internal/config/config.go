@@ -1,22 +1,26 @@
 package config
 
 import (
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
 
-// FileType is a type that represents the different types of file we might deal with
 type FileType string
+type StorageType string
+type DBType string
 
 const (
-	Image FileType = "image"
-	Video FileType = "video"
-	Audio FileType = "audio"
-	Other FileType = "other"
+	Image    FileType    = "image"
+	Video    FileType    = "video"
+	Audio    FileType    = "audio"
+	Other    FileType    = "other"
+	Local    StorageType = "local"
+	S3       StorageType = "s3"
+	Postgres DBType      = "postgres"
+	SQLite   DBType      = "sqlite"
 )
 
-// Config struct stores all configuration of our application
-// It will be populated either from a config file or environment variables
 type Config struct {
 	Server   Server   `mapstructure:"server"`
 	Database Database `mapstructure:"database"`
@@ -24,7 +28,6 @@ type Config struct {
 	Users    Users    `mapstructure:"users"`
 }
 
-// Server struct represents the server details of our application
 type Server struct {
 	BaseURL      string `mapstructure:"base_url"`
 	Port         string `mapstructure:"port"`
@@ -34,20 +37,27 @@ type Server struct {
 	AllowOrigins bool   `mapstructure:"allow_origins"`
 }
 
-// Database struct represents the database details of our application
 type Database struct {
-	Host         string `mapstructure:"host"`
-	Port         string `mapstructure:"port"`
-	User         string `mapstructure:"user"`
-	DBName       string `mapstructure:"dbname"`
-	Password     string `mapstructure:"password"`
-	SSLMode      string `mapstructure:"sslmode"`
-	LogMode      bool   `mapstructure:"log_mode"`
-	MaxIdleConns int    `mapstructure:"max_idle_conns"`
-	MaxOpenConns int    `mapstructure:"max_open_conns"`
+	Type     DBType `yaml:"type" validate:"required"`
+	Postgres struct {
+		Host         string `yaml:"host" validate:"required"`
+		Port         string `yaml:"port" validate:"required"`
+		User         string `yaml:"user" validate:"required"`
+		DBName       string `yaml:"dbname" validate:"required"`
+		Password     string `yaml:"password" validate:"required"`
+		SSLMode      string `yaml:"sslmode" validate:"required"`
+		LogMode      bool   `yaml:"log_mode"`
+		MaxIdleConns int    `yaml:"max_idle_conns"`
+		MaxOpenConns int    `yaml:"max_open_conns"`
+	} `yaml:"postgres"`
+	SQLite struct {
+		Path         string `yaml:"path" validate:"required"`
+		LogMode      bool   `yaml:"log_mode"`
+		MaxIdleConns int    `yaml:"max_idle_conns"`
+		MaxOpenConns int    `yaml:"max_open_conns"`
+	} `yaml:"sqlite"`
 }
 
-// StorageDetails struct represents the storage details of our application
 type Storage struct {
 	Type  string `mapstructure:"type"`
 	Local struct {
@@ -61,12 +71,10 @@ type Storage struct {
 	} `mapstructure:"s3"`
 }
 
-// Users struct represents the users' default details of our application
 type Users struct {
 	DefaultBio string `mapstructure:"default_bio"`
 }
 
-// Validate method validates if the Config struct is properly populated
 func (c *Config) Validate() error {
 	validate := validator.New()
 	return validate.Struct(c)
@@ -86,15 +94,22 @@ func ReadConfig(filename string) (*Config, error) {
 	viper.BindEnv("server.jwt_duration", "JWT_DURATION")
 	viper.BindEnv("server.allow_origins", "ALLOW_ORIGINS")
 
-	viper.BindEnv("database.host", "DB_HOST")
-	viper.BindEnv("database.port", "DB_PORT")
-	viper.BindEnv("database.name", "DB_NAME")
-	viper.BindEnv("database.user", "DB_USER")
-	viper.BindEnv("database.password", "DB_PASSWORD")
-	viper.BindEnv("database.sslmode", "SSL_MODE")
-	viper.BindEnv("database.log_mode", "LOG_MODE")
-	viper.BindEnv("database.max_idle_conns", "MAX_IDLE_CONNS")
-	viper.BindEnv("database.max_open_conns", "MAX_OPEN_CONNS")
+	viper.BindEnv("database.type", "DB_TYPE")
+
+	viper.BindEnv("database.postgres.host", "DB_HOST")
+	viper.BindEnv("database.postgres.port", "DB_PORT")
+	viper.BindEnv("database.postgres.dbname", "DB_NAME")
+	viper.BindEnv("database.postgres.user", "DB_USER")
+	viper.BindEnv("database.postgres.password", "DB_PASSWORD")
+	viper.BindEnv("database.postgres.sslmode", "DB_SSLMODE")
+	viper.BindEnv("database.postgres.log_mode", "DB_LOG_MODE")
+	viper.BindEnv("database.postgres.max_idle_conns", "DB_MAX_IDLE_CONNS")
+	viper.BindEnv("database.postgres.max_open_conns", "DB_MAX_OPEN_CONNS")
+
+	viper.BindEnv("database.sqlite.path", "SQLITE_PATH")
+	viper.BindEnv("database.sqlite.log_mode", "SQLITE_LOG_MODE")
+	viper.BindEnv("database.sqlite.max_idle_conns", "SQLITE_MAX_IDLE_CONNS")
+	viper.BindEnv("database.sqlite.max_open_conns", "SQLITE_MAX_OPEN_CONNS")
 
 	viper.BindEnv("storage.type", "STORAGE_TYPE")
 	viper.BindEnv("storage.local.path", "LOCAL_PATH")
@@ -123,4 +138,53 @@ func ReadConfig(filename string) (*Config, error) {
 
 	// If everything went well, return the Config struct
 	return &cfg, nil
+}
+
+func (cfg *Config) Print() {
+	logger.Log.Info().
+		Str("BaseURL", cfg.Server.BaseURL).
+		Str("Port", cfg.Server.Port).
+		Str("LogLevel", cfg.Server.LogLevel).
+		Int("JWTDuration", cfg.Server.JWTDuration).
+		Bool("AllowOrigins", cfg.Server.AllowOrigins).
+		Msg("Server config loaded")
+
+	switch cfg.Database.Type {
+	case SQLite:
+		logger.Log.Info().
+			Str("Path", cfg.Database.SQLite.Path).
+			Bool("LogMode", cfg.Database.SQLite.LogMode).
+			Int("MaxIdleConns", cfg.Database.SQLite.MaxIdleConns).
+			Int("MaxOpenConns", cfg.Database.SQLite.MaxOpenConns).
+			Msg("SQLite database config loaded")
+	case Postgres:
+		logger.Log.Info().
+			Str("Host", cfg.Database.Postgres.Host).
+			Str("Port", cfg.Database.Postgres.Port).
+			Str("User", cfg.Database.Postgres.User).
+			Str("DBName", cfg.Database.Postgres.DBName).
+			Str("SSLMode", cfg.Database.Postgres.SSLMode).
+			Bool("LogMode", cfg.Database.Postgres.LogMode).
+			Int("MaxIdleConns", cfg.Database.Postgres.MaxIdleConns).
+			Int("MaxOpenConns", cfg.Database.Postgres.MaxOpenConns).
+			Msg("Postgres database config loaded")
+	}
+
+	if cfg.Storage.Type == "local" {
+		logger.Log.Info().
+			Str("Type", cfg.Storage.Type).
+			Str("Path", cfg.Storage.Local.Path).
+			Msg("Local storage config loaded")
+	} else if cfg.Storage.Type == "s3" {
+		logger.Log.Info().
+			Str("Type", cfg.Storage.Type).
+			Str("Bucket", cfg.Storage.S3.Bucket).
+			Str("Region", cfg.Storage.S3.Region).
+			Str("AccessKey", cfg.Storage.S3.AccessKey).
+			Msg("S3 storage config loaded")
+	}
+
+	logger.Log.Info().
+		Str("DefaultBio", cfg.Users.DefaultBio).
+		Msg("Users config loaded")
 }
