@@ -35,6 +35,9 @@ func main() {
 	// Initialize logger
 	logger.Init(cfg.Server.LogLevel)
 
+	// Log the config
+	logger.LogConfig(cfg)
+
 	// Initialize response package
 	response.Init(cfg)
 

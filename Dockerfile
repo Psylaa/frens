@@ -4,6 +4,13 @@ FROM golang:latest
 # Add Maintainer Info
 LABEL maintainer="Brandon Wofford <gwoff11@gmail.com>"
 
+# Arguments for database config
+ARG DATABASE_HOST
+ARG DATABASE_PORT
+ARG DATABASE_USER
+ARG DATABASE_NAME
+ARG DATABASE_PASSWORD
+
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
@@ -18,6 +25,13 @@ COPY . .
 
 # Build the Go app
 RUN go build -o main .
+
+# Set the environment variables for the database from the arguments
+ENV DATABASE_HOST=$DATABASE_HOST
+ENV DATABASE_PORT=$DATABASE_PORT
+ENV DATABASE_USER=$DATABASE_USER
+ENV DATABASE_NAME=$DATABASE_NAME
+ENV DATABASE_PASSWORD=$DATABASE_PASSWORD
 
 # Expose port 8080 to the outside world (or whichever port your app runs on)
 EXPOSE 32500

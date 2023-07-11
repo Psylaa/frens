@@ -18,24 +18,10 @@ const (
 // Config struct stores all configuration of our application
 // It will be populated either from a config file or environment variables
 type Config struct {
-	Server   Server         `mapstructure:"server"`
-	Database Database       `mapstructure:"database"`
-	Storage  StorageDetails `mapstructure:"storage"`
-	Users    Users          `mapstructure:"users"`
-}
-
-// StorageDetails struct represents the storage details of our application
-type StorageDetails struct {
-	Type  string `mapstructure:"type"`
-	Local struct {
-		Path string `mapstructure:"path"`
-	} `mapstructure:"local"`
-	S3 struct {
-		Bucket    string `mapstructure:"bucket"`
-		Region    string `mapstructure:"region"`
-		AccessKey string `mapstructure:"access_key"`
-		SecretKey string `mapstructure:"secret_key"`
-	} `mapstructure:"s3"`
+	Server   Server   `mapstructure:"server"`
+	Database Database `mapstructure:"database"`
+	Storage  Storage  `mapstructure:"storage"`
+	Users    Users    `mapstructure:"users"`
 }
 
 // Server struct represents the server details of our application
@@ -45,7 +31,7 @@ type Server struct {
 	LogLevel     string `mapstructure:"log_level"`
 	JWTSecret    string `mapstructure:"jwt_secret"`
 	JWTDuration  int    `mapstructure:"jwt_duration"`
-	AllowOrigins string `mapstructure:"allow_origins"`
+	AllowOrigins bool   `mapstructure:"allow_origins"`
 }
 
 // Database struct represents the database details of our application
@@ -61,6 +47,20 @@ type Database struct {
 	MaxOpenConns int    `mapstructure:"max_open_conns"`
 }
 
+// StorageDetails struct represents the storage details of our application
+type Storage struct {
+	Type  string `mapstructure:"type"`
+	Local struct {
+		Path string `mapstructure:"path"`
+	} `mapstructure:"local"`
+	S3 struct {
+		Bucket    string `mapstructure:"bucket"`
+		Region    string `mapstructure:"region"`
+		AccessKey string `mapstructure:"access_key"`
+		SecretKey string `mapstructure:"secret_key"`
+	} `mapstructure:"s3"`
+}
+
 // Users struct represents the users' default details of our application
 type Users struct {
 	DefaultBio string `mapstructure:"default_bio"`
@@ -74,6 +74,7 @@ func (c *Config) Validate() error {
 
 // ReadConfig function reads configuration from a file or environment variables and validates it
 func ReadConfig(filename string) (*Config, error) {
+
 	// Set the file name of the configurations file
 	viper.SetConfigFile(filename)
 
