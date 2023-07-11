@@ -1,12 +1,11 @@
 package config
 
 import (
-	"io/ioutil"
-
 	"github.com/go-playground/validator/v10"
-	"gopkg.in/yaml.v2"
+	"github.com/spf13/viper"
 )
 
+// FileType is a type that represents the different types of file we might deal with
 type FileType string
 
 const (
@@ -16,72 +15,96 @@ const (
 	Other FileType = "other"
 )
 
+// Config struct stores all configuration of our application
+// It will be populated either from a config file or environment variables
 type Config struct {
-	Server   Server         `yaml:"server" validate:"required"`
-	Database Database       `yaml:"database" validate:"required"`
-	Storage  StorageDetails `yaml:"storage" validate:"required"`
-	Users    Users          `yaml:"users" validate:"required"`
+	Server   Server         `mapstructure:"server"`
+	Database Database       `mapstructure:"database"`
+	Storage  StorageDetails `mapstructure:"storage"`
+	Users    Users          `mapstructure:"users"`
 }
 
+// StorageDetails struct represents the storage details of our application
 type StorageDetails struct {
-	Type  string `yaml:"type" validate:"required"`
+	Type  string `mapstructure:"type"`
 	Local struct {
-		Path string `yaml:"path" validate:"required"`
-	} `yaml:"local"`
+		Path string `mapstructure:"path"`
+	} `mapstructure:"local"`
 	S3 struct {
-		Bucket    string `yaml:"bucket" validate:"required"`
-		Region    string `yaml:"region" validate:"required"`
-		AccessKey string `yaml:"access_key" validate:"required"`
-		SecretKey string `yaml:"secret_key" validate:"required"`
-	} `yaml:"s3"`
+		Bucket    string `mapstructure:"bucket"`
+		Region    string `mapstructure:"region"`
+		AccessKey string `mapstructure:"access_key"`
+		SecretKey string `mapstructure:"secret_key"`
+	} `mapstructure:"s3"`
 }
 
+// Server struct represents the server details of our application
 type Server struct {
-	BaseURL      string `yaml:"base_url" validate:"required"`
-	Port         string `yaml:"port" validate:"required"`
-	LogLevel     string `yaml:"log_level" validate:"required"`
-	JWTSecret    string `yaml:"jwt_secret" validate:"required"`
-	JWTDuration  int    `yaml:"jwt_duration" validate:"required"`
-	AllowOrigins string `yaml:"allow_origins" validate:"required"`
+	BaseURL      string `mapstructure:"base_url"`
+	Port         string `mapstructure:"port"`
+	LogLevel     string `mapstructure:"log_level"`
+	JWTSecret    string `mapstructure:"jwt_secret"`
+	JWTDuration  int    `mapstructure:"jwt_duration"`
+	AllowOrigins string `mapstructure:"allow_origins"`
 }
 
+// Database struct represents the database details of our application
 type Database struct {
-	Host         string `yaml:"host" validate:"required"`
-	Port         string `yaml:"port" validate:"required"`
-	User         string `yaml:"user" validate:"required"`
-	DBName       string `yaml:"dbname" validate:"required"`
-	Password     string `yaml:"password" validate:"required"`
-	SSLMode      string `yaml:"sslmode" validate:"required"`
-	LogMode      bool   `yaml:"log_mode"`
-	MaxIdleConns int    `yaml:"max_idle_conns"`
-	MaxOpenConns int    `yaml:"max_open_conns"`
+	Host         string `mapstructure:"host"`
+	Port         string `mapstructure:"port"`
+	User         string `mapstructure:"user"`
+	DBName       string `mapstructure:"dbname"`
+	Password     string `mapstructure:"password"`
+	SSLMode      string `mapstructure:"sslmode"`
+	LogMode      bool   `mapstructure:"log_mode"`
+	MaxIdleConns int    `mapstructure:"max_idle_conns"`
+	MaxOpenConns int    `mapstructure:"max_open_conns"`
 }
 
+// Users struct represents the users' default details of our application
 type Users struct {
-	DefaultBio string `yaml:"default_bio" validate:"required"`
+	DefaultBio string `mapstructure:"default_bio"`
 }
 
+// Validate method validates if the Config struct is properly populated
 func (c *Config) Validate() error {
 	validate := validator.New()
 	return validate.Struct(c)
 }
 
+// ReadConfig function reads configuration from a file or environment variables and validates it
 func ReadConfig(filename string) (*Config, error) {
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
+	// Set the file name of the configurations file
+	viper.SetConfigFile(filename)
+
+	// Set default values for the database configs
+	// They will be used if no other value is provided through file or environment variable
+	viper.SetDefault("database.host", "localhost")
+	viper.SetDefault("database.port", "5432")
+	viper.SetDefault("database.user", "sampleuser")
+	viper.SetDefault("database.password", "pass")
+
+	// viper.AutomaticEnv() configures viper to read from environment variables
+	// An environment variable with name 'X' will be matched with a key 'x' in Viper
+	viper.AutomaticEnv()
+
+	// Try to read the config file and output any encountered error
+	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
 
+	// Once the config file has been read, unmarshal it to the Config struct
+	// UnmarshalExact requires all fields in the Config struct to be present in the config file
 	var cfg Config
-	err = yaml.Unmarshal(buf, &cfg)
-	if err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	err = cfg.Validate()
-	if err != nil {
+	// Validate if the Config struct was populated correctly
+	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
+	// If everything went well, return the Config struct
 	return &cfg, nil
 }

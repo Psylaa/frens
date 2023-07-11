@@ -1,29 +1,59 @@
-# config.yaml
+# Server details
 server:
+  # Base URL of the server
   base_url: http://localhost:3001
-  port: 3001
-  log_level: debug #Options: debug, info, warn, error, fatal, panic
+  # Port on which the server listens
+  port: 32500
+  # Level of logs to print. Options: debug, info, warn, error, fatal, panic
+  log_level: debug
+  # Secret used for JWT
   jwt_secret: supersecret
+  # Duration of JWT in hours
   jwt_duration: 168
+  # Whether to allow requests from different origins
   allow_origins: true
+
+# Database details
 database:
+  # Host of the database
   host: localhost
+  # Port of the database
   port: 5432
+  # Name of the database
   dbname: frens
+  # User for accessing the database
   user: sampleuser
+  # Password for the user
   password: pass
+  # SSL mode for the database. Options: disable, require, verify-ca, verify-full.
   sslmode: disable
+  # Enable or disable logging of database operations
   log_mode: false
+  # Maximum number of idle connections to the database
   max_idle_conns: 10
+  # Maximum number of open connections to the database
   max_open_conns: 100
+
+# Storage details
 storage:
+  # Type of storage to use. Options: local, s3
   type: local
+  # Local storage details
   local:
+    # Path where to store the files locally
     path: C:\\temp\\frens
+  # AWS S3 storage details
   s3:
+    # S3 Bucket name
     bucket: frens-images
+    # AWS region where the S3 bucket is located
     region: us-east-1
+    # Access key for AWS
     access_key: sampleaccesskey
+    # Secret key for AWS
     secret_key: samplesecretkey
+
+# Default user details
 users:
+  # Default bio of a user
   default_bio: "This user has not yet written a bio."
