@@ -30,7 +30,10 @@ type FileLinks struct {
 }
 
 func CreateFileResponse(files []*database.File) *FileResponse {
-	var filesData []*FileData
+	// Initialize filesData as an empty slice
+	// This is so its not null in the JSON response
+	// because javascript is stupid
+	filesData := make([]*FileData, 0)
 
 	for _, file := range files {
 		selfLink := baseURL + "/v1/files/" + file.ID.String()

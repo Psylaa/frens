@@ -22,6 +22,15 @@ type Database struct {
 
 // New initializes a new database connection
 func New(cfg *config.Config) (*Database, error) {
+	logger.Log.Info().
+		Str("host", cfg.Database.Host).
+		Str("port", cfg.Database.Port).
+		Str("user", cfg.Database.User).
+		Str("password", cfg.Database.Password).
+		Str("dbname", cfg.Database.DBName).
+		Str("sslmode", cfg.Database.SSLMode).
+		Msg("Connecting to database")
+
 	dbinfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName, cfg.Database.Password, cfg.Database.SSLMode)
 
