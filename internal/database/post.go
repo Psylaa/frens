@@ -141,6 +141,7 @@ func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count i
 	var posts []*Post
 	result := pr.db.
 		Preload("Author").
+		Preload("Media").
 		Where("author_id IN (?) AND created_at < ?", userIDs, cursor).
 		Order("created_at DESC").
 		Limit(count).
@@ -163,13 +164,6 @@ func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count i
 		if result.Error == nil {
 			post.IsBookmarked = true
 		}
-
-		var media []*File
-		result = pr.db.Where("id IN (?)", post.MediaIDs).Find(&media)
-		if result.Error != nil {
-			return nil, result.Error
-		}
-		post.Media = media
 	}
 
 	return posts, nil
