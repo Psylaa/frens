@@ -2,7 +2,6 @@ package response
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -47,16 +46,17 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 	for _, post := range posts {
 		selfLink := fmt.Sprintf("%s/v1/posts/%s", baseURL, post.ID.String())
 
-		// Extract media IDs
-		var mediaIDs []string
-		for _, media := range post.Media {
-			mediaIDs = append(mediaIDs, media.ID.String())
-		}
+		// Initialize mediaIDs as an empty slice
+		// This is so its not null in the JSON response
+		// because javascript is stupid
+		mediaIDs := make([]string, 0)
 
-		log.Println(len(post.Media))
-		log.Println(len(post.Media))
-		log.Println(len(post.Media))
-		log.Println(len(post.Media))
+		// Extract media IDs
+		if len(post.Media) > 0 {
+			for _, media := range post.Media {
+				mediaIDs = append(mediaIDs, media.ID.String())
+			}
+		}
 
 		postData = append(postData, &PostData{
 			Type: shared.DataTypePost,

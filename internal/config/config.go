@@ -85,9 +85,8 @@ func ReadConfig(filename string) (*Config, error) {
 	viper.SetDefault("database.user", "sampleuser")
 	viper.SetDefault("database.password", "pass")
 
-	// viper.AutomaticEnv() configures viper to read from environment variables
-	// An environment variable with name 'X' will be matched with a key 'x' in Viper
-	viper.AutomaticEnv()
+	// viper.AutomaticEnv() sucks ass so we're specifying manually
+	viper.BindEnv("database.host", "DATABASE_HOST")
 
 	// Try to read the config file and output any encountered error
 	if err := viper.ReadInConfig(); err != nil {
