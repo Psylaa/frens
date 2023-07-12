@@ -7,6 +7,30 @@ Welcome to Frens, a revolutionary decentralized social networking platform. Desi
 - To see what we're working on big picture, check out our [roadmap](https://github.com/users/bwoff11/projects/2/views/1).
 - Or, if you're feeling adventurous, you can dive right into the [specification](https://github.com/bwoff11/frens/blob/main/docs/swagger.yaml).
 
+## 🛠 Built With
+
+This project wouldn't be possible without these awesome technologies:
+
+### Languages and Tools
+- [Go](https://golang.org/): A statically typed, compiled language with syntax similar to that of C, featuring garbage collection, type safety, dynamic-typing capabilities, many advanced built-in types.
+- [cgo](https://golang.org/cmd/cgo/): A tool for creating Go bindings for C libraries.
+- [Docker](https://www.docker.com/): A set of platform as a service products that use OS-level virtualization to deliver software in packages called containers.
+- [PostgreSQL](https://www.postgresql.org/): A free and open-source relational database management system emphasizing extensibility and SQL compliance.
+- [SQLite](https://www.sqlite.org/index.html): A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
+
+### Libraries
+- [Go Fiber](https://github.com/gofiber/fiber): An Express.js inspired web framework built on top of Fasthttp, the fastest HTTP engine for Go.
+- [Gorm](https://gorm.io/): A fantastic developer-friendly database interface ORM library for Golang.
+- [Viper](https://github.com/spf13/viper): A complete configuration solution for Go applications including 12-Factor apps, it is designed to work within an application, and can handle all types of configuration needs and formats.
+- [Zap Logging](https://github.com/uber-go/zap): A blazing fast, structured, leveled logging in Go.
+
+### Specifications
+- [JSON API](https://jsonapi.org/): A specification for how a client should request that resources be fetched or modified, and how a server should respond to those requests.
+- [OpenAPI](https://swagger.io/specification/): A specification for describing, producing, consuming, and visualizing RESTful web services.
+
+### Services
+- [reCAPTCHA](https://www.google.com/recaptcha/about/): A Google service that helps protect websites from spam and abuse by distinguishing human users from bots.
+
 # The Purpose
 
 Frens was born out of a necessity to address prevalent issues in current ActivityPub implementations. Our mission is to redefine the standards and deliver an optimized user experience.
