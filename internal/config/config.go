@@ -80,7 +80,7 @@ func ReadConfig(filename string) (*Config, error) {
 	// Manually binding each environment variable
 	// AutoEnv wasn't working for some reason, so we may revisit this later
 	viper.BindEnv("server.base_url", "BASE_URL")
-	viper.BindEnv("server.port", "PORT")
+	viper.BindEnv("server.port", "PORT") // MUST be port for services such as Heroku or Cloud Run
 	viper.BindEnv("server.log_level", "LOG_LEVEL")
 	viper.BindEnv("server.jwt_secret", "JWT_SECRET")
 	viper.BindEnv("server.jwt_duration", "JWT_DURATION")

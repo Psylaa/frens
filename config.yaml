@@ -24,7 +24,7 @@ database:
   # User for accessing the database
   user: sampleuser
   # Password for the user
-  password: pass
+  password: samplepass
   # SSL mode for the database. Options: disable, require, verify-ca, verify-full.
   sslmode: disable
   # Enable or disable logging of database operations
