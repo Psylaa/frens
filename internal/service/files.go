@@ -4,6 +4,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
@@ -44,13 +45,21 @@ func (fr *FilesRepo) Create(c *fiber.Ctx, file *multipart.FileHeader) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
+	// Set path based on platform
+	var path string
+	if runtime.GOOS == "windows" {
+		path = cfg.Storage.Local.WindowsPath
+	} else {
+		path = cfg.Storage.Local.LinuxPath
+	}
+
 	// Make directory if it doesn't exist
-	if err := os.MkdirAll(cfg.Storage.Local.Path, os.ModePerm); err != nil {
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
 	// Save file to directory
-	if err := c.SaveFile(file, filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+ext)); err != nil {
+	if err := c.SaveFile(file, filepath.Join(path, fileData.ID.String()+ext)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
@@ -67,8 +76,16 @@ func (fr *FilesRepo) GetByID(c *fiber.Ctx, fileID *uuid.UUID) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.CreateErrorResponse(response.ErrInternal))
 	}
 
+	// Set path based on platform
+	var path string
+	if runtime.GOOS == "windows" {
+		path = cfg.Storage.Local.WindowsPath
+	} else {
+		path = cfg.Storage.Local.LinuxPath
+	}
+
 	// Get file path
-	filePath := filepath.Join(cfg.Storage.Local.Path, fileData.ID.String()+fileData.Extension)
+	filePath := filepath.Join(path, fileData.ID.String()+fileData.Extension)
 
 	// Check if file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {

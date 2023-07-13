@@ -61,7 +61,8 @@ type Database struct {
 type Storage struct {
 	Type  string `mapstructure:"type"`
 	Local struct {
-		Path string `mapstructure:"path"`
+		WindowsPath string `mapstructure:"windows_path"`
+		LinuxPath   string `mapstructure:"linux_path"`
 	} `mapstructure:"local"`
 	S3 struct {
 		Bucket    string `mapstructure:"bucket"`
@@ -173,7 +174,8 @@ func (cfg *Config) Print() {
 	if cfg.Storage.Type == "local" {
 		logger.Log.Info().
 			Str("Type", cfg.Storage.Type).
-			Str("Path", cfg.Storage.Local.Path).
+			Str("WindowsPath", cfg.Storage.Local.WindowsPath).
+			Str("LinuxPath", cfg.Storage.Local.LinuxPath).
 			Msg("Local storage config loaded")
 	} else if cfg.Storage.Type == "s3" {
 		logger.Log.Info().

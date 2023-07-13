@@ -25,7 +25,8 @@ database:
 storage:
   type: local
   local:
-    path: C:\\temp\\frens
+    windows_path: C:\\temp\\frens
+    linux_path: /tmp/frens
   s3:
     bucket: frens-images
     region: us-east-1
