@@ -24,7 +24,7 @@ func (pr *PostRepo) Create(c *fiber.Ctx, text string, privacy shared.Privacy, me
 		BaseModel: database.BaseModel{
 			ID: uuid.New(),
 		},
-		AuthorID: *requestorID,
+		UserID:   *requestorID,
 		Text:     text,
 		Privacy:  privacy,
 		MediaIDs: mediaIDs,

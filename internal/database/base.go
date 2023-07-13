@@ -3,7 +3,6 @@ package database
 import (
 	"time"
 
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -16,44 +15,48 @@ type BaseModel struct {
 	UpdatedAt time.Time
 }
 
-// Base represents a generic CRUD interface for a database entity
 type Base[T Entity] interface {
-	// Create inserts a new entity into the database
 	Create(entity *T) error
-
-	// Update modifies an existing entity in the database
+	Read(id uuid.UUID) (*T, error)
+	ReadMany(ids []uuid.UUID) ([]T, error)
 	Update(entity *T) error
-
-	// DeleteByID deletes an entity by its ID
-	Delete(entity *T) error
+	Delete(id uuid.UUID) error
 }
 
 type BaseRepo[T Entity] struct {
 	db *gorm.DB
 }
 
-// Returns a new BaseRepo instance
 func NewBaseRepo[T Entity](db *gorm.DB) *BaseRepo[T] {
 	return &BaseRepo[T]{db: db}
 }
 
-// Creates an entity in the database
+// Creates a new entity
 func (repo *BaseRepo[T]) Create(entity *T) error {
-	logger.DebugLogRequestReceived("database", "BaseRepo", "Create")
-	result := repo.db.Create(entity)
-	return result.Error
+	return repo.db.Create(entity).Error
 }
 
-// Updates an entity in the database
+// Reads an entity by id
+func (repo *BaseRepo[T]) Read(id uuid.UUID) (*T, error) {
+	var entity T
+	err := repo.db.Where("id = ?", id).First(&entity).Error
+	return &entity, err
+}
+
+// Reads many entities by ids
+func (repo *BaseRepo[T]) ReadMany(ids []uuid.UUID) ([]T, error) {
+	var entities []T
+	err := repo.db.Where("id IN (?)", ids).Find(&entities).Error
+	return entities, err
+}
+
+// Updates an entity
 func (repo *BaseRepo[T]) Update(entity *T) error {
-	logger.DebugLogRequestReceived("database", "BaseRepo", "Update")
-	result := repo.db.Save(entity)
-	return result.Error
+	return repo.db.Save(entity).Error
 }
 
-// Deletes an entity with the given ID
-func (repo *BaseRepo[T]) Delete(entity *T) error {
-	logger.DebugLogRequestReceived("database", "BaseRepo", "Delete")
-	result := repo.db.Delete(entity)
-	return result.Error
+// Deletes an entity
+func (repo *BaseRepo[T]) Delete(id uuid.UUID) error {
+	var entity T
+	return repo.db.Where("id = ?", id).Delete(&entity).Error
 }

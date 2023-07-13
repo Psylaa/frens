@@ -11,13 +11,36 @@ import (
 
 type Database struct {
 	*gorm.DB
-	Blocks    Blocks
-	Bookmarks Bookmarks
-	Files     Files
-	Follows   Follows
-	Likes     Likes
-	Posts     Posts
-	Users     Users
+	Posts     interface{ Base[Post] }
+	Users     interface{ Base[User] }
+	Blocks    interface{ Interactor[Block] }
+	Bookmarks interface{ Interactor[Bookmark] }
+	Follows   interface{ Interactor[Follow] }
+	Likes     interface{ Interactor[Like] }
+}
+
+type Block struct {
+	InteractorModel
+	Source User `gorm:"foreignKey:UserID"`
+	Target User `gorm:"foreignKey:UserID"`
+}
+
+type Bookmark struct {
+	InteractorModel
+	Source User `gorm:"foreignKey:UserID"`
+	Target Post `gorm:"foreignKey:PostID"`
+}
+
+type Follow struct {
+	InteractorModel
+	Source User `gorm:"foreignKey:UserID"`
+	Target User `gorm:"foreignKey:UserID"`
+}
+
+type Like struct {
+	InteractorModel
+	Source User `gorm:"foreignKey:UserID"`
+	Target Post `gorm:"foreignKey:PostID"`
 }
 
 func New(cfg *config.Config) (*Database, error) {
@@ -50,16 +73,15 @@ func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConn
 	db.DB().SetMaxIdleConns(maxIdleConns)
 	db.DB().SetMaxOpenConns(maxOpenConns)
 
-	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follow{}, &Bookmark{}, &File{})
+	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follow{}, &Block{}, &Bookmark{})
 	logger.Log.Info().Msg("Auto migration completed")
 
 	return &Database{
-		Blocks:    NewBlockRepo(db),
-		Bookmarks: NewBookmarkRepo(db),
-		Files:     NewFileRepo(db),
-		Follows:   NewFollowRepo(db),
-		Likes:     NewLikeRepo(db),
-		Posts:     NewPostRepo(db),
+		Posts:     NewBaseRepo[Post](db),
 		Users:     NewUserRepo(db),
+		Blocks:    NewInteractorRepo[Block](db),
+		Bookmarks: NewInteractorRepo[Bookmark](db),
+		Follows:   NewInteractorRepo[Follow](db),
+		Likes:     NewInteractorRepo[Like](db),
 	}, nil
 }

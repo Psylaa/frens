@@ -36,8 +36,8 @@ type PostLinks struct {
 }
 
 type PostRel struct {
-	Author UserResponse `json:"author"`
-	Media  FileResponse `json:"media"`
+	User  UserResponse `json:"user"`
+	Media FileResponse `json:"media"`
 }
 
 func CreatePostsResponse(posts []*database.Post) *PostResponse {
@@ -74,8 +74,8 @@ func CreatePostsResponse(posts []*database.Post) *PostResponse {
 				Self: selfLink,
 			},
 			Relationships: PostRel{
-				Author: *CreateUsersResponse([]*database.User{&post.Author}),
-				Media:  *CreateFileResponse(post.Media),
+				User:  *CreateUsersResponse([]*database.User{post.User}),
+				Media: *CreateFileResponse(post.Media),
 			},
 		})
 	}
