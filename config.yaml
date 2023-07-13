@@ -6,22 +6,15 @@ server:
   jwt_duration: 168
   allow_origins: true
 database:
-  type: sqlite #Options: postgres, sqlite
-  postgres:
-    host: localhost
-    port: 5432
-    dbname: frens
-    user: sampleuser
-    password: pass
-    sslmode: disable
-    log_mode: false
-    max_idle_conns: 10
-    max_open_conns: 100
-  sqlite:
-    path: mydatabase.db
-    log_mode: false
-    max_idle_conns: 10
-    max_open_conns: 100
+  host: localhost
+  port: 5432
+  dbname: frens
+  user: user
+  password: pass
+  sslmode: disable
+  log_mode: true
+  max_idle_conns: 10
+  max_open_conns: 100
 storage:
   type: local
   local:

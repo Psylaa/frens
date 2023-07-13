@@ -2,7 +2,6 @@ package router
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
@@ -134,7 +133,6 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 	// Convert the media ID's to UUID's
 	mediaUUIDs := make([]*uuid.UUID, len(req.MediaIDs))
 	for i, id := range req.MediaIDs {
-		log.Println(id)
 		mediaID, err := uuid.Parse(id)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("error parsing media id")

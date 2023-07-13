@@ -1,6 +1,7 @@
 package database
 
 import (
+	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/logger"
@@ -149,6 +150,9 @@ func (pr *PostRepo) GetByUserIDs(userIDs []*uuid.UUID, cursor time.Time, count i
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	log.Println(posts[0].Author)
+	log.Println(posts[0].Author.ID)
 
 	// I wasnt able to get the more complex queries working to get this running in one request, so we need to loop through the posts and get isliked and isbookmarked for each post
 	// I dont think DB performance is a huge issue at this point, but this is something to keep in mind for the future

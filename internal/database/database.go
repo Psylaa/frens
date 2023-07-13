@@ -7,7 +7,6 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 type Database struct {
@@ -21,46 +20,18 @@ type Database struct {
 	Users     Users
 }
 
-// New initializes a new database connection
 func New(cfg *config.Config) (*Database, error) {
-	switch cfg.Database.Type {
-	case config.SQLite:
-		return NewSQLite(cfg)
-	case config.Postgres:
-		return NewPostgres(cfg)
-	default:
-		return nil, fmt.Errorf("unsupported database type: %s", cfg.Database.Type)
-	}
-}
-
-func NewSQLite(cfg *config.Config) (*Database, error) {
 	logger.Log.Info().
-		Str("path", cfg.Database.SQLite.Path).
-		Msg("Connecting to SQLite database")
-
-	db, err := gorm.Open("sqlite3", cfg.Database.SQLite.Path)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to connect to SQLite database")
-		return nil, err
-	}
-
-	logger.Log.Info().Msg("Successfully connected to SQLite database")
-
-	return initializeDatabase(db, cfg.Database.SQLite.LogMode, cfg.Database.SQLite.MaxIdleConns, cfg.Database.SQLite.MaxOpenConns)
-}
-
-func NewPostgres(cfg *config.Config) (*Database, error) {
-	logger.Log.Info().
-		Str("host", cfg.Database.Postgres.Host).
-		Str("port", cfg.Database.Postgres.Port).
-		Str("user", cfg.Database.Postgres.User).
-		Str("password", cfg.Database.Postgres.Password).
-		Str("dbname", cfg.Database.Postgres.DBName).
-		Str("sslmode", cfg.Database.Postgres.SSLMode).
+		Str("host", cfg.Database.Host).
+		Str("port", cfg.Database.Port).
+		Str("user", cfg.Database.User).
+		Str("password", cfg.Database.Password).
+		Str("dbname", cfg.Database.DBName).
+		Str("sslmode", cfg.Database.SSLMode).
 		Msg("Connecting to Postgres database")
 
 	dbinfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		cfg.Database.Postgres.Host, cfg.Database.Postgres.Port, cfg.Database.Postgres.User, cfg.Database.Postgres.DBName, cfg.Database.Postgres.Password, cfg.Database.Postgres.SSLMode)
+		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName, cfg.Database.Password, cfg.Database.SSLMode)
 
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
@@ -70,7 +41,7 @@ func NewPostgres(cfg *config.Config) (*Database, error) {
 
 	logger.Log.Info().Msg("Successfully connected to Postgres database")
 
-	return initializeDatabase(db, cfg.Database.Postgres.LogMode, cfg.Database.Postgres.MaxIdleConns, cfg.Database.Postgres.MaxOpenConns)
+	return initializeDatabase(db, cfg.Database.LogMode, cfg.Database.MaxIdleConns, cfg.Database.MaxOpenConns)
 }
 
 func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConns int) (*Database, error) {
@@ -81,10 +52,6 @@ func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConn
 
 	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follow{}, &Bookmark{}, &File{})
 	logger.Log.Info().Msg("Auto migration completed")
-
-	// Manually create the composite unique index
-	db.Model(&Like{}).AddUniqueIndex("idx_like_user_post", "user_id", "post_id")
-	db.Model(&Bookmark{}).AddUniqueIndex("idx_bm_user_post", "user_id", "post_id")
 
 	return &Database{
 		Blocks:    NewBlockRepo(db),

@@ -38,24 +38,15 @@ type Server struct {
 }
 
 type Database struct {
-	Type     DBType `yaml:"type" validate:"required"`
-	Postgres struct {
-		Host         string `yaml:"host" validate:"required"`
-		Port         string `yaml:"port" validate:"required"`
-		User         string `yaml:"user" validate:"required"`
-		DBName       string `yaml:"dbname" validate:"required"`
-		Password     string `yaml:"password" validate:"required"`
-		SSLMode      string `yaml:"sslmode" validate:"required"`
-		LogMode      bool   `yaml:"log_mode"`
-		MaxIdleConns int    `yaml:"max_idle_conns"`
-		MaxOpenConns int    `yaml:"max_open_conns"`
-	} `yaml:"postgres"`
-	SQLite struct {
-		Path         string `yaml:"path" validate:"required"`
-		LogMode      bool   `yaml:"log_mode"`
-		MaxIdleConns int    `yaml:"max_idle_conns"`
-		MaxOpenConns int    `yaml:"max_open_conns"`
-	} `yaml:"sqlite"`
+	Host         string `mapstructure:"host" validate:"required"`
+	Port         string `mapstructure:"port" validate:"required"`
+	User         string `mapstructure:"user" validate:"required"`
+	DBName       string `mapstructure:"dbname" validate:"required"`
+	Password     string `mapstructure:"password" validate:"required"`
+	SSLMode      string `mapstructure:"sslmode" validate:"required"`
+	LogMode      bool   `mapstructure:"log_mode"`
+	MaxIdleConns int    `mapstructure:"max_idle_conns"`
+	MaxOpenConns int    `mapstructure:"max_open_conns"`
 }
 
 type Storage struct {
@@ -150,26 +141,16 @@ func (cfg *Config) Print() {
 		Bool("AllowOrigins", cfg.Server.AllowOrigins).
 		Msg("Server config loaded")
 
-	switch cfg.Database.Type {
-	case SQLite:
-		logger.Log.Info().
-			Str("Path", cfg.Database.SQLite.Path).
-			Bool("LogMode", cfg.Database.SQLite.LogMode).
-			Int("MaxIdleConns", cfg.Database.SQLite.MaxIdleConns).
-			Int("MaxOpenConns", cfg.Database.SQLite.MaxOpenConns).
-			Msg("SQLite database config loaded")
-	case Postgres:
-		logger.Log.Info().
-			Str("Host", cfg.Database.Postgres.Host).
-			Str("Port", cfg.Database.Postgres.Port).
-			Str("User", cfg.Database.Postgres.User).
-			Str("DBName", cfg.Database.Postgres.DBName).
-			Str("SSLMode", cfg.Database.Postgres.SSLMode).
-			Bool("LogMode", cfg.Database.Postgres.LogMode).
-			Int("MaxIdleConns", cfg.Database.Postgres.MaxIdleConns).
-			Int("MaxOpenConns", cfg.Database.Postgres.MaxOpenConns).
-			Msg("Postgres database config loaded")
-	}
+	logger.Log.Info().
+		Str("Host", cfg.Database.Host).
+		Str("Port", cfg.Database.Port).
+		Str("User", cfg.Database.User).
+		Str("DBName", cfg.Database.DBName).
+		Str("SSLMode", cfg.Database.SSLMode).
+		Bool("LogMode", cfg.Database.LogMode).
+		Int("MaxIdleConns", cfg.Database.MaxIdleConns).
+		Int("MaxOpenConns", cfg.Database.MaxOpenConns).
+		Msg("Postgres database config loaded")
 
 	if cfg.Storage.Type == "local" {
 		logger.Log.Info().
