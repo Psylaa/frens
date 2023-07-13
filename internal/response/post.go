@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -36,51 +35,10 @@ type PostLinks struct {
 }
 
 type PostRel struct {
-	User  UserResponse `json:"user"`
-	Media FileResponse `json:"media"`
+	User UserResponse `json:"user"`
+	// Media here
 }
 
 func CreatePostsResponse(posts []*database.Post) *PostResponse {
-	var postData []*PostData
-
-	for _, post := range posts {
-		selfLink := fmt.Sprintf("%s/v1/posts/%s", baseURL, post.ID.String())
-
-		// Initialize mediaIDs as an empty slice
-		// This is so its not null in the JSON response
-		// because javascript is stupid
-		mediaIDs := make([]string, 0)
-
-		// Extract media IDs
-		if len(post.Media) > 0 {
-			for _, media := range post.Media {
-				mediaIDs = append(mediaIDs, media.ID.String())
-			}
-		}
-
-		postData = append(postData, &PostData{
-			Type: shared.DataTypePost,
-			ID:   post.ID,
-			Attributes: PostAttr{
-				CreatedAt:    post.CreatedAt,
-				UpdatedAt:    post.UpdatedAt,
-				Privacy:      string(post.Privacy),
-				Text:         post.Text,
-				MediaIDs:     mediaIDs,
-				IsLiked:      post.IsLiked,
-				IsBookmarked: post.IsBookmarked,
-			},
-			Links: PostLinks{
-				Self: selfLink,
-			},
-			Relationships: PostRel{
-				User:  *CreateUsersResponse([]*database.User{post.User}),
-				Media: *CreateFileResponse(post.Media),
-			},
-		})
-	}
-
-	return &PostResponse{
-		Data: postData,
-	}
+	return nil
 }

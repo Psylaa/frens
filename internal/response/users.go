@@ -1,8 +1,6 @@
 package response
 
 import (
-	"fmt"
-
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/shared"
 	"github.com/google/uuid"
@@ -28,24 +26,5 @@ type UserLinks struct {
 }
 
 func CreateUsersResponse(users []*database.User) *UserResponse {
-	var userData []*UserData
-
-	for _, user := range users {
-		selfLink := fmt.Sprintf("%s/v1/users/%s", baseURL, user.ID.String())
-
-		userData = append(userData, &UserData{
-			Type: shared.DataTypeUser,
-			ID:   user.ID,
-			Attributes: UserAttr{
-				Username: user.Username,
-			},
-			Links: UserLinks{
-				Self: selfLink,
-			},
-		})
-	}
-
-	return &UserResponse{
-		Data: userData,
-	}
+	return nil
 }

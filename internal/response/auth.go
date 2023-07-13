@@ -28,19 +28,5 @@ type AuthRel struct {
 }
 
 func CreateAuthResponse(token string, user *database.User, expiryDate time.Time) *AuthResponse {
-	return &AuthResponse{
-		Data: []*AuthData{
-			{
-				Type: shared.DataTypeToken,
-				Attributes: &AuthAttr{
-					Token:     token,
-					CreatedAt: time.Now(),
-					ExpiresAt: expiryDate,
-				},
-				Relationships: &AuthRel{
-					Owner: CreateUsersResponse([]*database.User{user}),
-				},
-			},
-		},
-	}
+	return nil
 }

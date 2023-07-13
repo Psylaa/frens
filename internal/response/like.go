@@ -23,22 +23,5 @@ type LikeAttr struct {
 }
 
 func CreateLikesResponse(likes []*database.Like) *LikeResponse {
-	var likeData []*LikeData
-
-	for _, like := range likes {
-
-		likeData = append(likeData, &LikeData{
-			Type: shared.DataTypeLike,
-			ID:   like.ID.String(),
-			Attributes: LikeAttr{
-				CreatedAt: like.CreatedAt.String(),
-				UserID:    like.UserID,
-				PostID:    like.PostID,
-			},
-		})
-	}
-
-	return &LikeResponse{
-		Data: likeData,
-	}
+	return nil
 }

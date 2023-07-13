@@ -37,7 +37,6 @@ type Repos struct {
 	Auth      *AuthRepo
 	Bookmarks *BookmarksRepo
 	Feed      *FeedRepo
-	Files     *FilesRepo
 	Follows   *FollowsRepo
 	Likes     *LikesRepo
 	Posts     *PostsRepo
@@ -56,7 +55,6 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 			Auth:      NewAuthRepo(db, srv),
 			Bookmarks: NewBookmarksRepo(db, srv),
 			Feed:      NewFeedRepo(db, srv),
-			Files:     NewFilesRepo(db, srv),
 			Follows:   NewFollowsRepo(db, srv),
 			Likes:     NewLikesRepo(db, srv),
 			Posts:     NewPostsRepo(db, srv),
@@ -100,12 +98,10 @@ func (r *Router) configureRoutes() {
 	v1 := r.app.Group("/v1")
 
 	r.repos.Auth.ConfigurePublicRoutes(v1.Group("/auth"))
-	r.repos.Files.ConfigurePublicRoutes(v1.Group("/files"))
 	r.addAuth()
 	r.repos.Auth.ConfigureProtectedRoutes(v1.Group("/auth"))
 	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
 	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
-	r.repos.Files.ConfigureProtectedRoutes(v1.Group("/files"))
 	r.repos.Follows.ConfigureRoutes(v1.Group("/follows"))
 	r.repos.Likes.ConfigureRoutes(v1.Group("/likes"))
 	r.repos.Posts.ConfigureRoutes(v1.Group("/posts"))

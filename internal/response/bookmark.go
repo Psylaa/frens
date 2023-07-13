@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/internal/database"
@@ -31,26 +30,5 @@ type BookmarkLinks struct {
 }
 
 func CreateBookmarksResponse(bookmarks []*database.Bookmark) *BookmarkResponse {
-	var bookmarkData []*BookmarkData
-
-	for _, bookmark := range bookmarks {
-		selfLink := fmt.Sprintf("%s/v1/bookmarks/%s", baseURL, bookmark.ID.String())
-
-		bookmarkData = append(bookmarkData, &BookmarkData{
-			Type: shared.DataTypeBookmark,
-			ID:   bookmark.ID,
-			Attributes: BookmarkAttr{
-				CreatedAt: bookmark.CreatedAt,
-				UserID:    bookmark.UserID,
-				PostID:    bookmark.PostID,
-			},
-			Links: BookmarkLinks{
-				Self: selfLink,
-			},
-		})
-	}
-
-	return &BookmarkResponse{
-		Data: bookmarkData,
-	}
+	return nil
 }
