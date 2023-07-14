@@ -69,11 +69,11 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 	// Find user in database
 	user, err := ur.Database.Users.ReadByEmail(req.Email)
 	if err != nil {
-		return models.ErrInternalServerError.SendResponse(c, "No user found with that email")
+		return models.ErrUnauthorized.SendResponse(c, "No user found with that email")
 	}
 
 	// Check password
-	if !user.CheckPassword(req.Password) {
+	if !user.IsPasswordValid(req.Password) {
 		return models.ErrUnauthorized.SendResponse(c, "invalid password")
 	}
 
