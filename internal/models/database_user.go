@@ -34,9 +34,9 @@ func (u *User) ToResponse() *UserRespone {
 	}
 }
 
-func (u *User) IsPasswordValid(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
-	return err == nil
+func (u *User) CheckPassword(password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	return err
 }
 
 func (u *User) SetBio(bio string) {

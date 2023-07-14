@@ -73,7 +73,12 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 	}
 
 	// Check password
-	if !user.IsPasswordValid(req.Password) {
+	if err := user.CheckPassword(req.Password); err != nil {
+		logger.Info(logger.LogMessage{
+			Package:  "service",
+			Function: "UserRepo.Login",
+			Message:  "Checkpassword failed for user: " + user.Username + " with error: " + err.Error(),
+		})
 		return models.ErrUnauthorized.SendResponse(c, "invalid password")
 	}
 
