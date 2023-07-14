@@ -35,8 +35,8 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	newUser.SetBio(defaultBio)
 
 	// Create user in database
-	if err := ur.Database.Create(&newUser).Error; err != nil {
-		return models.ErrInternalServerError.SendResponse(c, err.Error())
+	if err := ur.Database.Users.Create(newUser).Error; err != nil {
+		return models.ErrInternalServerError.SendResponse(c)
 	}
 
 	// Convert to response

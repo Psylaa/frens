@@ -11,88 +11,48 @@ import (
 )
 
 type Database struct {
-	*gorm.DB
-	Posts Posts
-	Users Users
-	//Blocks
-	//Bookmarks
-	//Follows
-	//Likes
-}
-
-type Block struct {
-	InteractorModel
-	Source models.User `gorm:"foreignKey:UserID"`
-	Target models.User `gorm:"foreignKey:UserID"`
-}
-
-type Bookmark struct {
-	InteractorModel
-	Source models.User `gorm:"foreignKey:UserID"`
-	Target models.Post `gorm:"foreignKey:PostID"`
-}
-
-type Follow struct {
-	InteractorModel
-	Source models.User `gorm:"foreignKey:UserID"`
-	Target models.User `gorm:"foreignKey:UserID"`
-}
-
-type Like struct {
-	InteractorModel
-	Source models.User `gorm:"foreignKey:UserID"`
-	Target models.Post `gorm:"foreignKey:PostID"`
+	db        *gorm.DB
+	Block     *BlockRepository
+	Bookmarks *BookmarkRepository
+	Follows   *FollowRepository
+	Likes     *LikeRepository
+	Posts     *PostRepository
+	Users     *UserRepository
 }
 
 func New(cfg *config.Config) (*Database, error) {
-	logger.Info(logger.LogMessage{
-		Package:  "database",
-		Function: "New",
-		Message:  "Initializing database",
-	})
-
 	dbinfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName, cfg.Database.Password, cfg.Database.SSLMode)
 
-	db, err := gorm.Open("postgres", dbinfo)
+	gormDB, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
+		logger.Fatal(logger.LogMessage{
+			Package:  "database",
+			Function: "New",
+			Message:  "Failed to connect to database: " + err.Error(),
+		}, err)
 		return nil, err
 	}
 
-	return initializeDatabase(db, cfg.Database.LogMode, cfg.Database.MaxIdleConns, cfg.Database.MaxOpenConns)
-}
+	gormDB.LogMode(cfg.Database.LogMode)
+	gormDB.DB().SetMaxIdleConns(cfg.Database.MaxIdleConns)
+	gormDB.DB().SetMaxOpenConns(cfg.Database.MaxOpenConns)
 
-func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConns int) (*Database, error) {
-	if db == nil {
-		logger.Fatal(logger.LogMessage{
-			Package:  "database",
-			Function: "initializeDatabase",
-			Message:  "Attempted to initialize a nil database",
-		}, nil)
-	}
+	gormDB.AutoMigrate(
+		&models.Bookmark{},
+		&models.Follow{},
+		&models.Like{},
+		&models.Post{},
+		&models.User{},
+	)
 
-	db.LogMode(logMode)
-
-	db.DB().SetMaxIdleConns(maxIdleConns)
-	db.DB().SetMaxOpenConns(maxOpenConns)
-
-	db.AutoMigrate(&models.User{}, &models.Post{}, &Like{}, &Follow{}, &Block{}, &Bookmark{})
-
-	newDB := &Database{
-		DB:    db,
-		Posts: NewPostRepo(db),
-		Users: NewUserRepo(db),
-		//Blocks: NewBlocksRepo(db),
-		//Bookmarks: NewBookmarksRepo(db),
-		//Follows:   NewFollowsRepo(db),
-		//Likes:     NewLikesRepo(db),
-	}
-
-	logger.Info(logger.LogMessage{
-		Package:  "database",
-		Function: "initializeDatabase",
-		Message:  "Database initialized",
-	})
-
-	return newDB, nil
+	return &Database{
+		db:        gormDB,
+		Block:     &BlockRepository{db: gormDB},
+		Bookmarks: &BookmarkRepository{db: gormDB},
+		Follows:   &FollowRepository{db: gormDB},
+		Likes:     &LikeRepository{db: gormDB},
+		Posts:     &PostRepository{db: gormDB},
+		Users:     &UserRepository{db: gormDB},
+	}, nil
 }
