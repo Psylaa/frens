@@ -1,5 +1,40 @@
 basePath: /v1
 definitions:
+  models.Attributes:
+    type: object
+  models.Data:
+    properties:
+      attributes:
+        $ref: '#/definitions/models.Attributes'
+      id:
+        type: string
+      relationships:
+        $ref: '#/definitions/models.Relationships'
+      type:
+        $ref: '#/definitions/models.DataTypes'
+    type: object
+  models.DataTypes:
+    enum:
+    - users
+    type: string
+    x-enum-varnames:
+    - Users
+  models.Error:
+    properties:
+      detail:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/models.Error'
+        type: array
+    type: object
   models.RegisterRequest:
     properties:
       email:
@@ -8,15 +43,18 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - email
+    - password
+    - username
     type: object
-  models.UserResponse:
+  models.Relationships:
+    type: object
+  models.Response:
     properties:
       data:
         items:
-          properties:
-            id:
-              type: string
-          type: object
+          $ref: '#/definitions/models.Data'
         type: array
     type: object
 host: localhost:3001
@@ -42,15 +80,15 @@ paths:
       description: Authenticate a user with the given credentials and return a JWT
         token.
       parameters:
-      - description: Username
+      - description: Email
         in: body
-        name: username
+        name: email
         required: true
         schema:
           type: string
-      - description: Username
+      - description: Email
         in: formData
-        name: username
+        name: email
         required: true
         type: string
       - description: Password
@@ -69,14 +107,24 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Authenticate User
       tags:
       - Auth
@@ -112,12 +160,15 @@ paths:
           $ref: '#/definitions/models.RegisterRequest'
       - in: formData
         name: email
+        required: true
         type: string
       - in: formData
         name: password
+        required: true
         type: string
       - in: formData
         name: username
+        required: true
         type: string
       produces:
       - application/json
@@ -125,11 +176,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserResponse'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Register New User
       tags:
       - Auth
@@ -926,7 +981,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserResponse'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
         "401":

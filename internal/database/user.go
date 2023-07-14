@@ -6,12 +6,13 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Users interface {
-	Base[models.User]
-}
-
 type UserRepo struct {
 	*BaseRepo[models.User]
+}
+
+type Users interface {
+	Base[models.User]
+	ReadByEmail(email string) (models.User, error)
 }
 
 func NewUserRepo(db *gorm.DB) Users {
@@ -31,4 +32,10 @@ func (r *UserRepo) ReadByUsers(ids []uuid.UUID) ([]models.User, error) {
 	var users []models.User
 	err := r.db.Where("id IN (?)", ids).Find(&users).Error
 	return users, err
+}
+
+func (r *UserRepo) ReadByEmail(email string) (models.User, error) {
+	var user models.User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	return user, err
 }

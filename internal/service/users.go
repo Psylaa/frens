@@ -5,15 +5,10 @@ import (
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type UserRepo struct {
 	Database *database.Database
-}
-
-func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
 }
 
 func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
@@ -24,6 +19,11 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	})
 
 	req.Sanitize()
+	err := req.Validate()
+	if err != nil {
+		return models.ErrInvalidBody.SendResponse(c, err.Error())
+	}
+
 	newUser, err := req.ToUser()
 	if err != nil {
 		return models.ErrInternalServerError.SendResponse(c)
@@ -37,10 +37,29 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	return newUser.ToResponse().Send(c)
 }
 
-func (ur *UserRepo) Update(c *fiber.Ctx, bio *string, avatarID *uuid.UUID, coverID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
-}
+func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
+	logger.Debug(logger.LogMessage{
+		Package:  "service",
+		Function: "UserRepo.Login",
+		Message:  "Logging in user: " + req.Email,
+	})
 
-func (ur *UserRepo) Delete(c *fiber.Ctx) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
+	req.Sanitize()
+	err := req.Validate()
+	if err != nil {
+		return models.ErrInvalidBody.SendResponse(c, err.Error())
+	}
+
+	// Find user in database
+	user, err := ur.Database.Users.ReadByEmail(req.Email)
+	if err != nil {
+		return models.ErrInternalServerError.SendResponse(c, err.Error())
+	}
+
+	// Check password
+	if !user.CheckPassword(req.Password) {
+		return models.ErrUnauthorized.SendResponse(c)
+	}
+
+	return nil
 }

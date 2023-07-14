@@ -21,8 +21,8 @@ type BaseModel struct {
 
 type Base[T any] interface {
 	Create(entity *T) error
-	Read(id uuid.UUID) (T, error)
-	ReadMany(ids []uuid.UUID) ([]T, error)
+	ReadByID(id uuid.UUID) (T, error)
+	ReadByIDs(ids []uuid.UUID) ([]T, error)
 	Update(entity T) error
 	Delete(id uuid.UUID) error
 }
@@ -57,14 +57,14 @@ func (repo *BaseRepo[T]) Create(entity *T) error {
 }
 
 // Reads an entity by id
-func (repo *BaseRepo[T]) Read(id uuid.UUID) (T, error) {
+func (repo *BaseRepo[T]) ReadByID(id uuid.UUID) (T, error) {
 	var entity T
 	err := repo.db.Where("id = ?", id).First(&entity).Error
 	return entity, err
 }
 
 // Reads many entities by ids
-func (repo *BaseRepo[T]) ReadMany(ids []uuid.UUID) ([]T, error) {
+func (repo *BaseRepo[T]) ReadByIDs(ids []uuid.UUID) ([]T, error) {
 	var entities []T
 	err := repo.db.Where("id IN (?)", ids).Find(&entities).Error
 	return entities, err

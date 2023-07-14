@@ -1,6 +1,8 @@
 package router
 
 import (
+	"log"
+
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
@@ -27,18 +29,31 @@ func (lr *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
 // @Tags Auth
 // @Accept  json,xml,x-www-form-urlencoded,multipart/form-data
 // @Produce  json
-// @Param username body string true "Username"
-// @Param username formData string true "Username"
+// @Param email body string true "Email"
+// @Param email formData string true "Email"
 // @Param password body string true "Password"
 // @Param password formData string true "Password"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Failure 500
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
 // @Router /auth/login [post]
 func (lr *AuthRepo) login(c *fiber.Ctx) error {
-	return nil
+	logger.Debug(logger.LogMessage{
+		Package:  "router",
+		Function: "login",
+		Message:  "Logging in user",
+	})
+
+	req := new(models.LoginRequest)
+	if err := c.BodyParser(req); err != nil {
+		return models.ErrInvalidBody.SendResponse(c, err.Error())
+	}
+
+	log.Println(req.Password)
+
+	return lr.Service.Users.Login(c, req)
 }
 
 // @Summary Logout User
@@ -77,9 +92,9 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 // @Produce json
 // @Param user body models.RegisterRequest true "The user account to create"
 // @Param user formData models.RegisterRequest true "The user account to create"
-// @Success 200 {object} models.UserResponse
-// @Failure 400
-// @Failure 500
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
 // @Router /auth/register [post]
 func (sr *AuthRepo) register(c *fiber.Ctx) error {
 	logger.Debug(logger.LogMessage{

@@ -42,8 +42,8 @@ const docTemplate = `{
                 "summary": "Authenticate User",
                 "parameters": [
                     {
-                        "description": "Username",
-                        "name": "username",
+                        "description": "Email",
+                        "name": "email",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -52,8 +52,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Username",
-                        "name": "username",
+                        "description": "Email",
+                        "name": "email",
                         "in": "formData",
                         "required": true
                     },
@@ -76,19 +76,34 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     },
                     "404": {
-                        "description": "Not Found"
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -147,31 +162,40 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "email",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "name": "password",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "name": "username",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -967,7 +991,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1619,8 +1643,67 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Attributes": {
+            "type": "object"
+        },
+        "models.Data": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/models.Attributes"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "relationships": {
+                    "$ref": "#/definitions/models.Relationships"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.DataTypes"
+                }
+            }
+        },
+        "models.DataTypes": {
+            "type": "string",
+            "enum": [
+                "users"
+            ],
+            "x-enum-varnames": [
+                "Users"
+            ]
+        },
+        "models.Error": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Error"
+                    }
+                }
+            }
+        },
         "models.RegisterRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1633,18 +1716,16 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserResponse": {
+        "models.Relationships": {
+            "type": "object"
+        },
+        "models.Response": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "string"
-                            }
-                        }
+                        "$ref": "#/definitions/models.Data"
                     }
                 }
             }

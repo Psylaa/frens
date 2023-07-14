@@ -12,12 +12,12 @@ import (
 
 type Database struct {
 	*gorm.DB
-	Posts Base[Post]
-	Users Base[models.User]
-	//Blocks    Interactor[Block]
-	//Bookmarks Interactor[Bookmark]
-	//Follows   Interactor[Follow]
-	//Likes     Interactor[Like]
+	Posts Posts
+	Users Users
+	//Blocks
+	//Bookmarks
+	//Follows
+	//Likes
 }
 
 type Block struct {
