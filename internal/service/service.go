@@ -1,9 +1,15 @@
 package service
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 )
+
+var JWTSigningKey []byte
+var JWTDuration time.Duration
+var defaultBio string
 
 type Service struct {
 	Blocks    *BlockRepo
@@ -15,6 +21,11 @@ type Service struct {
 }
 
 func New(configuration *config.Config) *Service {
+
+	// Store config values
+	JWTSigningKey = []byte(configuration.Server.JWTSecret)
+	JWTDuration = time.Duration(configuration.Server.JWTDuration) * time.Hour
+	defaultBio = configuration.Users.DefaultBio
 
 	database, err := database.New(configuration)
 	if err != nil {

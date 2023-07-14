@@ -29,6 +29,7 @@ func (rr *RegisterRequest) ToUser() (*User, error) {
 	}
 
 	return &User{
+		Role:     RoleUser,
 		Username: rr.Username,
 		Email:    rr.Email,
 		Password: string(hashedPassword),
