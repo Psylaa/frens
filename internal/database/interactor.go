@@ -1,8 +1,10 @@
 package database
 
 import (
+	"errors"
 	"time"
 
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -26,7 +28,17 @@ type Interactor[T Entity] interface {
 }
 
 func NewInteractorRepo[T Entity](db *gorm.DB) Interactor[T] {
-	return &InteractorRepo[T]{NewBaseRepo[T](db)}
+	if db == nil {
+		logger.Error(logger.LogMessage{
+			Package:  "database",
+			Function: "NewInteractorRepo",
+			Message:  "Attempted to create new interactor repo with nil database",
+		}, errors.New("database is nil"))
+	}
+
+	return &InteractorRepo[T]{
+		NewBaseRepo[T](db),
+	}
 }
 
 // ReadBySource reads all interactors by source user id.

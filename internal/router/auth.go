@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
@@ -81,10 +82,15 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /auth/register [post]
 func (sr *AuthRepo) register(c *fiber.Ctx) error {
+	logger.Debug(logger.LogMessage{
+		Package:  "router",
+		Function: "register",
+		Message:  "Registering new user",
+	})
 
-	var req models.RegisterRequest
+	req := new(models.RegisterRequest)
 	if err := c.BodyParser(req); err != nil {
-		return models.ErrInvalidBody.SendResponse(c)
+		return models.ErrInvalidBody.SendResponse(c, err.Error())
 	}
 
 	return sr.Service.Users.Create(c, req)

@@ -12,21 +12,26 @@ type BaseModel struct {
 	UpdatedAt time.Time
 }
 
+func (base *BaseModel) BeforeCreate() (err error) {
+	base.ID = uuid.New()
+	return
+}
+
 type User struct {
 	BaseModel
 	Username string `gorm:"unique"`
 	Email    string `gorm:"unique"`
 	Password string `gorm:"not null"`
-	Verified bool   `gorm:"default:false"`
+	Bio      string
+	Verified bool `gorm:"default:false"`
 }
 
-func (u *User) ToResponse() *UserResponse {
-	return &UserResponse{
-		Data: []struct {
-			ID string `json:"id"`
-		}{
+func (u *User) ToResponse() *Response {
+	return &Response{
+		Data: []Data{
 			{
-				ID: u.ID.String(),
+				Type: Users,
+				ID:   u.ID,
 			},
 		},
 	}
