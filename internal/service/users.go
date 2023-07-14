@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
@@ -35,8 +37,8 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	newUser.SetBio(defaultBio)
 
 	// Create user in database
-	if err := ur.Database.Users.Create(newUser).Error; err != nil {
-		return models.ErrInternalServerError.SendResponse(c)
+	if err := ur.Database.Users.Create(newUser); err != nil {
+		return models.ErrInternalServerError.SendResponse(c, err.Error())
 	}
 
 	// Convert to response
@@ -73,6 +75,7 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 	}
 
 	// Check password
+	log.Println(req.Password)
 	if err := user.CheckPassword(req.Password); err != nil {
 		logger.Info(logger.LogMessage{
 			Package:  "service",
