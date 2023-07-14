@@ -18,7 +18,7 @@ type UserLinks struct {
 }
 
 type UserData struct {
-	Type       DataTypes      `json:"type"`
+	Type       DataType       `json:"type"`
 	ID         uuid.UUID      `json:"id"`
 	Attributes UserAttributes `json:"attributes"`
 }

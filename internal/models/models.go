@@ -4,13 +4,29 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type DataTypes string
+type Privacy string
+
+const (
+	PrivacyPublic    Privacy = "public"
+	PrivacyProtected Privacy = "protected"
+	PrivacyPrivate   Privacy = "private"
+)
+
+type DataType string
+
+const (
+	DataTypeUser     DataType = "user"
+	DataTypePost     DataType = "post"
+	DataTypeFollow   DataType = "follow"
+	DataTypeToken    DataType = "token"
+	DataTypeBookmark DataType = "bookmark"
+	DataTypeLike     DataType = "like"
+	DataTypeFile     DataType = "file"
+)
 
 type Role string
 
 const (
-	DataTypeUser DataTypes = "users"
-
 	RoleAdmin Role = "admin"
 	RoleUser  Role = "user"
 )

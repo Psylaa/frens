@@ -29,7 +29,7 @@ type Block struct {
 type Bookmark struct {
 	InteractorModel
 	Source models.User `gorm:"foreignKey:UserID"`
-	Target Post        `gorm:"foreignKey:PostID"`
+	Target models.Post `gorm:"foreignKey:PostID"`
 }
 
 type Follow struct {
@@ -41,7 +41,7 @@ type Follow struct {
 type Like struct {
 	InteractorModel
 	Source models.User `gorm:"foreignKey:UserID"`
-	Target Post        `gorm:"foreignKey:PostID"`
+	Target models.Post `gorm:"foreignKey:PostID"`
 }
 
 func New(cfg *config.Config) (*Database, error) {
@@ -76,7 +76,7 @@ func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConn
 	db.DB().SetMaxIdleConns(maxIdleConns)
 	db.DB().SetMaxOpenConns(maxOpenConns)
 
-	db.AutoMigrate(&models.User{}, &Post{}, &Like{}, &Follow{}, &Block{}, &Bookmark{})
+	db.AutoMigrate(&models.User{}, &models.Post{}, &Like{}, &Follow{}, &Block{}, &Bookmark{})
 
 	newDB := &Database{
 		DB:    db,
