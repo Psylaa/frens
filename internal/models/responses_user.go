@@ -34,6 +34,7 @@ type UserAttributes struct {
 func (ur *UserRespone) AddToken(signingKey []byte, duration time.Duration) error {
 	claims := jwt.MapClaims{
 		"name": ur.Data[0].Attributes.Username,
+		"sub":  ur.Data[0].ID.String(),
 		"role": ur.Data[0].Attributes.Role,
 		"exp":  time.Now().Add(time.Hour * duration).Unix(),
 	}

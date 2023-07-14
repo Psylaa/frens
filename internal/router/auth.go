@@ -12,14 +12,14 @@ type AuthRepo struct {
 	Service *service.Service
 }
 
-func (lr *AuthRepo) ConfigurePublicRoutes(rtr fiber.Router) {
-	rtr.Post("/login", lr.login)
-	rtr.Post("/register", lr.register)
+func (ar *AuthRepo) ConfigurePublicRoutes(rtr fiber.Router) {
+	rtr.Post("/login", ar.login)
+	rtr.Post("/register", ar.register)
 }
 
-func (lr *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
-	rtr.Get("/verify", lr.verify)
-	rtr.Post("/logout", lr.logout)
+func (ar *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
+	rtr.Get("/verify", ar.verify)
+	rtr.Post("/logout", ar.logout)
 }
 
 // @Summary Authenticate User
@@ -31,13 +31,13 @@ func (lr *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
 // @Param email formData string true "Email"
 // @Param password body string true "Password"
 // @Param password formData string true "Password"
-// @Success 200 {object} models.Response
+// @Success 200 {object} models.UserResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
 // @Router /auth/login [post]
-func (lr *AuthRepo) login(c *fiber.Ctx) error {
+func (ar *AuthRepo) login(c *fiber.Ctx) error {
 	logger.Debug(logger.LogMessage{
 		Package:  "router",
 		Function: "login",
@@ -49,7 +49,7 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())
 	}
 
-	return lr.Service.Users.Login(c, req)
+	return ar.Service.Users.Login(c, req)
 }
 
 // @Summary Logout User
@@ -61,9 +61,8 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 // @Failure 401
 // @Security ApiKeyAuth
 // @Router /auth/logout [post]
-func (lr *AuthRepo) logout(c *fiber.Ctx) error {
-
-	return c.SendStatus(fiber.StatusOK)
+func (ar *AuthRepo) logout(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
 }
 
 // @Summary Verify Authentication Token
@@ -71,14 +70,12 @@ func (lr *AuthRepo) logout(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Success 200
-// @Failure 401
+// @Success 200 {object} models.UserRespone
+// @Failure 401 {object} models.ErrorResponse
 // @Security ApiKeyAuth
 // @Router /auth/verify [get]
-func (lr *AuthRepo) verify(c *fiber.Ctx) error {
-
-	// If we've gotten this far, the token has already passed through the middleware and is valid
-	return c.SendStatus(fiber.StatusOK)
+func (ar *AuthRepo) verify(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
 }
 
 // @Summary Register New User
@@ -88,11 +85,11 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 // @Produce json
 // @Param user body models.RegisterRequest true "The user account to create"
 // @Param user formData models.RegisterRequest true "The user account to create"
-// @Success 200 {object} models.Response
+// @Success 200 {object} models.UserRespone
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
 // @Router /auth/register [post]
-func (sr *AuthRepo) register(c *fiber.Ctx) error {
+func (ar *AuthRepo) register(c *fiber.Ctx) error {
 	logger.Debug(logger.LogMessage{
 		Package:  "router",
 		Function: "register",
@@ -104,5 +101,5 @@ func (sr *AuthRepo) register(c *fiber.Ctx) error {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())
 	}
 
-	return sr.Service.Users.Create(c, req)
+	return ar.Service.Users.Create(c, req)
 }
