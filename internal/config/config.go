@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
@@ -130,44 +129,4 @@ func ReadConfig(filename string) (*Config, error) {
 
 	// If everything went well, return the Config struct
 	return &cfg, nil
-}
-
-func (cfg *Config) Print() {
-	logger.Log.Info().
-		Str("BaseURL", cfg.Server.BaseURL).
-		Str("Port", cfg.Server.Port).
-		Str("LogLevel", cfg.Server.LogLevel).
-		Int("JWTDuration", cfg.Server.JWTDuration).
-		Bool("AllowOrigins", cfg.Server.AllowOrigins).
-		Msg("Server config loaded")
-
-	logger.Log.Info().
-		Str("Host", cfg.Database.Host).
-		Str("Port", cfg.Database.Port).
-		Str("User", cfg.Database.User).
-		Str("DBName", cfg.Database.DBName).
-		Str("SSLMode", cfg.Database.SSLMode).
-		Bool("LogMode", cfg.Database.LogMode).
-		Int("MaxIdleConns", cfg.Database.MaxIdleConns).
-		Int("MaxOpenConns", cfg.Database.MaxOpenConns).
-		Msg("Postgres database config loaded")
-
-	if cfg.Storage.Type == "local" {
-		logger.Log.Info().
-			Str("Type", cfg.Storage.Type).
-			Str("WindowsPath", cfg.Storage.Local.WindowsPath).
-			Str("LinuxPath", cfg.Storage.Local.LinuxPath).
-			Msg("Local storage config loaded")
-	} else if cfg.Storage.Type == "s3" {
-		logger.Log.Info().
-			Str("Type", cfg.Storage.Type).
-			Str("Bucket", cfg.Storage.S3.Bucket).
-			Str("Region", cfg.Storage.S3.Region).
-			Str("AccessKey", cfg.Storage.S3.AccessKey).
-			Msg("S3 storage config loaded")
-	}
-
-	logger.Log.Info().
-		Str("DefaultBio", cfg.Users.DefaultBio).
-		Msg("Users config loaded")
 }

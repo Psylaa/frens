@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
@@ -76,17 +77,17 @@ func New(configuration *config.Config) *Router {
 
 // Run starts the server
 func (r *Router) Run() {
-	logger.DebugLogRequestReceived("router", "main", "Run")
 
 	port := ":" + r.Port
 	if err := r.App.Listen(port); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed to start server")
+		log.Fatal(err)
 	}
 }
 
 func (r *Router) configureMiddleware() {
+	// Create separate logger for fiber
 	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
-		Logger: &logger.Log,
+		Logger: &logger.Logger,
 	}))
 
 	r.App.Use(cors.New(cors.Config{
@@ -113,7 +114,11 @@ func (r *Router) configureRoutes() {
 	r.Repos.Posts.ConfigureRoutes(v1.Group("/posts"))
 	r.Repos.Users.ConfigureRoutes(v1.Group("/users"))
 
-	logger.Log.Info().Msg("Configured routes")
+	logger.Info(logger.LogMessage{
+		Package:  "router",
+		Function: "configureRoutes",
+		Message:  "routes configured",
+	})
 }
 
 func (r *Router) addAuth() {
@@ -152,6 +157,5 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 	}
 
 	c.Locals("requestorID", uuidPtr)
-	logger.DebugLogRequestUpdate("router", "extractRequestorID", "extractRequestorID", "parsed userID from token: "+uuidPtr.String())
 	return c.Next()
 }

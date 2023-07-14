@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/bwoff11/frens/internal/database"
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -17,7 +16,6 @@ func (ur *UserRepo) GetByID(c *fiber.Ctx, userID *uuid.UUID) error {
 }
 
 func (ur *UserRepo) Create(c *fiber.Ctx, req models.RegisterRequest) error {
-	logger.DebugLogRequestReceived("service", "user", "create")
 
 	// Convert request to user model
 	newUser, err := req.ToUser()

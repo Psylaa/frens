@@ -31,7 +31,6 @@ func main() {
 
 	// Initialize logger
 	logger.Init(configuration.Server.LogLevel)
-	configuration.Print() // Print the config. Necessary after logger is initialized
 
 	// Initialize router and start the server
 	// This will create a service, which will in turn create a database connection

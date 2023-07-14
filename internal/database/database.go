@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bwoff11/frens/internal/config"
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -44,25 +43,14 @@ type Like struct {
 }
 
 func New(cfg *config.Config) (*Database, error) {
-	logger.Log.Info().
-		Str("host", cfg.Database.Host).
-		Str("port", cfg.Database.Port).
-		Str("user", cfg.Database.User).
-		Str("password", cfg.Database.Password).
-		Str("dbname", cfg.Database.DBName).
-		Str("sslmode", cfg.Database.SSLMode).
-		Msg("Connecting to Postgres database")
 
 	dbinfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.DBName, cfg.Database.Password, cfg.Database.SSLMode)
 
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to connect to database")
 		return nil, err
 	}
-
-	logger.Log.Info().Msg("Successfully connected to Postgres database")
 
 	return initializeDatabase(db, cfg.Database.LogMode, cfg.Database.MaxIdleConns, cfg.Database.MaxOpenConns)
 }
@@ -74,7 +62,6 @@ func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConn
 	db.DB().SetMaxOpenConns(maxOpenConns)
 
 	db.AutoMigrate(&User{}, &Post{}, &Like{}, &Follow{}, &Block{}, &Bookmark{})
-	logger.Log.Info().Msg("Auto migration completed")
 
 	return &Database{
 		Posts:     NewPostRepo(db),

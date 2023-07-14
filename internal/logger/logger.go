@@ -4,38 +4,65 @@ import (
 	"os"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-var Log zerolog.Logger
+// Logger instance
+var Logger zerolog.Logger
 
+// LogMessage represents the details for a log message
+type LogMessage struct {
+	Package  string
+	Function string
+	Message  string
+}
+
+// Init initializes the logger
 func Init(level string) {
 	logLevel, _ := zerolog.ParseLevel(level)
 	zerolog.SetGlobalLevel(logLevel)
 
-	writer := zerolog.ConsoleWriter{Out: os.Stderr}
-	Log = zerolog.New(writer).With().Timestamp().Logger()
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 }
 
-func DebugLogRequestReceived(pack string, repo string, method string) {
-	Log.Debug().
-		Str("package", pack).
-		Str("repo", repo).
-		Str("method", method).
-		Msg("request received")
+// Debug logs a debug level message
+func Debug(logMessage LogMessage) {
+	Logger.Debug().
+		Str("package", logMessage.Package).
+		Str("function", logMessage.Function).
+		Msg(logMessage.Message)
 }
 
-func DebugLogRequestUpdate(pack string, repo string, method string, message string) {
-	Log.Debug().
-		Str("package", pack).
-		Str("repo", repo).
-		Str("method", method).
-		Msgf("request updated: %s", message)
+// Info logs an info level message
+func Info(logMessage LogMessage) {
+	Logger.Info().
+		Str("package", logMessage.Package).
+		Str("function", logMessage.Function).
+		Msg(logMessage.Message)
 }
 
-func ErrorLogRequestError(pack string, repo string, method string, message string, err error) {
-	Log.Error().Err(err).
-		Str("package", pack).
-		Str("repo", repo).
-		Str("method", method).
-		Msgf("error handling request: %s", message)
+// Warn logs a warning level message
+func Warn(logMessage LogMessage) {
+	Logger.Warn().
+		Str("package", logMessage.Package).
+		Str("function", logMessage.Function).
+		Msg(logMessage.Message)
+}
+
+// Error logs an error level message
+func Error(logMessage LogMessage, err error) {
+	Logger.Error().
+		Err(err).
+		Str("package", logMessage.Package).
+		Str("function", logMessage.Function).
+		Msg(logMessage.Message)
+}
+
+func Fatal(logMessage LogMessage, err error) {
+	Logger.Fatal().
+		Err(err).
+		Str("package", logMessage.Package).
+		Str("function", logMessage.Function).
+		Msg(logMessage.Message)
 }

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -27,7 +26,6 @@ func (fr *FeedRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /feeds/algorithmic [get]
 func (fr *FeedRepo) getAlgo(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "feed", "getAlgo")
 	return nil
 }
 
@@ -58,6 +56,5 @@ func (fr *FeedRepo) getChrono(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /feeds/explore [get]
 func (fr *FeedRepo) getExplore(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "feed", "getExplore")
 	return nil
 }

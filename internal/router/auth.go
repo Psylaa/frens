@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
@@ -51,7 +50,6 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /auth/logout [post]
 func (lr *AuthRepo) logout(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "Auth", "logout")
 
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -66,7 +64,6 @@ func (lr *AuthRepo) logout(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /auth/verify [get]
 func (lr *AuthRepo) verify(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "Auth", "verifyToken")
 
 	// If we've gotten this far, the token has already passed through the middleware and is valid
 	return c.SendStatus(fiber.StatusOK)
@@ -84,7 +81,6 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /auth/register [post]
 func (sr *AuthRepo) register(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "auth", "register")
 
 	var req models.RegisterRequest
 	if err := c.BodyParser(req); err != nil {

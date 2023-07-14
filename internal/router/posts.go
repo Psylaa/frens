@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -39,7 +38,6 @@ func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /posts [get]
 func (pr *PostsRepo) search(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "search")
 	return nil
 }
 
@@ -89,7 +87,6 @@ func (pr *PostsRepo) create(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{postID} [put]
 func (pr *PostsRepo) update(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "update")
 	return nil
 }
 
