@@ -1,11 +1,7 @@
 package router
 
 import (
-	"strconv"
-
 	"github.com/bwoff11/frens/internal/database"
-	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -41,25 +37,5 @@ func (br *BlockRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Security ApiKeyAuth
 // @Router /blocks [get]
 func (br *BlockRepo) get(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "blocks", "get")
-
-	// Get the query parameters
-	queryCount := c.Query("count", "")
-	queryOffset := c.Query("offset", "")
-
-	// Parse the query parameters
-	count, err := strconv.Atoi(queryCount)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing count parameter")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCount))
-	}
-
-	offset, err := strconv.Atoi(queryOffset)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing offset parameter")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidCount))
-	}
-
-	// Send to the service layer
-	return br.Srv.Blocks.Get(c, count, offset)
+	return nil
 }

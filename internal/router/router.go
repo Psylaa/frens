@@ -1,15 +1,12 @@
 package router
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/internal/config"
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/contrib/fiberzerolog"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -26,11 +23,10 @@ const (
 )
 
 type Router struct {
-	app    *fiber.App
-	config *config.Config
-	db     *database.Database
-	srv    *service.Service
-	repos  Repos
+	App       *fiber.App
+	Port      string
+	JWTSecret []byte
+	Repos     Repos
 }
 
 type Repos struct {
@@ -44,25 +40,33 @@ type Repos struct {
 }
 
 // New creates a new router instance
-func New(cfg *config.Config, db *database.Database, srv *service.Service) *Router {
-	app := fiber.New(fiber.Config{})
+func New(configuration *config.Config) *Router {
+
+	// Create service
+	service := service.New(configuration)
+
 	r := &Router{
-		app:    app,
-		config: cfg,
-		db:     db,
-		srv:    srv,
-		repos: Repos{
-			Auth:      NewAuthRepo(db, srv),
-			Bookmarks: NewBookmarksRepo(db, srv),
-			Feed:      NewFeedRepo(db, srv),
-			Follows:   NewFollowsRepo(db, srv),
-			Likes:     NewLikesRepo(db, srv),
-			Posts:     NewPostsRepo(db, srv),
-			Users:     NewUsersRepo(db, srv),
+		Repos: Repos{
+			Auth:      &AuthRepo{Service: service},
+			Bookmarks: &BookmarksRepo{Service: service},
+			Feed:      &FeedRepo{Service: service},
+			Follows:   &FollowsRepo{Service: service},
+			Likes:     &LikesRepo{Service: service},
+			Posts:     &PostsRepo{Service: service},
+			Users:     &UsersRepo{Service: service},
 		},
 	}
 
-	r.app.Get("/swagger/*", swagger.HandlerDefault)
+	// Store config values
+	r.Port = configuration.Server.Port
+	r.JWTSecret = []byte(configuration.Server.JWTSecret)
+
+	// Create fiber App
+	r.App = fiber.New(fiber.Config{
+		DisableStartupMessage: false,
+	})
+
+	r.App.Get("/swagger/*", swagger.HandlerDefault)
 
 	r.configureMiddleware()
 	r.configureRoutes()
@@ -72,64 +76,60 @@ func New(cfg *config.Config, db *database.Database, srv *service.Service) *Route
 
 // Run starts the server
 func (r *Router) Run() {
-	port := ":" + r.config.Server.Port
-	if err := r.app.Listen(port); err != nil {
+	logger.DebugLogRequestReceived("router", "main", "Run")
+
+	port := ":" + r.Port
+	if err := r.App.Listen(port); err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
 
 func (r *Router) configureMiddleware() {
-	r.app.Use(fiberzerolog.New(fiberzerolog.Config{
+	r.App.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: &logger.Log,
 	}))
 
-	r.app.Use(cors.New(cors.Config{
+	r.App.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
-	r.app.Use(limiter.New(limiter.Config{
+	r.App.Use(limiter.New(limiter.Config{
 		Max:        maxRequestsPerSecond,
 		Expiration: requestExpiration,
 	}))
 }
 
 func (r *Router) configureRoutes() {
-	v1 := r.app.Group("/v1")
+	v1 := r.App.Group("/v1")
 
-	r.repos.Auth.ConfigurePublicRoutes(v1.Group("/auth"))
+	r.Repos.Auth.ConfigurePublicRoutes(v1.Group("/auth"))
 	r.addAuth()
-	r.repos.Auth.ConfigureProtectedRoutes(v1.Group("/auth"))
-	r.repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
-	r.repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
-	r.repos.Follows.ConfigureRoutes(v1.Group("/follows"))
-	r.repos.Likes.ConfigureRoutes(v1.Group("/likes"))
-	r.repos.Posts.ConfigureRoutes(v1.Group("/posts"))
-	r.repos.Users.ConfigureRoutes(v1.Group("/users"))
+	r.Repos.Auth.ConfigureProtectedRoutes(v1.Group("/auth"))
+	r.Repos.Bookmarks.ConfigureRoutes(v1.Group("/bookmarks"))
+	r.Repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
+	r.Repos.Follows.ConfigureRoutes(v1.Group("/follows"))
+	r.Repos.Likes.ConfigureRoutes(v1.Group("/likes"))
+	r.Repos.Posts.ConfigureRoutes(v1.Group("/posts"))
+	r.Repos.Users.ConfigureRoutes(v1.Group("/users"))
 
 	logger.Log.Info().Msg("Configured routes")
 }
 
 func (r *Router) addAuth() {
-	r.app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(r.config.Server.JWTSecret)},
+	r.App.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: r.JWTSecret},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			if err.Error() == "Missing or malformed JWT" {
-				logger.Log.Warn().Msg("token is missing or malformed: " + err.Error())
-				return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
-			}
-			logger.Log.Warn().Msg("unknown token error: " + err.Error())
-			return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+			return models.ErrInvalidToken.SendResponse(c)
 		},
 	}))
 
-	r.app.Use(r.extractRequestorID)
+	r.App.Use(r.extractRequestorID)
 }
 
 func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 	if c.Locals("user") == nil {
-		logger.Log.Warn().Msg("no user in context of provided token")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		return models.ErrInvalidToken.SendResponse(c, "no user in context")
 	}
 
 	user := c.Locals("user").(*jwt.Token)
@@ -137,65 +137,21 @@ func (r *Router) extractRequestorID(c *fiber.Ctx) error {
 	sub, ok := claims["sub"].(string)
 
 	if !ok {
-		logger.Log.Warn().Msg("no sub claim in token")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		return models.ErrInvalidToken.SendResponse(c, "no sub claim in token")
 	}
 
 	userUUID, err := uuid.Parse(sub)
 	if err != nil {
-		logger.Log.Warn().Msg("invalid sub claim in token")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		return models.ErrInvalidToken.SendResponse(c, "invalid sub claim in token")
 	}
 
 	uuidPtr := &userUUID
 
 	if userUUID == uuid.Nil {
-		logger.Log.Warn().Msg("invalid sub claim in token")
-		return c.Status(fiber.StatusUnauthorized).JSON(response.CreateErrorResponse(response.ErrInvalidToken))
+		return models.ErrInvalidToken.SendResponse(c, "invalid sub claim in token")
 	}
 
 	c.Locals("requestorID", uuidPtr)
-
 	logger.DebugLogRequestUpdate("router", "extractRequestorID", "extractRequestorID", "parsed userID from token: "+uuidPtr.String())
 	return c.Next()
-}
-
-// Validation utility
-func validateRequest(v *validator.Validate, req interface{}) ([]map[string]interface{}, error) {
-	if err := v.Struct(req); err != nil {
-		// Convert the error into a validation.Errors object
-		errList := err.(validator.ValidationErrors)
-
-		// Create a new slice to hold the JSON API error objects
-		jsonErrs := createJsonApiErrors(errList)
-
-		// Return the error response
-		return jsonErrs, err
-	}
-	return nil, nil
-}
-
-// JSON API errors utility
-func createJsonApiErrors(errList validator.ValidationErrors) []map[string]interface{} {
-	jsonErrs := make([]map[string]interface{}, len(errList))
-
-	// Loop through the validation errors
-	for i, e := range errList {
-		// Create an error object
-		jsonErr := make(map[string]interface{})
-
-		jsonErr["status"] = "400"
-		jsonErr["source"] = map[string]string{"pointer": "/data/attributes/" + e.Field()}
-		jsonErr["title"] = "Invalid Attribute"
-
-		detail := fmt.Sprintf("%s validation failed on the '%s' tag", e.Field(), e.ActualTag())
-		if e.Param() != "" {
-			detail = fmt.Sprintf("%s validation failed on the '%s' tag, condition: %s", e.Field(), e.ActualTag(), e.Param())
-		}
-		jsonErr["detail"] = detail
-
-		jsonErrs[i] = jsonErr
-	}
-
-	return jsonErrs
 }

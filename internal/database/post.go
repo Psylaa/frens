@@ -26,6 +26,6 @@ type PostsRepo struct {
 	*BaseRepo[Post]
 }
 
-func NewPostsRepo(db *gorm.DB) Posts {
+func NewPostRepo(db *gorm.DB) Posts {
 	return &PostsRepo{NewBaseRepo[Post](db)}
 }

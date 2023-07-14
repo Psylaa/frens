@@ -1,14 +1,11 @@
 package service
 
 import (
-	"log"
-
 	"github.com/bwoff11/frens/internal/config"
 	"github.com/bwoff11/frens/internal/database"
 )
 
 type Service struct {
-	Auth      *AuthRepo
 	Blocks    *BlockRepo
 	Bookmarks *BookmarkRepo
 	Feed      *FeedRepo
@@ -17,22 +14,21 @@ type Service struct {
 	Users     *UserRepo
 }
 
-var db *database.Database
-var cfg *config.Config
+func New(configuration *config.Config) *Service {
 
-func New(database *database.Database, configuration *config.Config) *Service {
-	db = database
-	cfg = configuration
-
-	if db == nil {
-		log.Panic("Database pointer provided to service package is nil")
+	database, err := database.New(configuration)
+	if err != nil {
+		panic(err)
 	}
 
-	if cfg == nil {
-		log.Panic("Config pointer provided to service package is nil")
+	s := &Service{
+		Blocks:    &BlockRepo{Database: database},
+		Bookmarks: &BookmarkRepo{Database: database},
+		Feed:      &FeedRepo{Database: database},
+		Likes:     &LikeRepo{Database: database},
+		Posts:     &PostRepo{Database: database},
+		Users:     &UserRepo{Database: database},
 	}
 
-	return &Service{
-		Bookmarks: &BookmarkRepo{},
-	}
+	return s
 }

@@ -1,69 +1,24 @@
 basePath: /v1
 definitions:
-  response.BookmarkAttr:
-    properties:
-      createdAt:
-        type: string
-      postId:
-        type: string
-      userId:
-        type: string
-    type: object
-  response.BookmarkData:
-    properties:
-      attributes:
-        $ref: '#/definitions/response.BookmarkAttr'
-      id:
-        type: string
-      links:
-        $ref: '#/definitions/response.BookmarkLinks'
-      type:
-        $ref: '#/definitions/shared.DataType'
-    type: object
-  response.BookmarkLinks:
-    properties:
-      self:
-        type: string
-    type: object
-  response.BookmarkResponse:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/response.BookmarkData'
-        type: array
-    type: object
-  router.RegisterRequest:
+  models.RegisterRequest:
     properties:
       email:
         type: string
       password:
         type: string
       username:
-        maxLength: 24
-        minLength: 1
         type: string
-    required:
-    - password
-    - username
     type: object
-  shared.DataType:
-    enum:
-    - user
-    - post
-    - follow
-    - token
-    - bookmark
-    - like
-    - file
-    type: string
-    x-enum-varnames:
-    - DataTypeUser
-    - DataTypePost
-    - DataTypeFollow
-    - DataTypeToken
-    - DataTypeBookmark
-    - DataTypeLike
-    - DataTypeFile
+  models.UserResponse:
+    properties:
+      data:
+        items:
+          properties:
+            id:
+              type: string
+          type: object
+        type: array
+    type: object
 host: localhost:3001
 info:
   contact:
@@ -154,23 +109,23 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/router.RegisterRequest'
+          $ref: '#/definitions/models.RegisterRequest'
       - in: formData
         name: email
         type: string
       - in: formData
         name: password
-        required: true
         type: string
       - in: formData
-        maxLength: 24
-        minLength: 1
         name: username
-        required: true
         type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
         "400":
           description: Bad Request
         "500":
@@ -246,8 +201,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/response.BookmarkResponse'
         "400":
           description: Bad Request
         "401":
@@ -328,106 +281,6 @@ paths:
       summary: Retrieve Explore Feed
       tags:
       - Feed
-  /files:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a list of files uploaded by the authenticated user.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Retrieve User's Files
-      tags:
-      - Files
-    post:
-      consumes:
-      - multipart/form-data
-      description: Uploads a new file and assigns it to the authenticated user.
-      parameters:
-      - description: File to upload
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Upload File
-      tags:
-      - Files
-  /files/{fileID}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes the specified file from the authenticated user's uploaded
-        files.
-      parameters:
-      - description: File ID
-        in: path
-        name: fileID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Delete File
-      tags:
-      - Files
-    get:
-      consumes:
-      - application/json
-      description: Retrieves the specified file from the authenticated user's uploaded
-        files.
-      parameters:
-      - description: File ID
-        in: path
-        name: fileID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Retrieve File by ID
-      tags:
-      - Files
   /likes:
     get:
       consumes:
@@ -514,22 +367,12 @@ paths:
         required: true
         schema:
           type: string
-      - description: The text of the post
-        in: formData
-        name: text
-        required: true
-        type: string
       - description: The privacy setting of the post
         in: body
         name: privacy
         required: true
         schema:
           type: string
-      - description: The privacy setting of the post
-        in: formData
-        name: privacy
-        required: true
-        type: string
       - description: The UUIDs of the media files attached to the post
         in: body
         name: mediaIDs
@@ -537,13 +380,6 @@ paths:
           items:
             type: string
           type: array
-      - collectionFormat: csv
-        description: The UUIDs of the media files attached to the post
-        in: formData
-        items:
-          type: string
-        name: mediaIDs
-        type: array
       produces:
       - application/json
       responses:
@@ -1078,6 +914,30 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete User
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Get the authenticated user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get Self
       tags:
       - Users
     put:

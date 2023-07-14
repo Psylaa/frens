@@ -1,27 +1,13 @@
 package router
 
 import (
-	"fmt"
-
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
 	"github.com/bwoff11/frens/internal/service"
-	"github.com/bwoff11/frens/internal/shared"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type PostsRepo struct {
-	DB  *database.Database
-	Srv *service.Service
-}
-
-func NewPostsRepo(db *database.Database, srv *service.Service) *PostsRepo {
-	return &PostsRepo{
-		DB:  db,
-		Srv: srv,
-	}
+	Service *service.Service
 }
 
 func (pr *PostsRepo) ConfigureRoutes(rtr fiber.Router) {
@@ -71,23 +57,7 @@ func (pr *PostsRepo) search(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /posts/{postID} [get]
 func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "getByID")
-
-	// Parse the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer.
-	return pr.Srv.Posts.GetByID(c, &postID)
-}
-
-type CreatePostRequest struct {
-	Text     string   `json:"text"`
-	Privacy  string   `json:"privacy"`
-	MediaIDs []string `json:"mediaIDs"`
+	return nil
 }
 
 // @Summary Create a post
@@ -103,46 +73,7 @@ type CreatePostRequest struct {
 // @Failure 500
 // @Router /posts [post]
 func (pr *PostsRepo) create(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "create")
-
-	// Parse the request body
-	var req CreatePostRequest
-	if err := c.BodyParser(&req); err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	// Fill in default values
-	if req.Privacy == "" {
-		req.Privacy = string(shared.PrivacyPublic)
-	}
-
-	// Validate the request body
-	// Ensure one of text or media is provided
-	if req.Text == "" && len(req.MediaIDs) == 0 {
-		logger.Log.Error().Msg("no text or media provided in request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-	// Ensure the privacy setting is valid
-	privacy := shared.Privacy(req.Privacy)
-	if !privacy.IsValid() {
-		logger.Log.Error().Msg(fmt.Sprintf("invalid privacy setting provided in request body: %s", req.Privacy))
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	// Convert the media ID's to UUID's
-	mediaUUIDs := make([]*uuid.UUID, len(req.MediaIDs))
-	for i, id := range req.MediaIDs {
-		mediaID, err := uuid.Parse(id)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("error parsing media id")
-			return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-		}
-		mediaUUIDs[i] = &mediaID
-	}
-
-	// Send the request to the service layer
-	return pr.Srv.Posts.Create(c, req.Text, privacy, mediaUUIDs)
+	return nil
 }
 
 // @Summary Update a post
@@ -175,17 +106,7 @@ func (pr *PostsRepo) update(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{postID} [delete]
 func (pr *PostsRepo) delete(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "delete")
-	// Parse the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-	postIDPtr := &postID
-
-	// Send the request to the service layer.
-	return pr.Srv.Posts.Delete(c, postIDPtr)
+	return nil
 }
 
 // @Summary Bookmark a Post
@@ -201,17 +122,7 @@ func (pr *PostsRepo) delete(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{postID}/bookmarks [post]
 func (pr *PostsRepo) createBookmark(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "createBookmark")
-
-	// Get the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer.
-	return pr.Srv.Bookmarks.Create(c, &postID)
+	return nil
 }
 
 // @Summary Unbookmark a Post
@@ -227,17 +138,7 @@ func (pr *PostsRepo) createBookmark(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts/{postID}/bookmarks [delete]
 func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "deleteBookmark")
-
-	// Get the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer.
-	return pr.Srv.Bookmarks.Delete(c, &postID)
+	return nil
 }
 
 // @Summary Like a Post
@@ -254,17 +155,7 @@ func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /posts/{postID}/likes [post]
 func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "createLike")
-
-	// Get the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer.
-	return pr.Srv.Likes.Create(c, &postID)
+	return nil
 }
 
 // @Summary Unlike a Post
@@ -282,15 +173,5 @@ func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /posts/{postID}/likes/ [delete]
 func (pr *PostsRepo) deleteLike(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "posts", "deleteLike")
-
-	// Get the post ID from the URL parameter.
-	postID, err := uuid.Parse(c.Params("postID"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("error parsing post id")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidID))
-	}
-
-	// Send the request to the service layer.
-	return pr.Srv.Likes.Delete(c, &postID)
+	return nil
 }

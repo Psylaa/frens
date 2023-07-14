@@ -5,16 +5,16 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Users interface {
-	Base[User]
-}
-
 type User struct {
 	BaseModel
 	Username string `gorm:"unique"`
 	Email    string `gorm:"unique"`
 	Password string `gorm:"not null"`
 	Verified bool   `gorm:"default:false"`
+}
+
+type Users interface {
+	Base[User]
 }
 
 type UserRepo struct {

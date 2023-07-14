@@ -77,7 +77,7 @@ func initializeDatabase(db *gorm.DB, logMode bool, maxIdleConns int, maxOpenConn
 	logger.Log.Info().Msg("Auto migration completed")
 
 	return &Database{
-		Posts:     NewBaseRepo[Post](db),
+		Posts:     NewPostRepo(db),
 		Users:     NewUserRepo(db),
 		Blocks:    NewInteractorRepo[Block](db),
 		Bookmarks: NewInteractorRepo[Bookmark](db),

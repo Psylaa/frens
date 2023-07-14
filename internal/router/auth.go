@@ -1,34 +1,15 @@
 package router
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/microcosm-cc/bluemonday"
-
-	"github.com/bwoff11/frens/internal/database"
 	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/response"
+	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
 
 // AuthRepo struct represents the /Auth route.
 type AuthRepo struct {
-	DB  *database.Database
-	Srv *service.Service
-}
-
-type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=1,max=24"`
-	Email    string `json:"email" validate:"omitempty,email"`
-	Password string `json:"password" validate:"required"`
-}
-
-// NewAuthRepo creates a new AuthRepo instance.
-func NewAuthRepo(db *database.Database, srv *service.Service) *AuthRepo {
-	return &AuthRepo{
-		DB:  db,
-		Srv: srv,
-	}
+	Service *service.Service
 }
 
 func (lr *AuthRepo) ConfigurePublicRoutes(rtr fiber.Router) {
@@ -57,28 +38,7 @@ func (lr *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
 // @Failure 500
 // @Router /auth/login [post]
 func (lr *AuthRepo) login(c *fiber.Ctx) error {
-	logger.DebugLogRequestReceived("router", "Auth", "Auth")
-
-	// Parse body
-	var body struct {
-		Username string `form:"username" json:"username"`
-		Password string `form:"password" json:"password"`
-	}
-	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	// Sanitize input to prevent XSS attacks
-	p := bluemonday.UGCPolicy()
-	body.Username = p.Sanitize(body.Username)
-	body.Password = p.Sanitize(body.Password)
-
-	// Validate body
-	if body.Username == "" || body.Password == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidBody))
-	}
-
-	return lr.Srv.Auth.Login(c, body.Username, body.Password)
+	return nil
 }
 
 // @Summary Logout User
@@ -117,33 +77,19 @@ func (lr *AuthRepo) verify(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param user body RegisterRequest true "The user account to create"
-// @Param user formData RegisterRequest true "The user account to create"
+// @Param user body models.RegisterRequest true "The user account to create"
+// @Param user formData models.RegisterRequest true "The user account to create"
+// @Success 200 {object} models.UserResponse
 // @Failure 400
 // @Failure 500
 // @Router /auth/register [post]
 func (sr *AuthRepo) register(c *fiber.Ctx) error {
 	logger.DebugLogRequestReceived("router", "auth", "register")
 
-	// Parse the request body
-	req := new(RegisterRequest)
+	var req models.RegisterRequest
 	if err := c.BodyParser(req); err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.CreateErrorResponse(response.ErrInvalidUserID))
+		return models.ErrInvalidBody.SendResponse(c)
 	}
 
-	// Sanitize the input
-	p := bluemonday.UGCPolicy()
-	req.Username = p.Sanitize(req.Username)
-	req.Email = p.Sanitize(req.Email)
-	// Don't sanitize password - it might unintentionally change it.
-
-	// Validate using validator package
-	v := validator.New()
-	if jsonErrs, err := validateRequest(v, req); err != nil {
-		logger.Log.Error().Err(err).Msg("Validation error")
-		return c.Status(fiber.StatusBadRequest).JSON(map[string]interface{}{"errors": jsonErrs})
-	}
-
-	return sr.Srv.Users.Create(c, req.Username, req.Email, req.Password)
+	return sr.Service.Users.Create(c, req)
 }

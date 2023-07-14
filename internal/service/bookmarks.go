@@ -3,11 +3,14 @@ package service
 import (
 	"time"
 
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-type BookmarkRepo struct{}
+type BookmarkRepo struct {
+	Database *database.Database
+}
 
 func (br *BookmarkRepo) Get(c *fiber.Ctx, count int, cursor time.Time) error {
 	return c.SendStatus(fiber.StatusNotImplemented)

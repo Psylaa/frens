@@ -141,7 +141,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/router.RegisterRequest"
+                            "$ref": "#/definitions/models.RegisterRequest"
                         }
                     },
                     {
@@ -152,19 +152,21 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
-                        "maxLength": 24,
-                        "minLength": 1,
                         "type": "string",
                         "name": "username",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserResponse"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -287,10 +289,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.BookmarkResponse"
-                        }
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request"
@@ -398,162 +397,6 @@ const docTemplate = `{
                     "Feed"
                 ],
                 "summary": "Retrieve Explore Feed",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/files": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves a list of files uploaded by the authenticated user.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Files"
-                ],
-                "summary": "Retrieve User's Files",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Uploads a new file and assigns it to the authenticated user.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Files"
-                ],
-                "summary": "Upload File",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "File to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/files/{fileID}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves the specified file from the authenticated user's uploaded files.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Files"
-                ],
-                "summary": "Retrieve File by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "File ID",
-                        "name": "fileID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Deletes the specified file from the authenticated user's uploaded files.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Files"
-                ],
-                "summary": "Delete File",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "File ID",
-                        "name": "fileID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -703,13 +546,6 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "type": "string",
-                        "description": "The text of the post",
-                        "name": "text",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "description": "The privacy setting of the post",
                         "name": "privacy",
                         "in": "body",
@@ -717,13 +553,6 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "The privacy setting of the post",
-                        "name": "privacy",
-                        "in": "formData",
-                        "required": true
                     },
                     {
                         "description": "The UUIDs of the media files attached to the post",
@@ -735,16 +564,6 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "The UUIDs of the media files attached to the post",
-                        "name": "mediaIDs",
-                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1127,6 +946,44 @@ const docTemplate = `{
             }
         },
         "/users/self": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the authenticated user's profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get Self",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -1762,62 +1619,8 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "response.BookmarkAttr": {
+        "models.RegisterRequest": {
             "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "postId": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.BookmarkData": {
-            "type": "object",
-            "properties": {
-                "attributes": {
-                    "$ref": "#/definitions/response.BookmarkAttr"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "links": {
-                    "$ref": "#/definitions/response.BookmarkLinks"
-                },
-                "type": {
-                    "$ref": "#/definitions/shared.DataType"
-                }
-            }
-        },
-        "response.BookmarkLinks": {
-            "type": "object",
-            "properties": {
-                "self": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.BookmarkResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.BookmarkData"
-                    }
-                }
-            }
-        },
-        "router.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1826,32 +1629,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
-                    "type": "string",
-                    "maxLength": 24,
-                    "minLength": 1
+                    "type": "string"
                 }
             }
         },
-        "shared.DataType": {
-            "type": "string",
-            "enum": [
-                "user",
-                "post",
-                "follow",
-                "token",
-                "bookmark",
-                "like",
-                "file"
-            ],
-            "x-enum-varnames": [
-                "DataTypeUser",
-                "DataTypePost",
-                "DataTypeFollow",
-                "DataTypeToken",
-                "DataTypeBookmark",
-                "DataTypeLike",
-                "DataTypeFile"
-            ]
+        "models.UserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }`

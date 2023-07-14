@@ -1,11 +1,14 @@
 package service
 
 import (
+	"github.com/bwoff11/frens/internal/database"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-type LikeRepo struct{}
+type LikeRepo struct {
+	Database *database.Database
+}
 
 func (lr *LikeRepo) GetByID(c *fiber.Ctx, postID *uuid.UUID) error {
 	return c.SendStatus(fiber.StatusNotImplemented)
