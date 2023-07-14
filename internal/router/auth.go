@@ -1,8 +1,6 @@
 package router
 
 import (
-	"log"
-
 	"github.com/bwoff11/frens/internal/logger"
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
@@ -50,8 +48,6 @@ func (lr *AuthRepo) login(c *fiber.Ctx) error {
 	if err := c.BodyParser(req); err != nil {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())
 	}
-
-	log.Println(req.Password)
 
 	return lr.Service.Users.Login(c, req)
 }
