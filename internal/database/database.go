@@ -39,9 +39,11 @@ func New(cfg *config.Config) (*Database, error) {
 	gormDB.DB().SetMaxOpenConns(cfg.Database.MaxOpenConns)
 
 	gormDB.AutoMigrate(
+		&models.Block{},
 		&models.Bookmark{},
 		&models.Follow{},
 		&models.Like{},
+		&models.Post{},
 		&models.Post{},
 		&models.User{},
 	)

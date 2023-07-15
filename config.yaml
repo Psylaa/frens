@@ -12,7 +12,7 @@ database:
   user: user
   password: pass
   sslmode: disable
-  log_mode: false
+  log_mode: true
   max_idle_conns: 10
   max_open_conns: 100
 storage:

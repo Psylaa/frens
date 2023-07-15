@@ -6,8 +6,8 @@ import (
 )
 
 type CreatePostRequest struct {
-	Text    string  `json:"text"`
-	Privacy Privacy `json:"privacy"`
+	Text    string  `json:"text" validate:"max=2048"`
+	Privacy Privacy `json:"privacy" validate:"oneof=private public protected"`
 }
 
 func (req *CreatePostRequest) Sanitize() {
@@ -20,6 +20,7 @@ func (req *CreatePostRequest) Validate() error {
 }
 
 func (req *CreatePostRequest) ToPost(requestorID *uuid.UUID) (*Post, error) {
+
 	return &Post{
 		UserID:  *requestorID,
 		Privacy: req.Privacy,

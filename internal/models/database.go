@@ -70,10 +70,10 @@ func (u *User) ToResponse() *UserRespone {
 
 type Post struct {
 	BaseModel
-	UserID  uuid.UUID `gorm:"type:uuid;not null" json:"user_id"` // ID of the user who created the post
-	User    User      `json:"user"`                              // User who created the post
-	Text    string    `gorm:"type:text" json:"text"`             // Text content of the post
-	Privacy Privacy   `gorm:"default:public" json:"privacy"`     // Privacy of the post
+	UserID  uuid.UUID `gorm:"type:uuid;not null"`
+	User    User      `gorm:"foreignKey:UserID;references:ID"`
+	Text    string    `gorm:"type:text"`
+	Privacy Privacy   `gorm:""`
 }
 
 func (p *Post) ToResponse() *PostResponse {
