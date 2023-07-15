@@ -23,7 +23,9 @@ type PostData struct {
 }
 
 type PostAttributes struct {
-	Text string `json:"text"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+	Text      string `json:"text"`
 }
 
 type Relationship struct {

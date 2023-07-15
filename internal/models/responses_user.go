@@ -24,11 +24,13 @@ type UserData struct {
 }
 
 type UserAttributes struct {
-	Role      Role    `json:"role"`
-	Username  string  `json:"username"`
-	Bio       string  `json:"bio"`
-	Verrified bool    `json:"verified"`
-	Token     *string `json:"token,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Role      Role      `json:"role"`
+	Username  string    `json:"username"`
+	Bio       string    `json:"bio"`
+	Verrified bool      `json:"verified"`
+	Token     *string   `json:"token,omitempty"`
 }
 
 func (ur *UserResponse) AddToken(signingKey []byte, duration time.Duration) error {

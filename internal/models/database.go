@@ -38,9 +38,11 @@ func (u *User) ToResponseData() UserData {
 		Type: DataTypeUser,
 		ID:   u.ID,
 		Attributes: UserAttributes{
-			Role:     u.Role,
-			Username: u.Username,
-			Bio:      u.Bio,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+			Role:      u.Role,
+			Username:  u.Username,
+			Bio:       u.Bio,
 			//Verified: u.Verified,
 		},
 	}
@@ -59,7 +61,9 @@ func (p *Post) ToResponseData() (PostData, UserData) {
 		Type: DataTypePost,
 		ID:   p.ID,
 		Attributes: PostAttributes{
-			Text: p.Text,
+			CreatedAt: p.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: p.UpdatedAt.Format(time.RFC3339),
+			Text:      p.Text,
 		},
 		Relationships: Relationship{
 			User: RelationshipData{
