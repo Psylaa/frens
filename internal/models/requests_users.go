@@ -5,6 +5,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (lr *LoginRequest) Sanitize() {
+	p := bluemonday.UGCPolicy()
+	lr.Email = p.Sanitize(lr.Email)
+}
+
+func (lr *LoginRequest) Validate() error {
+	return ValidateStruct(lr)
+}
+
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
@@ -15,7 +29,6 @@ func (rr *RegisterRequest) Sanitize() {
 	p := bluemonday.UGCPolicy()
 	rr.Username = p.Sanitize(rr.Username)
 	rr.Email = p.Sanitize(rr.Email)
-	// Password is not sanitized as it will be hashed and we don't want to unintentionally alter it
 }
 
 func (rr *RegisterRequest) Validate() error {
@@ -34,4 +47,10 @@ func (rr *RegisterRequest) ToUser() (*User, error) {
 		Email:    rr.Email,
 		Password: string(hashedPassword),
 	}, nil
+}
+
+type UpdateUserRequest struct {
+	Bio      *string `json:"bio"`
+	AvatarID *string `json:"avatar_id"`
+	CoverID  *string `json:"cover_id"`
 }

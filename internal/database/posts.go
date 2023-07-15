@@ -30,7 +30,9 @@ func (r *PostRepository) Read(limit *int, cursor *time.Time, ids ...uuid.UUID) (
 		query = query.Where("id IN (?)", ids)
 	}
 
-	err := query.Find(&posts).Error
+	err := query.
+		Preload("User").
+		Find(&posts).Error
 	return posts, err
 }
 

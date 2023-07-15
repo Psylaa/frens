@@ -65,7 +65,6 @@ func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param text body string true "The text of the post"
-// @Param privacy body string true "The privacy setting of the post"
 // @Param mediaIDs body []string false "The UUIDs of the media files attached to the post"
 // @Success 200
 // @Failure 400

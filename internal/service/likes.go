@@ -6,9 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type LikeRepo struct {
-	Database *database.Database
-}
+type LikeRepo struct{ Database *database.Database }
 
 func (lr *LikeRepo) GetByID(c *fiber.Ctx, postID *uuid.UUID) error {
 	return c.SendStatus(fiber.StatusNotImplemented)
