@@ -34,15 +34,18 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	}
 
 	// Add default bio
-	newUser.SetBio(defaultBio)
+	newUser.Bio = defaultBio
 
 	// Create user in database
 	if err := ur.Database.Users.Create(newUser); err != nil {
 		return models.ErrInternalServerError.SendResponse(c, err.Error())
 	}
 
-	// Convert to response
-	resp := newUser.ToResponse()
+	// Convert to response data
+	respData := newUser.ToResponseData()
+
+	// Create response
+	resp := models.CreateUserResponse(respData)
 
 	// Add token
 	err = resp.AddToken(JWTSigningKey, JWTDuration)
@@ -51,7 +54,7 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 	}
 
 	// Send response
-	return resp.Send(c)
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
 func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
@@ -85,8 +88,11 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 		return models.ErrUnauthorized.SendResponse(c, "invalid password")
 	}
 
-	// Convert to response
-	resp := user.ToResponse()
+	// Convert to response data
+	respData := user.ToResponseData()
+
+	// Create response
+	resp := models.CreateUserResponse(respData)
 
 	// Add token
 	err = resp.AddToken(JWTSigningKey, JWTDuration)
@@ -95,5 +101,5 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 	}
 
 	// Send response
-	return resp.Send(c)
+	return c.Status(fiber.StatusOK).JSON(resp)
 }

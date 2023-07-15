@@ -33,26 +33,15 @@ func (u *User) CheckPassword(password string) error {
 	return err
 }
 
-func (u *User) SetBio(bio string) {
-	u.Bio = bio
-}
-
-func (u *User) ToResponse() *UserRespone {
-	return &UserRespone{
-		Links: UserLinks{
-			Self: "todo",
-		},
-		Data: []UserData{
-			{
-				Type: DataTypeUser,
-				ID:   u.ID,
-				Attributes: UserAttributes{
-					Role:      u.Role,
-					Username:  u.Username,
-					Bio:       u.Bio,
-					Verrified: u.Verified,
-				},
-			},
+func (u *User) ToResponseData() UserData {
+	return UserData{
+		Type: DataTypeUser,
+		ID:   u.ID,
+		Attributes: UserAttributes{
+			Role:     u.Role,
+			Username: u.Username,
+			Bio:      u.Bio,
+			//Verified: u.Verified,
 		},
 	}
 }
@@ -65,22 +54,26 @@ type Post struct {
 	Media  []Media   `json:"-"`
 }
 
-func (p *Post) ToResponse() *PostResponse {
-	return &PostResponse{
-		Links: PostLinks{
-			Self: "todo",
+func (p *Post) ToResponseData() (PostData, UserData) {
+	postData := PostData{
+		Type: DataTypePost,
+		ID:   p.ID,
+		Attributes: PostAttributes{
+			Text: p.Text,
 		},
-		Data: []PostData{
-			{
-				Type: DataTypePost,
-				ID:   p.ID,
-				Attributes: PostAttributes{
-					UserID: p.UserID,
-					Text:   p.Text,
+		Relationships: Relationship{
+			User: RelationshipData{
+				Data: RelationshipDetails{
+					Type: "user",
+					ID:   p.UserID,
 				},
 			},
 		},
 	}
+
+	userData := p.User.ToResponseData()
+
+	return postData, userData
 }
 
 type Follow struct {

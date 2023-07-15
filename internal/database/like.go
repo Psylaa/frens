@@ -10,8 +10,22 @@ import (
 
 type LikeRepository struct{ db *gorm.DB }
 
-func (r *LikeRepository) Create(like *models.Like) error {
-	return r.db.Create(like).Error
+func (r *LikeRepository) Create(like *models.Like) (*models.Like, error) {
+	if err := r.db.Create(like).Error; err != nil {
+		return nil, err
+	}
+
+	// Reload the like so that we can preload the user and post.
+	var loadedLike models.Like
+	if err := r.db.
+		Preload("User").
+		Preload("Post").
+		First(&loadedLike, "id = ?", like.ID).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return &loadedLike, nil
 }
 
 func (r *LikeRepository) Read(limit *int, cursor *time.Time, ids ...uuid.UUID) ([]models.Like, error) {

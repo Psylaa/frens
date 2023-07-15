@@ -10,8 +10,21 @@ import (
 
 type PostRepository struct{ db *gorm.DB }
 
-func (r *PostRepository) Create(post *models.Post) error {
-	return r.db.Create(post).Error
+func (r *PostRepository) Create(post *models.Post) (*models.Post, error) {
+	if err := r.db.Create(post).Error; err != nil {
+		return nil, err
+	}
+
+	// Reload the post so that we can preload the user.
+	var loadedPost models.Post
+	if err := r.db.
+		Preload("User").
+		First(&loadedPost, "id = ?", post.ID).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return &loadedPost, nil
 }
 
 func (r *PostRepository) Read(limit *int, cursor *time.Time, ids ...uuid.UUID) ([]models.Post, error) {

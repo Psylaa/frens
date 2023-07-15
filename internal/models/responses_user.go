@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserRespone struct {
+type UserResponse struct {
 	Links UserLinks  `json:"links"`
 	Data  []UserData `json:"data"`
 }
@@ -31,7 +31,7 @@ type UserAttributes struct {
 	Token     *string `json:"token,omitempty"`
 }
 
-func (ur *UserRespone) AddToken(signingKey []byte, duration time.Duration) error {
+func (ur *UserResponse) AddToken(signingKey []byte, duration time.Duration) error {
 	claims := jwt.MapClaims{
 		"name": ur.Data[0].Attributes.Username,
 		"sub":  ur.Data[0].ID.String(),
@@ -48,6 +48,6 @@ func (ur *UserRespone) AddToken(signingKey []byte, duration time.Duration) error
 	return nil
 }
 
-func (ur *UserRespone) Send(c *fiber.Ctx) error {
+func (ur *UserResponse) Send(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(ur)
 }

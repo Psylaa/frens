@@ -43,14 +43,14 @@ func (pr *PostRepo) Create(c *fiber.Ctx, req *models.CreatePostRequest) error {
 		return models.ErrInternalServerError.SendResponse(c)
 	}
 
-	// Create post in database
-	if err := pr.Database.Posts.Create(newPost); err != nil {
+	// Create post in database and get the post with preloaded user
+	newPost, err = pr.Database.Posts.Create(newPost)
+	if err != nil {
 		return models.ErrInternalServerError.SendResponse(c, err.Error())
 	}
 
-	// Convert to response
-	resp := newPost.ToResponse()
-
-	// Send response
-	return resp.Send(c)
+	// Convert to response and send
+	postData, userData := newPost.ToResponseData()
+	resp := models.CreatePostResponse(postData, userData)
+	return c.Status(fiber.StatusCreated).JSON(resp)
 }

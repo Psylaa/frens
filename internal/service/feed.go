@@ -25,16 +25,31 @@ func (f *FeedRepo) GetChrono(c *fiber.Ctx, req models.FeedRequest) error {
 		req.Cursor = &now
 	}
 
-	// Call the Read function from PostRepository using the provided or default values.
 	posts, err := f.Database.Posts.Read(req.Count, req.Cursor)
-
 	if err != nil {
-		// handle the error, maybe return a 500 status with some information
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to retrieve posts",
-		})
+		return models.ErrInternalServerError.SendResponse(c)
 	}
 
-	// If there's no error, send the posts as a response.
-	return c.Status(fiber.StatusOK).JSON(posts)
+	// Convert posts to response format and collect all users.
+	var data []models.PostData
+	var included []models.UserData
+	includedMap := make(map[string]struct{}) // Used to track included users.
+
+	for _, post := range posts {
+		postData, userData := post.ToResponseData()
+
+		// Check if user is already included.
+		if _, ok := includedMap[userData.ID.String()]; !ok {
+			// If not, add user to included slice and map.
+			included = append(included, userData)
+			includedMap[userData.ID.String()] = struct{}{}
+		}
+
+		// Add post data to data slice.
+		data = append(data, postData)
+	}
+
+	// Create and send response.
+	resp := models.CreateFeedResponse(data, included)
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
