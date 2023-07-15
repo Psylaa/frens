@@ -31,11 +31,11 @@ func (ar *AuthRepo) ConfigureProtectedRoutes(rtr fiber.Router) {
 // @Param email formData string true "Email"
 // @Param password body string true "Password"
 // @Param password formData string true "Password"
-// @Success 200 {object} models.UserResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 404 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
 // @Router /auth/login [post]
 func (ar *AuthRepo) login(c *fiber.Ctx) error {
 	logger.Debug(logger.LogMessage{
@@ -70,8 +70,8 @@ func (ar *AuthRepo) logout(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} models.UserRespone
-// @Failure 401 {object} models.ErrorResponse
+// @Success 200
+// @Failure 401
 // @Security ApiKeyAuth
 // @Router /auth/verify [get]
 func (ar *AuthRepo) verify(c *fiber.Ctx) error {
@@ -85,9 +85,9 @@ func (ar *AuthRepo) verify(c *fiber.Ctx) error {
 // @Produce json
 // @Param user body models.RegisterRequest true "The user account to create"
 // @Param user formData models.RegisterRequest true "The user account to create"
-// @Success 200 {object} models.UserRespone
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200
+// @Failure 400
+// @Failure 500
 // @Router /auth/register [post]
 func (ar *AuthRepo) register(c *fiber.Ctx) error {
 	logger.Debug(logger.LogMessage{

@@ -36,6 +36,7 @@ type Repos struct {
 	Feed      *FeedRepo
 	Follows   *FollowsRepo
 	Likes     *LikesRepo
+	Media     *MediaRepo
 	Posts     *PostsRepo
 	Users     *UsersRepo
 }
@@ -53,6 +54,7 @@ func New(configuration *config.Config) *Router {
 			Feed:      &FeedRepo{Service: service},
 			Follows:   &FollowsRepo{Service: service},
 			Likes:     &LikesRepo{Service: service},
+			Media:     &MediaRepo{Service: service},
 			Posts:     &PostsRepo{Service: service},
 			Users:     &UsersRepo{Service: service},
 		},
@@ -111,6 +113,7 @@ func (r *Router) configureRoutes() {
 	r.Repos.Feed.ConfigureRoutes(v1.Group("/feeds"))
 	r.Repos.Follows.ConfigureRoutes(v1.Group("/follows"))
 	r.Repos.Likes.ConfigureRoutes(v1.Group("/likes"))
+	r.Repos.Media.ConfigureRoutes(v1.Group("/media"))
 	r.Repos.Posts.ConfigureRoutes(v1.Group("/posts"))
 	r.Repos.Users.ConfigureRoutes(v1.Group("/users"))
 

@@ -19,13 +19,14 @@ const (
 type DataType string
 
 const (
-	DataTypeUser     DataType = "user"
-	DataTypePost     DataType = "post"
-	DataTypeFollow   DataType = "follow"
-	DataTypeToken    DataType = "token"
+	DataTypeBlock    DataType = "block"
 	DataTypeBookmark DataType = "bookmark"
+	DataTypeFollow   DataType = "follow"
 	DataTypeLike     DataType = "like"
-	DataTypeFile     DataType = "file"
+	DataTypeMedia    DataType = "media"
+	DataTypePost     DataType = "post"
+	DataTypeToken    DataType = "token"
+	DataTypeUser     DataType = "user"
 )
 
 type Role string

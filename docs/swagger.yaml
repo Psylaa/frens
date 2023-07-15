@@ -1,45 +1,11 @@
 basePath: /v1
 definitions:
-  models.Attributes:
-    type: object
-  models.Data:
-    properties:
-      attributes:
-        $ref: '#/definitions/models.Attributes'
-      id:
-        type: string
-      relationships:
-        $ref: '#/definitions/models.Relationships'
-      type:
-        $ref: '#/definitions/models.DataTypes'
-    type: object
-  models.DataTypes:
-    enum:
-    - users
-    type: string
-    x-enum-varnames:
-    - Users
-  models.Error:
-    properties:
-      detail:
-        type: string
-      status:
-        type: integer
-      title:
-        type: string
-    type: object
-  models.ErrorResponse:
-    properties:
-      errors:
-        items:
-          $ref: '#/definitions/models.Error'
-        type: array
-    type: object
   models.RegisterRequest:
     properties:
       email:
         type: string
       password:
+        minLength: 6
         type: string
       username:
         type: string
@@ -47,15 +13,6 @@ definitions:
     - email
     - password
     - username
-    type: object
-  models.Relationships:
-    type: object
-  models.Response:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/models.Data'
-        type: array
     type: object
 host: localhost:3001
 info:
@@ -107,24 +64,14 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
       summary: Authenticate User
       tags:
       - Auth
@@ -163,6 +110,7 @@ paths:
         required: true
         type: string
       - in: formData
+        minLength: 6
         name: password
         required: true
         type: string
@@ -175,16 +123,10 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
       summary: Register New User
       tags:
       - Auth
@@ -371,6 +313,80 @@ paths:
       summary: Search Likes
       tags:
       - Likes
+  /media:
+    post:
+      consumes:
+      - application/json
+      description: Create media
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Create Media
+      tags:
+      - Media
+  /media/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete media by ID
+      parameters:
+      - description: Media ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Media
+      tags:
+      - Media
+    get:
+      consumes:
+      - application/json
+      description: Retrieve media by ID
+      parameters:
+      - description: Media ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get Media
+      tags:
+      - Media
   /posts:
     get:
       consumes:
@@ -980,8 +996,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
         "401":

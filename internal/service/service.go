@@ -16,6 +16,7 @@ type Service struct {
 	Bookmarks *BookmarkRepo
 	Feed      *FeedRepo
 	Likes     *LikeRepo
+	Media     *MediaRepo
 	Posts     *PostRepo
 	Users     *UserRepo
 }
@@ -37,6 +38,7 @@ func New(configuration *config.Config) *Service {
 		Bookmarks: &BookmarkRepo{Database: database},
 		Feed:      &FeedRepo{Database: database},
 		Likes:     &LikeRepo{Database: database},
+		Media:     &MediaRepo{Database: database},
 		Posts:     &PostRepo{Database: database},
 		Users:     &UserRepo{Database: database},
 	}

@@ -16,6 +16,7 @@ type Database struct {
 	Bookmarks *BookmarkRepository
 	Follows   *FollowRepository
 	Likes     *LikeRepository
+	Media     *MediaRepository
 	Posts     *PostRepository
 	Users     *UserRepository
 }
@@ -43,6 +44,7 @@ func New(cfg *config.Config) (*Database, error) {
 		&models.Bookmark{},
 		&models.Follow{},
 		&models.Like{},
+		&models.Media{},
 		&models.Post{},
 		&models.Post{},
 		&models.User{},
@@ -54,6 +56,7 @@ func New(cfg *config.Config) (*Database, error) {
 		Bookmarks: &BookmarkRepository{db: gormDB},
 		Follows:   &FollowRepository{db: gormDB},
 		Likes:     &LikeRepository{db: gormDB},
+		Media:     &MediaRepository{db: gormDB},
 		Posts:     &PostRepository{db: gormDB},
 		Users:     &UserRepository{db: gormDB},
 	}, nil

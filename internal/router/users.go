@@ -42,7 +42,7 @@ func (ur *UsersRepo) search(c *fiber.Ctx) error {
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} models.Response
+// @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
