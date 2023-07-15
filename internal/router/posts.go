@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -71,7 +72,13 @@ func (pr *PostsRepo) getByID(c *fiber.Ctx) error {
 // @Failure 500
 // @Router /posts [post]
 func (pr *PostsRepo) create(c *fiber.Ctx) error {
-	return nil
+
+	var req models.CreatePostRequest
+	if err := c.BodyParser(&req); err != nil {
+		return models.ErrInvalidBody.SendResponse(c)
+	}
+
+	return pr.Service.Posts.Create(c, &req)
 }
 
 // @Summary Update a post

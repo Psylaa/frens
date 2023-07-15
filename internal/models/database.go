@@ -70,31 +70,47 @@ func (u *User) ToResponse() *UserRespone {
 
 type Post struct {
 	BaseModel
-	UserID uuid.UUID `gorm:"type:uuid;not null" json:"user_id"` // ID of the user who created the post
-	User   User      `json:"user"`                              // User who created the post
-	Text   string    `gorm:"type:text" json:"text"`             // Text content of the post
+	UserID  uuid.UUID `gorm:"type:uuid;not null" json:"user_id"` // ID of the user who created the post
+	User    User      `json:"user"`                              // User who created the post
+	Text    string    `gorm:"type:text" json:"text"`             // Text content of the post
+	Privacy Privacy   `gorm:"default:public" json:"privacy"`     // Privacy of the post
+}
+
+func (p *Post) ToResponse() *PostResponse {
+	return &PostResponse{
+		Links: PostLinks{
+			Self: "todo",
+		},
+		Data: []PostData{
+			{
+				Type: DataTypePost,
+				ID:   p.ID,
+				Attributes: PostAttributes{
+					UserID:  p.UserID,
+					Text:    p.Text,
+					Privacy: p.Privacy,
+				},
+			},
+		},
+	}
 }
 
 type Follow struct {
 	InteractorModel
-	Source User `gorm:"foreignKey:UserID"`
-	Target User `gorm:"foreignKey:UserID"`
 }
 
 type Like struct {
 	InteractorModel
-	Source User `gorm:"foreignKey:UserID"`
-	Target Post `gorm:"foreignKey:PostID"`
 }
 
 type Bookmark struct {
 	InteractorModel
-	Source User `gorm:"foreignKey:UserID"`
-	Target Post `gorm:"foreignKey:PostID"`
 }
 
 type Block struct {
 	InteractorModel
-	Source User `gorm:"foreignKey:UserID"`
-	Target User `gorm:"foreignKey:UserID"`
+}
+
+type Media struct {
+	InteractorModel
 }

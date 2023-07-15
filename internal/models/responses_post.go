@@ -23,7 +23,7 @@ type PostData struct {
 type PostAttributes struct {
 	UserID  uuid.UUID `json:"userId"`
 	Text    string    `json:"text"`
-	Privacy string    `json:"privacy"`
+	Privacy Privacy   `json:"privacy"`
 }
 
 func (pr *PostResponse) Send(c *fiber.Ctx) error {
