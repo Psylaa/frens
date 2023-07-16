@@ -3,7 +3,6 @@
 Welcome to Frens, a revolutionary decentralized social networking platform. Designed with a keen focus on performance, scalability, and an unwavering respect for user privacy, Frens delivers an elevated social media experience. Built with the power of Go, our platform stands as a lightweight, yet formidable solution, giving users unparalleled control over their data.
 
 - To get started, please check out our [wiki](https://github.com/bwoff11/frens/wiki).
-- To understand how everything works, read our [design philosophy](https://github.com/bwoff11/frens/wiki/Design-Philosophy)
 
 <p align="center">
   <img src="./assets/Demo1.png" alt="demo1" width="30%">
