@@ -1,14 +1,25 @@
 package service
 
 import (
+	"time"
+
 	"github.com/bwoff11/frens/models"
 	"github.com/bwoff11/frens/pkg/database"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/jsonapi"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService struct{ Database *database.Database }
+type AuthService struct {
+	Database    *database.Database
+	JWTSecret   []byte
+	JWTDuration int
+}
+
+type Token struct {
+	ID string `jsonapi:"primary,token"`
+}
 
 func (a *AuthService) Login(c *fiber.Ctx, email, password string) error {
 	var user models.User
@@ -27,7 +38,28 @@ func (a *AuthService) Login(c *fiber.Ctx, email, password string) error {
 		})
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"name":  "John Doe",
+		"admin": false,
+		"exp":   time.Now().Add(time.Hour * time.Duration(a.JWTDuration)).Unix(),
+	}
+
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	encryptedToken, err := token.SignedString(a.JWTSecret)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create token",
+		})
+	}
+
+	// Prepare the response
+	c.Response().Header.Set(fiber.HeaderContentType, jsonapi.MediaType)
+	c.Response().SetStatusCode(fiber.StatusOK)
+
+	// Respond with the user
+	return jsonapi.MarshalPayload(c.Response().BodyWriter(), &Token{ID: encryptedToken})
 }
 
 func (a *AuthService) Register(c *fiber.Ctx, username, email, password string) error {

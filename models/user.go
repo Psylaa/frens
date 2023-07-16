@@ -7,6 +7,6 @@ type User struct {
 	CreatedAt time.Time `jsonapi:"attr,createdAt"`
 	UpdatedAt time.Time `jsonapi:"attr,updatedAt"`
 	Username  string    `gorm:"not null;unique" jsonapi:"attr,username"`
-	Email     string    `gorm:"not null;unique" jsonapi:"attr,email"`
+	Email     string    `gorm:"not null;unique"`
 	Password  string    `gorm:"not null"`
 }

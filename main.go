@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	service := service.New(db)
+	service := service.New(db, &config.API)
 
 	router := router.New(service, &config.API)
 	router.Start()

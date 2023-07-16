@@ -1,6 +1,9 @@
 package service
 
-import "github.com/bwoff11/frens/pkg/database"
+import (
+	"github.com/bwoff11/frens/pkg/config"
+	"github.com/bwoff11/frens/pkg/database"
+)
 
 type Service struct {
 	Auth     *AuthService
@@ -14,9 +17,13 @@ type Service struct {
 	User     *UserService
 }
 
-func New(db *database.Database) *Service {
+func New(db *database.Database, config *config.APIConfig) *Service {
 	return &Service{
-		Auth:     &AuthService{Database: db},
+		Auth: &AuthService{
+			Database:    db,
+			JWTSecret:   []byte(config.TokenSecret),
+			JWTDuration: config.TokenDuration,
+		},
 		Block:    &BlockService{Database: db},
 		Bookmark: &BookmarkService{Database: db},
 		Feed:     &FeedService{Database: db},
