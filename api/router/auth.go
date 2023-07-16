@@ -15,5 +15,10 @@ func (a *AuthRepo) Login(c *fiber.Ctx) error {
 }
 
 func (a *AuthRepo) Register(c *fiber.Ctx) error {
-	return nil
+	var req RegisterRequest
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+	validate.Struct(req)
+	a.Service.Register(req.Username, req.Email, req.Password)
 }

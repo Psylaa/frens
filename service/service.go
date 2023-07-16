@@ -27,7 +27,6 @@ func New(db *database.Database) *Service {
 	return &Service{
 		Block:    block.New(db),
 		Bookmark: bookmark.New(db),
-		Feed:     feed.New(db),
 		Follow:   follow.New(db),
 		Like:     like.New(db),
 		Media:    media.New(db),

@@ -1,35 +1,15 @@
 package database
 
 import (
-	"time"
-
+	"github.com/bwoff11/frens/models"
 	"github.com/bwoff11/frens/pkg/config"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // DB represents a connection pool to the database.
 type Database struct {
-	Conn  *gorm.DB
-	Repos *Repositories
-}
-
-// Repositories represents the collections of Repo.
-type Repositories struct {
-	Block     *BlockRepo
-	Bookmarks *BookmarkRepo
-	Follows   *FollowRepo
-	Likes     *LikeRepo
-	Media     *MediaRepo
-	Posts     *PostRepo
-	Users     *UserRepo
-}
-
-type BaseModel struct {
-	ID        uuid.UUID `gorm:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Conn *gorm.DB
 }
 
 func New(config *config.DatabaseConfig) (*Database, error) {
@@ -50,41 +30,31 @@ func New(config *config.DatabaseConfig) (*Database, error) {
 
 	db.Conn.LogMode(config.LogMode)
 
-	db.Conn.Model(&Block{}).AddUniqueIndex("idx_block_user_blocked", "user_id", "blocked_id")
-	db.Conn.Model(&Bookmark{}).AddUniqueIndex("idx_bookmark_user_post", "user_id", "post_id")
-	db.Conn.Model(&Follow{}).AddUniqueIndex("idx_follow_user_followed", "user_id", "followed_id")
-	db.Conn.Model(&Like{}).AddUniqueIndex("idx_like_user_post", "user_id", "post_id")
+	db.Conn.Model(&models.Block{}).AddUniqueIndex("idx_block_user_blocked", "user_id", "blocked_id")
+	db.Conn.Model(&models.Bookmark{}).AddUniqueIndex("idx_bookmark_user_post", "user_id", "post_id")
+	db.Conn.Model(&models.Follow{}).AddUniqueIndex("idx_follow_user_followed", "user_id", "followed_id")
+	db.Conn.Model(&models.Like{}).AddUniqueIndex("idx_like_user_post", "user_id", "post_id")
 
 	if config.DevMode {
 		db.Conn.DropTableIfExists(
-			&Block{},
-			&Bookmark{},
-			&Follow{},
-			&Like{},
-			&Media{},
-			&Post{},
-			&User{})
+			&models.Block{},
+			&models.Bookmark{},
+			&models.Follow{},
+			&models.Like{},
+			&models.Media{},
+			&models.Post{},
+			&models.User{})
 	}
 
 	db.Conn.AutoMigrate(
-		&Block{},
-		&Bookmark{},
-		&Follow{},
-		&Like{},
-		&Media{},
-		&Post{},
-		&User{},
+		&models.Block{},
+		&models.Bookmark{},
+		&models.Follow{},
+		&models.Like{},
+		&models.Media{},
+		&models.Post{},
+		&models.User{},
 	)
-
-	db.Repos = &Repositories{
-		Block:     &BlockRepo{Conn: db.Conn},
-		Bookmarks: &BookmarkRepo{Conn: db.Conn},
-		Follows:   &FollowRepo{Conn: db.Conn},
-		Likes:     &LikeRepo{Conn: db.Conn},
-		Media:     &MediaRepo{Conn: db.Conn},
-		Posts:     &PostRepo{Conn: db.Conn},
-		Users:     &UserRepo{Conn: db.Conn},
-	}
 
 	return &db, nil
 }

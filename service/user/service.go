@@ -11,3 +11,17 @@ func New(db *database.Database) *Service {
 		Database: db,
 	}
 }
+
+func (s *Service) Register(username, email, password string) error {
+	newUser := &database.User{
+		Username: username,
+		Email:    email,
+		Password: password,
+	}
+
+	if err := s.Database.Conn.Create(newUser).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -3,8 +3,11 @@ package router
 import (
 	"github.com/bwoff11/frens/pkg/config"
 	"github.com/bwoff11/frens/service"
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
+
+var validate = validator.New()
 
 type Router struct {
 	App   *fiber.App
@@ -61,50 +64,51 @@ func (r *Router) Start() error {
 }
 
 func addRoutes(router *Router) {
-	addPrivateRoutes(router)
+	v1 := router.App.Group("/v1")
+	addPrivateRoutes(v1, router)
 	//middleware.AddAuthenticator(router.Token.Secret)
-	addPublicRoutes(router)
+	addPublicRoutes(v1, router)
 }
 
-func addPublicRoutes(router *Router) {
+func addPublicRoutes(v1 fiber.Router, router *Router) {
 	// Authentication routes
-	authGroup := router.App.Group("/auth")
+	authGroup := v1.Group("/auth")
 	authGroup.Post("/login", router.Repos.Auth.Login)
 	authGroup.Post("/register", router.Repos.Auth.Register)
 }
 
-func addPrivateRoutes(router *Router) {
+func addPrivateRoutes(v1 fiber.Router, router *Router) {
 	/*
 		// User routes
-		userGroup := app.Group("/user")
+		userGroup := v1.Group("/user")
 		userGroup.Get("/:id", router.Users.Get)
 		userGroup.Post("/", router.Users.Create)
 		userGroup.Put("/:id", router.Users.Update)
 		userGroup.Delete("/:id", router.Users.Delete)
 
 		// Like routes
-		likeGroup := app.Group("/like")
+		likeGroup := v1.Group("/like")
 		likeGroup.Post("/:postId", router.Likes.LikePost)
 		likeGroup.Delete("/:postId", router.Likes.UnlikePost)
 
 		// Bookmark routes
-		bookmarkGroup := app.Group("/bookmark")
+		bookmarkGroup := v1.Group("/bookmark")
 		bookmarkGroup.Post("/:postId", router.Bookmarks.BookmarkPost)
 		bookmarkGroup.Delete("/:postId", router.Bookmarks.UnbookmarkPost)
 
 		// Block routes
-		blockGroup := app.Group("/block")
+		blockGroup := v1.Group("/block")
 		blockGroup.Post("/:userId", router.Blocks.BlockUser)
 		blockGroup.Delete("/:userId", router.Blocks.UnblockUser)
 
 		// Feed routes
-		feedGroup := app.Group("/feed")
+		feedGroup := v1.Group("/feed")
 		feedGroup.Get("/chronological", router.Feed.Chronological)
 		feedGroup.Get("/algorithmic", router.Feed.Algorithmic)
 		feedGroup.Get("/explore", router.Feed.Explore)
 
 		// Media routes
-		mediaGroup := app.Group("/media")
+		mediaGroup := v1.Group("/media")
 		mediaGroup.Get("/:mediaId", router.Media.Get)
 		mediaGroup.Post("/", router.Media.Upload)
 		mediaGroup.Delete("/:mediaId", router.Media.Delete)
