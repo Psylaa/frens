@@ -4,8 +4,6 @@ Welcome to Frens, a revolutionary decentralized social networking platform. Desi
 
 - To get started, please check out our [wiki](https://github.com/bwoff11/frens/wiki).
 - To understand how everything works, read our [design philosophy](https://github.com/bwoff11/frens/wiki/Design-Philosophy)
-- To see what we're working on big picture, check out our [roadmap](https://github.com/users/bwoff11/projects/2/views/1).
-- Or, if you're feeling adventurous, you can dive right into the [specification](https://github.com/bwoff11/frens/blob/main/docs/swagger.yaml).
 
 <p align="center">
   <img src="./assets/Demo1.png" alt="demo1" width="30%">
@@ -20,7 +18,6 @@ This project wouldn't be possible without these awesome technologies:
 ### Languages and Tools
 
 - [Go](https://golang.org/): A statically typed, compiled language featuring type safety.
-- [cgo](https://golang.org/cmd/cgo/): A tool for creating Go bindings for C libraries.
 - [PostgreSQL](https://www.postgresql.org/): A free and open-source relational database system.
 
 ### Libraries
