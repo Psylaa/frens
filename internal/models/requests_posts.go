@@ -4,17 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/microcosm-cc/bluemonday"
 )
 
 type CreatePostRequest struct {
 	Text     string      `json:"text" validate:"max=2048"`
 	MediaIDs []uuid.UUID `json:"media_ids"`
-}
-
-func (req *CreatePostRequest) Sanitize() {
-	p := bluemonday.UGCPolicy()
-	req.Text = p.Sanitize(req.Text)
 }
 
 func (req *CreatePostRequest) Validate() error {

@@ -20,8 +20,7 @@ func (ur *UserRepo) Create(c *fiber.Ctx, req *models.RegisterRequest) error {
 		Message:  "Creating user: " + req.Username,
 	})
 
-	// Sanitize and validate request
-	req.Sanitize()
+	// Validate request
 	err := req.Validate()
 	if err != nil {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())
@@ -64,8 +63,7 @@ func (ur *UserRepo) Login(c *fiber.Ctx, req *models.LoginRequest) error {
 		Message:  "Logging in user: " + req.Email,
 	})
 
-	// Sanitize and validate request
-	req.Sanitize()
+	// Validate request
 	err := req.Validate()
 	if err != nil {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())

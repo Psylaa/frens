@@ -42,14 +42,11 @@ func (br *BookmarkRepository) Delete(id uuid.UUID) error {
 	return br.db.Where("id = ?", id).Delete(&models.Bookmark{}).Error
 }
 
-func (br *BookmarkRepository) GetBySourceID(id uuid.UUID) ([]models.Bookmark, error) {
-	var bookmarks []models.Bookmark
-	err := br.db.Where("source_id = ?", id).Find(&bookmarks).Error
-	return bookmarks, err
-}
-
-func (br *BookmarkRepository) GetByTargetID(id uuid.UUID) ([]models.Bookmark, error) {
-	var bookmarks []models.Bookmark
-	err := br.db.Where("target_id = ?", id).Find(&bookmarks).Error
-	return bookmarks, err
+func (br *BookmarkRepository) Exists(userID, postID *uuid.UUID) bool {
+	var count int
+	br.db.
+		Model(&models.Bookmark{}).
+		Where("user_id = ? AND post_id = ?", userID, postID).
+		Count(&count)
+	return count > 0
 }

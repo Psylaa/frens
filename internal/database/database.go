@@ -39,6 +39,11 @@ func New(cfg *config.Config) (*Database, error) {
 	gormDB.DB().SetMaxIdleConns(cfg.Database.MaxIdleConns)
 	gormDB.DB().SetMaxOpenConns(cfg.Database.MaxOpenConns)
 
+	gormDB.Model(&models.Block{}).AddUniqueIndex("idx_block_user_blocked", "user_id", "blocked_id")
+	gormDB.Model(&models.Bookmark{}).AddUniqueIndex("idx_bookmark_user_post", "user_id", "post_id")
+	gormDB.Model(&models.Follow{}).AddUniqueIndex("idx_follow_user_followed", "user_id", "followed_id")
+	gormDB.Model(&models.Like{}).AddUniqueIndex("idx_like_user_post", "user_id", "post_id")
+
 	gormDB.AutoMigrate(
 		&models.Block{},
 		&models.Bookmark{},

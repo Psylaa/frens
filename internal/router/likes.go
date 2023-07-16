@@ -19,14 +19,12 @@ func (lr *LikesRepo) ConfigureRoutes(rtr fiber.Router) {
 // @Tags Likes
 // @Accept  json
 // @Produce  json
-// @Param likeID query string false "Like ID"
 // @Param postID query string false "Post ID"
-// @Param userID query string false "User ID"
 // @Success 200
 // @Failure 401
 // @Failure 500
 // @Security ApiKeyAuth
 // @Router /likes [get]
 func (lr *LikesRepo) get(c *fiber.Ctx) error {
-	return nil
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{})
 }

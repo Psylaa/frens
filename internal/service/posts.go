@@ -19,8 +19,7 @@ func (pr *PostRepo) Create(c *fiber.Ctx, req *models.CreatePostRequest) error {
 		Message:  "Creating post",
 	})
 
-	// Sanitize and validate request
-	req.Sanitize()
+	// Validate request
 	err := req.Validate()
 	if err != nil {
 		return models.ErrInvalidBody.SendResponse(c, err.Error())
@@ -49,8 +48,17 @@ func (pr *PostRepo) Create(c *fiber.Ctx, req *models.CreatePostRequest) error {
 		return models.ErrInternalServerError.SendResponse(c, err.Error())
 	}
 
-	// Convert to response and send
+	// Convert to response data
 	postData, userData := newPost.ToResponseData()
+
+	// Manually set isLiked and isBookmarked
+	if exists := pr.Database.Likes.Exists(requestorID, &newPost.ID); exists {
+		postData.Attributes.IsLiked = true
+	}
+	if exists := pr.Database.Bookmarks.Exists(requestorID, &newPost.ID); exists {
+		postData.Attributes.IsBookmarked = true
+	}
+
 	resp := models.CreatePostResponse(postData, userData)
 	return c.Status(fiber.StatusCreated).JSON(resp)
 }

@@ -69,6 +69,11 @@ var (
 		Title:  "Invalid Password Length",
 		Detail: "The password provided is not long enough. It should be at least 8 characters.",
 	}
+	ErrInvalidPostID = &Error{
+		Status: fiber.StatusBadRequest,
+		Title:  "Invalid Post ID",
+		Detail: "The post ID provided is not valid. Please check the ID and try again.",
+	}
 
 	// Authentication and Authorization errors
 	ErrInvalidToken = &Error{

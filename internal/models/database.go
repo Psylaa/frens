@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,7 +44,6 @@ func (u *User) ToResponseData() UserData {
 			Role:      u.Role,
 			Username:  u.Username,
 			Bio:       u.Bio,
-			//Verified: u.Verified,
 		},
 	}
 }
@@ -66,7 +66,10 @@ func (p *Post) ToResponseData() (PostData, UserData) {
 			Text:      p.Text,
 		},
 		Relationships: Relationship{
-			User: RelationshipData{
+			User: &RelationshipData{
+				Links: RelationshipLinks{
+					Self: fmt.Sprintf("/users/%s", p.UserID),
+				},
 				Data: RelationshipDetails{
 					Type: "user",
 					ID:   p.UserID,
@@ -89,7 +92,42 @@ type Follow struct {
 type Like struct {
 	BaseModel
 	UserID uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	User   *User     `gorm:"foreignKey:UserID;references:ID" json:"-"`
 	PostID uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	Post   *Post     `gorm:"foreignKey:PostID;references:ID" json:"-"`
+}
+
+func (l *Like) ToResponseData() LikeData {
+	likeData := LikeData{
+		Type: DataTypeLike,
+		ID:   l.ID,
+		Attributes: LikeAttributes{
+			CreatedAt: l.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: l.UpdatedAt.Format(time.RFC3339),
+		},
+		Relationships: Relationship{
+			User: &RelationshipData{
+				Links: RelationshipLinks{
+					Self: fmt.Sprintf("/users/%s", l.UserID),
+				},
+				Data: RelationshipDetails{
+					Type: DataTypeUser,
+					ID:   l.UserID,
+				},
+			},
+			Post: &RelationshipData{
+				Links: RelationshipLinks{
+					Self: fmt.Sprintf("/posts/%s", l.PostID),
+				},
+				Data: RelationshipDetails{
+					Type: DataTypePost,
+					ID:   l.PostID,
+				},
+			},
+		},
+	}
+
+	return likeData
 }
 
 type Bookmark struct {

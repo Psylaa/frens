@@ -2,28 +2,52 @@ package service
 
 import (
 	"github.com/bwoff11/frens/internal/database"
+	"github.com/bwoff11/frens/internal/logger"
+	"github.com/bwoff11/frens/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 type LikeRepo struct{ Database *database.Database }
 
-func (lr *LikeRepo) GetByID(c *fiber.Ctx, postID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
-}
+func (lr *LikeRepo) Create(c *fiber.Ctx, req *models.CreateLikeRequest) error {
+	logger.Debug(logger.LogMessage{
+		Package:  "service",
+		Function: "LikeRepo.Create",
+		Message:  "Creating like",
+	})
 
-func (lr *LikeRepo) GetByPostID(c *fiber.Ctx, postID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
-}
+	// Validate request
+	err := req.Validate()
+	if err != nil {
+		return models.ErrInvalidBody.SendResponse(c, err.Error())
+	}
 
-func (lr *LikeRepo) GetByPostIDAndUserID(c *fiber.Ctx, postID *uuid.UUID, userID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
-}
+	// Get requesting user
+	requestorID, ok := c.Locals("requestorID").(*uuid.UUID)
+	if !ok {
+		logger.Error(logger.LogMessage{
+			Package:  "service",
+			Function: "LikeRepo.Create",
+			Message:  "Error parsing requestorID from context.",
+		}, nil)
+		return models.ErrInternalServerError.SendResponse(c, "Error parsing requestorID from context.")
+	}
 
-func (lr *LikeRepo) Create(c *fiber.Ctx, postID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
-}
+	// Convert request to like
+	newLike, err := req.ToLike(requestorID)
+	if err != nil {
+		return models.ErrInternalServerError.SendResponse(c)
+	}
 
-func (lr *LikeRepo) Delete(c *fiber.Ctx, postID *uuid.UUID) error {
-	return c.SendStatus(fiber.StatusNotImplemented)
+	// Create like in database and get the like with preloaded user
+	newLike, err = lr.Database.Likes.Create(newLike)
+	if err != nil {
+		return models.ErrInternalServerError.SendResponse(c, err.Error())
+	}
+
+	// Convert to response and send
+	likeData := newLike.ToResponseData()
+	resp := models.CreateLikeResponse(likeData)
+	return c.Status(fiber.StatusCreated).JSON(resp)
 }

@@ -11,7 +11,6 @@ type FeedLinks struct {
 }
 
 func CreateFeedResponse(data []PostData, included []UserData) *FeedResponse {
-	// Create links
 	links := FeedLinks{
 		Self: "/feed",
 	}

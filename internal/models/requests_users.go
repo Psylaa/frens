@@ -10,11 +10,6 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
-func (lr *LoginRequest) Sanitize() {
-	p := bluemonday.UGCPolicy()
-	lr.Email = p.Sanitize(lr.Email)
-}
-
 func (lr *LoginRequest) Validate() error {
 	return ValidateStruct(lr)
 }

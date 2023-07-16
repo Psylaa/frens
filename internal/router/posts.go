@@ -4,6 +4,7 @@ import (
 	"github.com/bwoff11/frens/internal/models"
 	"github.com/bwoff11/frens/internal/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type PostsRepo struct {
@@ -158,7 +159,16 @@ func (pr *PostsRepo) deleteBookmark(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /posts/{postID}/likes [post]
 func (pr *PostsRepo) createLike(c *fiber.Ctx) error {
-	return nil
+	postIDStr := c.Params("postID")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		return models.ErrInvalidPostID.SendResponse(c)
+	}
+
+	var req models.CreateLikeRequest
+	req.PostID = postID
+
+	return pr.Service.Likes.Create(c, &req)
 }
 
 // @Summary Unlike a Post

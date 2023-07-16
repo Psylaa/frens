@@ -23,22 +23,11 @@ type PostData struct {
 }
 
 type PostAttributes struct {
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
-	Text      string `json:"text"`
-}
-
-type Relationship struct {
-	User RelationshipData `json:"user"`
-}
-
-type RelationshipData struct {
-	Data RelationshipDetails `json:"data"`
-}
-
-type RelationshipDetails struct {
-	Type string    `json:"type"`
-	ID   uuid.UUID `json:"id"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+	Text         string `json:"text"`
+	IsLiked      bool   `json:"isLiked"`
+	IsBookmarked bool   `json:"isBookmarked"`
 }
 
 func (pr *PostResponse) Send(c *fiber.Ctx) error {

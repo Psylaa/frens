@@ -44,6 +44,7 @@ func (r *PostRepository) Read(limit *int, cursor *time.Time, ids ...uuid.UUID) (
 	}
 
 	err := query.
+		Order("created_at DESC").
 		Preload("User").
 		Find(&posts).Error
 	return posts, err

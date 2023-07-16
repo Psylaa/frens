@@ -48,14 +48,15 @@ func (r *LikeRepository) Read(limit *int, cursor *time.Time, ids ...uuid.UUID) (
 	return likes, err
 }
 
-func (r *LikeRepository) GetBySourceID(id uuid.UUID) ([]models.Like, error) {
-	var likes []models.Like
-	err := r.db.Where("source_id = ?", id).Find(&likes).Error
-	return likes, err
+func (r *LikeRepository) Delete(like *models.Like) error {
+	return r.db.Delete(like).Error
 }
 
-func (r *LikeRepository) GetByTargetID(id uuid.UUID) ([]models.Like, error) {
-	var likes []models.Like
-	err := r.db.Where("target_id = ?", id).Find(&likes).Error
-	return likes, err
+func (r *LikeRepository) Exists(userID, postID *uuid.UUID) bool {
+	var count int
+	r.db.
+		Model(&models.Like{}).
+		Where("user_id = ? AND post_id = ?", userID, postID).
+		Count(&count)
+	return count > 0
 }
