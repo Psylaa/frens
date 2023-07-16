@@ -10,7 +10,7 @@ database:
   password: pass
   log_mode: true
   ssl_mode: disable
-  dev_mode: false # For testing. This will wipe the database on startup. Do not use in production for obvious reasons.
+  dev_mode: true # For testing. This will wipe the database on startup. Do not use in production for obvious reasons.
 
 handlers:
   port: "32500"

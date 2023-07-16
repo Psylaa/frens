@@ -81,10 +81,10 @@ func addRoutes(router *Router) {
 	}))
 
 	router.Repos.Auth.addPrivateRoutes(v1)
-	//router.Repos.Bookmarks.addPrivateRoutes(v1)
+	router.Repos.Bookmarks.addPrivateRoutes(v1)
 	router.Repos.Feed.addPrivateRoutes(v1)
 	//router.Repos.Follows.addPrivateRoutes(v1)
-	//router.Repos.Likes.addPrivateRoutes(v1)
+	router.Repos.Likes.addPrivateRoutes(v1)
 	//router.Repos.Media.addPrivateRoutes(v1)
 	router.Repos.Posts.addPrivateRoutes(v1)
 	//router.Repos.Users.addPrivateRoutes(v1)

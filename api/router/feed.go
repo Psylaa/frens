@@ -11,9 +11,6 @@ type FeedRepo struct {
 	Service *service.FeedService
 }
 
-func (fr *FeedRepo) addPublicRoutes(rtr fiber.Router) {
-}
-
 func (fr *FeedRepo) addPrivateRoutes(rtr fiber.Router) {
 	grp := rtr.Group("/feeds")
 	//grp.Get("/algorithmic", fr.getAlgorithmic)
