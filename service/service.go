@@ -1,8 +1,12 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/bwoff11/frens/pkg/config"
 	"github.com/bwoff11/frens/pkg/database"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service struct {
@@ -33,4 +37,22 @@ func New(db *database.Database, config *config.APIConfig) *Service {
 		Post:     &PostService{Database: db},
 		User:     &UserService{Database: db},
 	}
+}
+
+func getRequestorID(c *fiber.Ctx) (uint32, error) {
+	// Retrieve the user from the JWT
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return 0, fiber.ErrUnauthorized
+	}
+
+	// Convert the user ID to a uint32
+	var id uint32
+	if _, err := fmt.Sscanf(sub, "%d", &id); err != nil {
+		return 0, fiber.ErrUnauthorized
+	}
+
+	return id, nil
 }

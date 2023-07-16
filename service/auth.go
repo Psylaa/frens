@@ -93,19 +93,14 @@ func (a *AuthService) Register(c *fiber.Ctx, username, email, password string) e
 }
 
 func (a *AuthService) Refresh(c *fiber.Ctx) error {
-	// Retrieve the user from the JWT
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	sub, ok := claims["sub"].(string)
-	if !ok {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to read token",
-		})
+	userID, err := getRequestorID(c)
+	if err != nil {
+		return err
 	}
 
 	// Create the Claims
 	newClaims := jwt.MapClaims{
-		"sub": sub,
+		"sub": userID,
 		"exp": time.Now().Add(time.Hour * time.Duration(a.JWTDuration)).Unix(),
 	}
 

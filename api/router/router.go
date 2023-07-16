@@ -75,6 +75,7 @@ func addRoutes(router *Router) {
 	}))
 
 	router.Repos.Auth.addPrivateRoutes(v1)
+	router.Repos.Posts.addPrivateRoutes(v1)
 }
 
 /*
