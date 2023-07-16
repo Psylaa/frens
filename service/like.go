@@ -48,11 +48,24 @@ func (ls *LikeService) LikePost(c *fiber.Ctx, postID uint32) error {
 		})
 	}
 
+	// Preload User and Post on the newly created Like
+	if err := ls.Database.Conn.
+		Preload("User").
+		Preload("Post").
+		Preload("Post.User").
+		First(&newLike, newLike.ID).
+		Error; err != nil {
+		// Log and handle error here
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve the like",
+		})
+	}
+
 	// Set the content type to application/vnd.api+json
 	c.Response().Header.Set(fiber.HeaderContentType, jsonapi.MediaType)
 
 	// Marshal the like into JSON API format
-	if err := jsonapi.MarshalPayloadWithoutIncluded(c.Response().BodyWriter(), &newLike); err != nil {
+	if err := jsonapi.MarshalPayload(c.Response().BodyWriter(), &newLike); err != nil {
 		// Log and handle error here
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to marshal the like",
@@ -76,10 +89,25 @@ func (ls *LikeService) UnlikePost(c *fiber.Ctx, postID uint32) error {
 
 	// Find the Like in the database
 	var existingLike models.Like
-	if err := ls.Database.Conn.Where("user_id = ? AND post_id = ?", userID, postID).First(&existingLike).Error; err != nil {
+	if err := ls.Database.Conn.
+		Preload("User").
+		Preload("Post").
+		Preload("Post.User").
+		Where("user_id = ? AND post_id = ?", userID, postID).First(&existingLike).Error; err != nil {
 		// Log and handle error here
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to find the like",
+		})
+	}
+
+	// Set the content type to application/vnd.api+json
+	c.Response().Header.Set(fiber.HeaderContentType, jsonapi.MediaType)
+
+	// Marshal the like into JSON API format
+	if err := jsonapi.MarshalPayload(c.Response().BodyWriter(), &existingLike); err != nil {
+		// Log and handle error here
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to marshal the like",
 		})
 	}
 
@@ -88,17 +116,6 @@ func (ls *LikeService) UnlikePost(c *fiber.Ctx, postID uint32) error {
 		// Log and handle error here
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to unlike a post",
-		})
-	}
-
-	// Set the content type to application/vnd.api+json
-	c.Response().Header.Set(fiber.HeaderContentType, jsonapi.MediaType)
-
-	// Marshal the like into JSON API format
-	if err := jsonapi.MarshalPayloadWithoutIncluded(c.Response().BodyWriter(), &existingLike); err != nil {
-		// Log and handle error here
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to marshal the like",
 		})
 	}
 
