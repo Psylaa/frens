@@ -1,12 +1,12 @@
 package models
 
-import (
-	"github.com/jinzhu/gorm"
-)
+import "time"
 
 type User struct {
-	gorm.Model
-	Username string `gorm:"not null;unique" jsonapi:"attr,username"`
-	Email    string `gorm:"not null;unique" jsonapi:"attr,email"`
-	Password string `gorm:"not null" jsonapi:"attr,password"`
+	ID        uint32    `gorm:"primary_key;auto_increment" jsonapi:"primary,user"`
+	CreatedAt time.Time `jsonapi:"attr,createdAt"`
+	UpdatedAt time.Time `jsonapi:"attr,updatedAt"`
+	Username  string    `gorm:"not null;unique" jsonapi:"attr,username"`
+	Email     string    `gorm:"not null;unique" jsonapi:"attr,email"`
+	Password  string    `gorm:"not null"`
 }

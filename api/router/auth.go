@@ -11,7 +11,12 @@ type AuthRepo struct {
 }
 
 func (a *AuthRepo) Login(c *fiber.Ctx) error {
-	return nil
+	var req LoginRequest
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+	validate.Struct(req)
+	return a.Service.Login(c, req.Email, req.Password)
 }
 
 func (a *AuthRepo) Register(c *fiber.Ctx) error {
@@ -20,5 +25,5 @@ func (a *AuthRepo) Register(c *fiber.Ctx) error {
 		return err
 	}
 	validate.Struct(req)
-	return a.Service.Register(req.Username, req.Email, req.Password)
+	return a.Service.Register(c, req.Username, req.Email, req.Password)
 }
