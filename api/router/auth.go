@@ -1,13 +1,13 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/user"
+	"github.com/bwoff11/frens/service"
 	"github.com/gofiber/fiber/v2"
 )
 
 // AuthRepo struct represents the /Auth route.
 type AuthRepo struct {
-	Service *user.Service
+	Service *service.AuthService
 }
 
 func (a *AuthRepo) Login(c *fiber.Ctx) error {
@@ -20,5 +20,5 @@ func (a *AuthRepo) Register(c *fiber.Ctx) error {
 		return err
 	}
 	validate.Struct(req)
-	a.Service.Register(req.Username, req.Email, req.Password)
+	return a.Service.Register(req.Username, req.Email, req.Password)
 }

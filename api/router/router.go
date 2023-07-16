@@ -37,7 +37,7 @@ func New(service *service.Service, config *config.APIConfig) *Router {
 		App:  app,
 		Port: config.Port,
 		Repos: Repos{
-			Auth:      &AuthRepo{Service: service.User},
+			Auth:      &AuthRepo{Service: service.Auth},
 			Bookmarks: &BookmarksRepo{Service: service.Bookmark},
 			Feed:      &FeedRepo{Service: service.Feed},
 			Follows:   &FollowsRepo{Service: service.Follow},

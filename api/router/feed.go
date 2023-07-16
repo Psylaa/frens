@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/feed"
+	"github.com/bwoff11/frens/service"
 )
 
 type FeedRepo struct {
-	Service *feed.Service
+	Service *service.FeedService
 }

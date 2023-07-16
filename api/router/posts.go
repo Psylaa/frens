@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/post"
+	"github.com/bwoff11/frens/service"
 )
 
 type PostsRepo struct {
-	Service *post.Service
+	Service *service.PostService
 }

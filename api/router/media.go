@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/media"
+	"github.com/bwoff11/frens/service"
 )
 
 type MediaRepo struct {
-	Service *media.Service
+	Service *service.MediaService
 }

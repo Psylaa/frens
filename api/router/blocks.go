@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/block"
+	"github.com/bwoff11/frens/service"
 )
 
 type BlockRepo struct {
-	Service *block.Service
+	Service *service.BlockService
 }

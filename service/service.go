@@ -1,36 +1,29 @@
 package service
 
-import (
-	"github.com/bwoff11/frens/pkg/database"
-	"github.com/bwoff11/frens/service/block"
-	"github.com/bwoff11/frens/service/bookmark"
-	"github.com/bwoff11/frens/service/feed"
-	"github.com/bwoff11/frens/service/follow"
-	"github.com/bwoff11/frens/service/like"
-	"github.com/bwoff11/frens/service/media"
-	"github.com/bwoff11/frens/service/post"
-	"github.com/bwoff11/frens/service/user"
-)
+import "github.com/bwoff11/frens/pkg/database"
 
 type Service struct {
-	Block    *block.Service
-	Bookmark *bookmark.Service
-	Feed     *feed.Service
-	Follow   *follow.Service
-	Like     *like.Service
-	Media    *media.Service
-	Post     *post.Service
-	User     *user.Service
+	Auth     *AuthService
+	Block    *BlockService
+	Bookmark *BookmarkService
+	Feed     *FeedService
+	Follow   *FollowService
+	Like     *LikeService
+	Media    *MediaService
+	Post     *PostService
+	User     *UserService
 }
 
 func New(db *database.Database) *Service {
 	return &Service{
-		Block:    block.New(db),
-		Bookmark: bookmark.New(db),
-		Follow:   follow.New(db),
-		Like:     like.New(db),
-		Media:    media.New(db),
-		Post:     post.New(db),
-		User:     user.New(db),
+		Auth:     &AuthService{Database: db},
+		Block:    &BlockService{Database: db},
+		Bookmark: &BookmarkService{Database: db},
+		Feed:     &FeedService{Database: db},
+		Follow:   &FollowService{Database: db},
+		Like:     &LikeService{Database: db},
+		Media:    &MediaService{Database: db},
+		Post:     &PostService{Database: db},
+		User:     &UserService{Database: db},
 	}
 }

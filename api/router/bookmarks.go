@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/bookmark"
+	"github.com/bwoff11/frens/service"
 )
 
 type BookmarksRepo struct {
-	Service *bookmark.Service
+	Service *service.BookmarkService
 }

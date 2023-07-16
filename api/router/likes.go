@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/bwoff11/frens/service/like"
+	"github.com/bwoff11/frens/service"
 )
 
 type LikesRepo struct {
-	Service *like.Service
+	Service *service.LikeService
 }
