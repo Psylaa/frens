@@ -2,11 +2,10 @@
 package main
 
 import (
-	"log"
-
-	"github.com/bwoff11/frens/internal/config"
-	"github.com/bwoff11/frens/internal/logger"
-	"github.com/bwoff11/frens/internal/router"
+	"github.com/bwoff11/frens/api/router"
+	"github.com/bwoff11/frens/pkg/config"
+	"github.com/bwoff11/frens/pkg/database"
+	"github.com/bwoff11/frens/service"
 )
 
 // @title Frens API
@@ -23,17 +22,18 @@ import (
 // @host localhost:3001
 // @BasePath /v1
 func main() {
-	// Read the config
-	configuration, err := config.ReadConfig("config.yaml")
+	config, err := config.Load()
 	if err != nil {
-		log.Fatalf("Error reading config: %v", err)
+		panic(err)
 	}
 
-	// Initialize logger
-	logger.Init(configuration.Server.LogLevel)
+	db, err := database.New(&config.Database)
+	if err != nil {
+		panic(err)
+	}
 
-	// Initialize router and start the server
-	// This will create a service, which will in turn create a database connection
-	router := router.New(configuration)
-	router.Run()
+	service := service.New(db)
+
+	router := router.New(service, &config.API)
+	router.Start()
 }

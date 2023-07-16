@@ -1,20 +1,22 @@
-server:
-  base_url: http://localhost:3001
-  port: 32500
-  log_level: debug #Options: debug, info, warn, error, fatal, panic
-  jwt_secret: supersecret
-  jwt_duration: 168
-  allow_origins: true
+app:
+  users:
+    default_bio: "This user has not yet written a bio."
+
 database:
   host: localhost
-  port: 5432
-  dbname: frens
+  port: "5432"
+  name: frens
   user: user
   password: pass
-  sslmode: disable
   log_mode: true
-  max_idle_conns: 10
-  max_open_conns: 100
+  ssl_mode: disable
+  dev_mode: true # For testing. This will wipe the database on startup. Do not use in production for obvious reasons.
+
+handlers:
+  port: "32500"
+  token_secret: supersecret
+  token_duration: 168
+
 storage:
   type: local
   local:
@@ -25,5 +27,3 @@ storage:
     region: us-east-1
     access_key: sampleaccesskey
     secret_key: samplesecretkey
-users:
-  default_bio: "This user has not yet written a bio."
