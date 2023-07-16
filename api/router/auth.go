@@ -18,8 +18,9 @@ func (ar *AuthRepo) addPublicRoutes(rtr fiber.Router) {
 
 func (ar *AuthRepo) addPrivateRoutes(rtr fiber.Router) {
 	grp := rtr.Group("/auth")
+	grp.Get("/verify", ar.Verify)
 	grp.Post("/refresh", ar.Service.Refresh)
-	//rtr.Post("/logout", ar.Logout)
+	grp.Delete("/logout", ar.Logout)
 }
 
 func (a *AuthRepo) Login(c *fiber.Ctx) error {
@@ -42,4 +43,15 @@ func (a *AuthRepo) Register(c *fiber.Ctx) error {
 		return err
 	}
 	return a.Service.Register(c, req.Username, req.Email, req.Password)
+}
+
+func (a *AuthRepo) Verify(c *fiber.Ctx) error {
+	// If we've gotten this far, this means the request
+	// has already passed through auth. Send a 200 with
+	// an empty body.
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
+}
+
+func (a *AuthRepo) Logout(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
 }

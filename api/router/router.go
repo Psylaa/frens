@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 var validate = validator.New()
@@ -55,6 +56,11 @@ func New(service *service.Service, config *config.APIConfig) *Router {
 			Duration: config.TokenDuration,
 		},
 	}
+
+	router.App.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "*",
+	}))
 
 	addRoutes(router)
 	return router

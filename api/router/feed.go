@@ -17,8 +17,10 @@ func (fr *FeedRepo) addPublicRoutes(rtr fiber.Router) {
 func (fr *FeedRepo) addPrivateRoutes(rtr fiber.Router) {
 	grp := rtr.Group("/feeds")
 	//grp.Get("/algorithmic", fr.getAlgorithmic)
+	grp.Get("/algorithmic", fr.getChronological) // placeholder
 	grp.Get("/chronological", fr.getChronological)
 	//grp.Get("/explore", fr.getExplore)
+	grp.Get("/explore", fr.getChronological) // placeholder
 }
 
 func (fr *FeedRepo) getChronological(c *fiber.Ctx) error {
