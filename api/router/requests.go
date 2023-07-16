@@ -15,3 +15,8 @@ type CreatePostRequest struct {
 	Text    string `validate:"required,min=1,max=1000"`
 	Privacy string `validate:"omitempty,oneof=public protected private"`
 }
+
+type ChronoFeedRequest struct {
+	Count  uint8  `validate:"omitempty,min=1,max=255"`
+	Cursor uint32 `validate:"omitempty"`
+}
