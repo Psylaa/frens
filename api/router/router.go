@@ -4,6 +4,7 @@ import (
 	"github.com/bwoff11/frens/pkg/config"
 	"github.com/bwoff11/frens/service"
 	"github.com/go-playground/validator"
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -59,26 +60,31 @@ func New(service *service.Service, config *config.APIConfig) *Router {
 	return router
 }
 
-func (r *Router) Start() error {
-	return r.App.Listen(":" + r.Port)
+func (r *Router) Start() {
+	if err := r.App.Listen(":" + r.Port); err != nil {
+		panic(err)
+	}
 }
 
 func addRoutes(router *Router) {
 	v1 := router.App.Group("/v1")
-	addPrivateRoutes(v1, router)
-	//middleware.AddAuthenticator(router.Token.Secret)
-	addPublicRoutes(v1, router)
+	router.Repos.Auth.addPublicRoutes(v1)
+
+	v1.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: router.Token.Secret},
+	}))
+
+	router.Repos.Auth.addPrivateRoutes(v1)
 }
 
+/*
 func addPublicRoutes(v1 fiber.Router, router *Router) {
-	// Authentication routes
 	authGroup := v1.Group("/auth")
 	authGroup.Post("/login", router.Repos.Auth.Login)
 	authGroup.Post("/register", router.Repos.Auth.Register)
 }
 
 func addPrivateRoutes(v1 fiber.Router, router *Router) {
-	/*
 		// User routes
 		userGroup := v1.Group("/user")
 		userGroup.Get("/:id", router.Users.Get)
@@ -112,5 +118,4 @@ func addPrivateRoutes(v1 fiber.Router, router *Router) {
 		mediaGroup.Get("/:mediaId", router.Media.Get)
 		mediaGroup.Post("/", router.Media.Upload)
 		mediaGroup.Delete("/:mediaId", router.Media.Delete)
-	*/
-}
+*/

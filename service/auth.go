@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/bwoff11/frens/models"
@@ -39,10 +40,9 @@ func (a *AuthService) Login(c *fiber.Ctx, email, password string) error {
 	}
 
 	// Create the Claims
-	claims := jwt.MapClaims{
-		"name":  "John Doe",
-		"admin": false,
-		"exp":   time.Now().Add(time.Hour * time.Duration(a.JWTDuration)).Unix(),
+	claims := jwt.RegisteredClaims{
+		Subject:   fmt.Sprint(user.ID),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(a.JWTDuration))),
 	}
 
 	// Create token
@@ -90,4 +90,38 @@ func (a *AuthService) Register(c *fiber.Ctx, username, email, password string) e
 
 	// Respond with the created user
 	return jsonapi.MarshalPayload(c.Response().BodyWriter(), &newUser)
+}
+
+func (a *AuthService) Refresh(c *fiber.Ctx) error {
+	// Retrieve the user from the JWT
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to read token",
+		})
+	}
+
+	// Create the Claims
+	newClaims := jwt.MapClaims{
+		"sub": sub,
+		"exp": time.Now().Add(time.Hour * time.Duration(a.JWTDuration)).Unix(),
+	}
+
+	// Create token
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
+	encryptedToken, err := newToken.SignedString(a.JWTSecret)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create token",
+		})
+	}
+
+	// Prepare the response
+	c.Response().Header.Set(fiber.HeaderContentType, jsonapi.MediaType)
+	c.Response().SetStatusCode(fiber.StatusOK)
+
+	// Respond with the user
+	return jsonapi.MarshalPayload(c.Response().BodyWriter(), &Token{ID: encryptedToken})
 }
