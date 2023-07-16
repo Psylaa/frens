@@ -18,7 +18,6 @@ This project wouldn't be possible without these awesome technologies:
 ### Languages and Tools
 
 - [Go](https://golang.org/): A statically typed, compiled language featuring type safety.
-- [cgo](https://golang.org/cmd/cgo/): A tool for creating Go bindings for C libraries.
 - [PostgreSQL](https://www.postgresql.org/): A free and open-source relational database system.
 
 ### Libraries
